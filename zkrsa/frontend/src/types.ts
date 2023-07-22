@@ -13,6 +13,7 @@ export interface PropsButtonGenerateProof {
     setproof: SetProof;
     setcompiledCircuit: Dispatch<SetStateAction<null>>;
     hash: string | null;
+    address: string | null;
     signature: string | null;
     publicKey: string | null;
     vkeyProof: null | any;
