@@ -13,12 +13,22 @@ export default async function handler(
 ) {
     const { id, digest, signature, publicKey } = req.body;
 
+    const regex = /modulus: ([\s\S]*?)\npublic exponent:/gm;
+
+    let match = regex.exec(publicKey);
+    let modulus;
+
+    if (match) {
+        modulus = match[1]; // The first capture group contains the modulus
+        modulus = modulus.replace(/\s+/g, ''); // Remove whitespace from the modulus string
+    }
+
     if (req.method === 'POST') {
         try {
             const client = await pool.connect();
             await client.query(
                 `INSERT INTO data(id, digest, signature, publicKey) VALUES($1, $2, $3, $4)`,
-                [id, digest, signature, publicKey]
+                [id, digest, signature, modulus]
             );
 
             res.status(200).json({ message: 'Data has been stored' });
