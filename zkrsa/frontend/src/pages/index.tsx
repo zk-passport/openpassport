@@ -1,5 +1,5 @@
 import type { NextPage } from 'next';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     ButtonGenerateProof,
     ButtonExportProof,
@@ -13,6 +13,8 @@ import {
 } from '../components/Inputs';
 import { NavMenu, Title, Description, Footer } from '../components/Navigation';
 import { PropsAppPage } from '../types';
+import { Web3Button } from '@web3modal/react';
+
 /**
  * @dev for exporting json proof and public signals data
  */
@@ -35,6 +37,9 @@ const Home: NextPage<PropsAppPage> = ({
 
     return (
         <div>
+            <div className="mt-5 ml-5">
+                <Web3Button />
+            </div>
             <Title></Title>
             <Description></Description>
             <NavMenu></NavMenu>
@@ -50,7 +55,13 @@ const Home: NextPage<PropsAppPage> = ({
                         />
                     </div>
                 )}
-                <InputHash sethash={sethash} hash={hash}></InputHash>
+                {hash && signature && publicKey ? (
+                    <div className="text-green-500 font-roboto-light-300 text-5xl">
+                        🎊 You exist! 🎊
+                    </div>
+                ) : null}
+
+                {/*<InputHash sethash={sethash} hash={hash}></InputHash>
                 <InputSignature
                     setsignature={setsignature}
                     signature={signature}
@@ -58,7 +69,7 @@ const Home: NextPage<PropsAppPage> = ({
                 <InputPublicKey
                     setpublicKey={setpublicKey}
                     publicKey={publicKey}
-                ></InputPublicKey>
+                ></InputPublicKey>*/}
             </div>
             <div className="mt-4 flex flex-col w-11/12">
                 <ButtonGenerateProof

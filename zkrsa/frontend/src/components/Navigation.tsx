@@ -24,7 +24,7 @@ export const Title: NextComponentType = () => {
     return (
         <div className="flex justify-center mt-10 my-4">
             <div className="w-1/2 text-beige text-center font-work-sans text-4xl">
-                zkRSA signature verification
+                Proof of Baguette 🥖
             </div>
         </div>
     );
@@ -65,15 +65,9 @@ export const Description: NextComponentType = () => {
     return (
         <div className="flex font-roboto-light-300 my-10 text-beige justify-center">
             <div className="w-3/4 text-center">
-                Generate a zero-knowledge proof for a valid RSA signature. You
-                can generate a signature using our repo{' '}
-                <a
-                    className="hover:text-gold"
-                    href="https://github.com/dmpierre/zkrsa"
-                >
-                    here
-                </a>
-                .
+                Mint a Soulbound Token with your Passport. You need to follow
+                the steps on our Android app, after which you can enter your
+                passport number and click on Generate proof.
             </div>
         </div>
     );
