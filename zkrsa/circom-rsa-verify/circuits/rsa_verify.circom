@@ -4,15 +4,18 @@ include "../circom-bigint/circomlib/circuits/bitify.circom";
 // Pkcs1v15 + Sha256
 // exp 65537
 template RsaVerifyPkcs1v15(w, nb, e_bits, hashLen) {
+    signal private input hashed[hashLen];
     signal input exp[nb];
     signal input sign[nb];
     signal input modulus[nb];
 
-    signal input hashed[hashLen];
+    // signal input hashed[hashLen];
+
+    signal input address;
 
     // sign ** exp mod modulus
     component pm = PowerModv2(w, nb, e_bits);
-    for (var i  = 0; i < nb; i++) {
+    for (var i = 0; i < nb; i++) {
         pm.base[i] <== sign[i];
         pm.exp[i] <== exp[i];
         pm.modulus[i] <== modulus[i];
