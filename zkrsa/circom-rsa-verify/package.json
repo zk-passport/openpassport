@@ -9,12 +9,12 @@
     "scripts": {
         "test": "mocha --max-old-space-size=16000 -t 10000s",
         "test:sha1": "npx ts-mocha  --max-old-space-size=16000 -t 10000s test/rsaSha1Verify.ts",
-        "circuit:compile": "npx circom test/circuits/rsa_sha1_verify.circom -o bin/rsa_sha1_verify.json",
-        "circuit:setup": "npx snarkjs setup -c bin/rsa_sha1_verify.json --pk groth16_zkey_prove.json --vk groth16_zkey_verify.json --protocol groth",
-        "circuit:witness": "npx snarkjs calculatewitness -c bin/rsa_sha1_verify.json -i inputs/input.json -w witness/witness.json",
-        "circuit:prove": "npx snarkjs proof -w witness/witness.json --pk vkeys/groth16_zkey_prove.json -p proofs/proof.json --pub publicSignals/public.json",
-        "circuit:verify": "npx snarkjs verify --vk vkeys/groth16_zkey_verify.json -p proofs/proof.json --pub publicSignals/public.json",
-        "circuit:solverifier": "npx snarkjs generateverifier --vk vkeys/groth16_zkey_verify.json -v contracts/contracts/RsaSha1Verifier.sol",
+        "circuit:compile": "npx circom test/circuits/rsa_verify.circom -o bin/rsa_verify.json",
+        "circuit:setup": "npx snarkjs setup -c bin/rsa_verify.json --pk groth16_zkey_prove.json --vk groth16_zkey_verify.json --protocol groth",
+        "circuit:witness": "npx snarkjs calculatewitness -c bin/rsa_verify.json -i inputs/input.json -w witness/witness.json",
+        "circuit:prove": "npx snarkjs proof -w witness/witness.json --pk groth16_zkey_prove.json -p proofs/proof.json --pub publicSignals/public.json",
+        "circuit:verify": "npx snarkjs verify --vk groth16_zkey_verify.json -p proofs/proof.json --pub publicSignals/public.json",
+        "circuit:solverifier": "npx snarkjs generateverifier --vk groth16_zkey_verify.json -v contracts/contracts/RsaSha256Verifier.sol",
         "circuit:calldata": "npx snarkjs generatecall -p proofs/proof.json --pub publicSignals/public.json"
     },
     "keywords": [

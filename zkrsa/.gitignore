@@ -12,3 +12,7 @@ vkeys
 witness
 proofs
 publicSignals
+
+# dont upload those, too heavy :
+circom-rsa-verify/groth16_zkey_prove.json
+circom-rsa-verify/groth16_zkey_verify.json
