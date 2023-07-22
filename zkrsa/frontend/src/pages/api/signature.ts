@@ -1,21 +1,11 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import sqlite3 from 'sqlite3';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
+dotenv.config();
 
-let db = new sqlite3.Database('./database.sqlite3', (err) => {
-    if (err) {
-        return console.error(err.message);
-    }
-    console.log('Connected to the SQlite database.');
+const pool = new Pool({
+    connectionString: `postgresql://postgres:${process.env.PG_PASSWORD}@db.mnztocxnpjbvvzqoopwv.supabase.co:5432/postgres`,
 });
-
-db.run(
-    'CREATE TABLE IF NOT EXISTS data(id TEXT PRIMARY KEY, digest TEXT, signature TEXT, publicKey TEXT)',
-    (err) => {
-        if (err) {
-            console.log(err);
-        }
-    }
-);
 
 export default async function handler(
     req: NextApiRequest,
@@ -25,45 +15,39 @@ export default async function handler(
 
     if (req.method === 'POST') {
         try {
-            db.run(
-                `INSERT INTO data(id, digest, signature, publicKey) VALUES(?, ?, ?, ?)`,
-                [id, digest, signature, publicKey],
-                function (this: sqlite3.RunResult, err: Error | null) {
-                    if (err) {
-                        return console.log(err.message);
-                    }
-
-                    console.log(
-                        `A row has been inserted with rowid ${this.lastID}`
-                    );
-                }
+            const client = await pool.connect();
+            await client.query(
+                `INSERT INTO data(id, digest, signature, publicKey) VALUES($1, $2, $3, $4)`,
+                [id, digest, signature, publicKey]
             );
 
-            res.status(200).json({ message: 'Signature has been stored' });
+            res.status(200).json({ message: 'Data has been stored' });
+            client.release();
         } catch (err) {
             res.status(500).json({ message: 'Something went wrong' });
+            console.log(err);
         }
     } else if (req.method === 'GET') {
         const { id } = req.query;
+        try {
+            const client = await pool.connect();
+            const { rows } = await client.query(
+                'SELECT digest, signature, publicKey FROM data WHERE id = $1',
+                [id]
+            );
 
-        db.get(
-            'SELECT digest, signature, publicKey FROM data WHERE id = ?',
-            [id],
-            (err, row) => {
-                if (err) {
-                    res.status(500).json({
-                        message: 'An error occurred during the query',
-                    });
-                    return console.error(err.message);
-                }
-
-                if (!row) {
-                    res.status(404).json({ message: 'Not found' });
-                } else {
-                    res.status(200).json(row);
-                }
+            if (rows.length > 0) {
+                res.status(200).json(rows[0]);
+            } else {
+                res.status(404).json({ message: 'Not found' });
             }
-        );
+            client.release();
+        } catch (err) {
+            res.status(500).json({
+                message: 'An error occurred during the query',
+            });
+            console.log(err);
+        }
     } else {
         res.status(405).json({ message: 'Method not allowed' });
     }
