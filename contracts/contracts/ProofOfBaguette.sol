@@ -36,7 +36,7 @@ contract ProofOfBaguette is ERC721Enumerable, Ownable {
         uint256[2] memory a,
         uint256[2][2] memory b,
         uint256[2] memory c,
-        uint256[100] memory inputs
+        uint256[97] memory inputs
     ) public {
         // Check eth address committed to in proof matches msg.sender, to avoid replayability
         // require(address(uint160(inputs[addressIndexInSignals])) == msg.sender, "Invalid address");
