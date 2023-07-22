@@ -18,6 +18,33 @@ describe("Rsa pkcs1v15 verify", () => {
         rsa_pkvs1v15_circuit = new snarkjs.Circuit(cirDef);
     });
 
+    // OUR TEST
+    it("2048 bits public key. correct sign. 0", () => {
+        // public key params. decimal
+        const exp = bigInt(10001, 16);
+        console.log('exp', exp)
+        // signature. decimal
+        const mod = "df11ba06d7937a059e8ce7916ab0fb0b094a9b9ecf98e97eda6834a23075f2030072a3c7868f85045af2acb5f5c2bedf6c25614d99232b98bb456e5f8ce32148882f2281537ac7aa80e4cdb79e0cdf4627cd08da32ce263ef54a26c2ca3493f1d02d9fabcd89952058cb0085fa356b13f9e2cc1e9ca4f47678dc49129d55531bd2817dd436d5aef778d4d439d2d659b0cf9d58eeff43ce2cff26d5c66d23164123fc9c3e6cd4902e9d7b54d9509b03f95debfc3fb15ef7b458ac64a2c6e26bf010451eff67ed87f6ca7a946dd7ac86dea2566cbdc9aa0e3cbaad9f5ed4b6886cd08f6baf1487b58f6ba33075968396c216ef65b0eb49c6978464dcde99f9a9a1"
+        const modulus = bigInt(mod, 16);
+        console.log('modulus', modulus)
+        const sig = "5a78c5d241463136f26255cb75fe2de2dbaeda10ef7c7eea2f6b635940e079b04d6bfec592ef1293366076382e2a9543bd84a973c66e6c0715e468738c5d802c98cd81aa3d338a4e338e93e219412835456c4a0208587c360a5b8d4c2d09d069671e4175104c69c8ad2dadc6dea40729463dd8543392420406c08a020dadcb14ec78fad95ccef0cbe06a5416c45a9abc31c38d88190cb650a6536f0357bb6a04c59817a889d2eee4128b7757b2f7b52e572b030ef7b362dbad20de3a2a2c488134042fb8b18a254d2332cde4996e768da37863419a2760b9f394de395425db5b8276a24b60f02a0b595bf81a28dc3bd7584863641a75504b0df267467de87516"
+        const sign = bigInt(sig, 16);
+        console.log('sign', sign)
+        // hashed data. decimal
+        const ha = "9671c5d47b0eeac91b394beb60bbc3026fe837ecd0edeee69e0f750e8490c6e7"
+        const hashed = bigInt(ha, 16);
+        console.log('hashed', hashed)
+
+        const input = Object.assign({},
+            splitToWords(sign, 64, 32, "sign"),
+            splitToWords(exp, 64, 32, "exp"),
+            splitToWords(modulus, 64, 32, "modulus"),
+            splitToWords(hashed, 64, 4, "hashed"),
+        );
+        console.log(input)
+        const witness = rsa_pkvs1v15_circuit.calculateWitness(input);
+        console.log('witness', witness)
+    });
 
     it("2048 bits public key. correct sign. 1", () => {
         // public key params. decimal
@@ -36,8 +63,8 @@ describe("Rsa pkcs1v15 verify", () => {
             splitToWords(modulus, 64, 32, "modulus"),
             splitToWords(hashed, 64, 4, "hashed"),
         );
-        console.log(rsa_pkvs1v15_circuit)
-        console.log(input)
+        // console.log(rsa_pkvs1v15_circuit)
+        // console.log(input)
         const witness = rsa_pkvs1v15_circuit.calculateWitness(input);
     });
 
