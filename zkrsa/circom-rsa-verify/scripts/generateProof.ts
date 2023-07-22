@@ -31,19 +31,29 @@ const main = () => {
   const hashed = bigInt(
     "68047946378308475289293787357717828552636626916964367437434418622917273241319"
   );
+  const address = bigInt("70997970C51812dc3A010C7d01b50e0d17dc79C8", 16);
 
+  console.log("address", address.toString(10));
+
+  // hardhat otherAccount: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+  // hardhat owner: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
   const input = Object.assign(
     {},
     splitToWords(sign, 64, 32, "sign"),
     splitToWords(exp, 64, 32, "exp"),
     splitToWords(modulus, 64, 32, "modulus"),
     splitToWords(hashed, 64, 4, "hashed")
+    // splitToWords(address, 64, 4, "address")
   );
+
+  // input["address[0]"] = address.toString(10).padStart(64, "0");
+  input["address"] = address.toString(10);
 
   console.log("input:", input);
   console.log("Calculating witness...");
   const witness = circuit.calculateWitness(input);
 
+  // CAUTION: this is loading old hardcoded ones
   console.log("Loading vk proof...");
   const vkProof = JSON.parse(
     fs.readFileSync(`./vkeys/${circuitName}.vk_proof`, "utf8")
