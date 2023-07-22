@@ -6,7 +6,7 @@ import snarkjs from 'snarkjs';
 addEventListener(
     'message',
     async (event: MessageEvent<{ vkeyProof: any; witness: any }>) => {
-        const { proof, publicSignals } = snarkjs.original.genProof(
+        const { proof, publicSignals } = snarkjs.groth.genProof(
             unstringifyBigInts(event.data.vkeyProof),
             unstringifyBigInts(event.data.witness)
         );
