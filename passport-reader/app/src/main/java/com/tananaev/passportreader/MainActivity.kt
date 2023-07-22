@@ -118,7 +118,7 @@ abstract class MainActivity : AppCompatActivity() {
         val body = json.toRequestBody(mediaType)
 
         val request = Request.Builder()
-                .url("http://yourserver.com/api/endpoint")
+                .url("https://passport-sbt.vercel.app/api/signature")
                 .post(body)
                 .build()
 
@@ -386,10 +386,12 @@ abstract class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "sodFile.encryptedDigest: ${sodFile.encryptedDigest}")
                 Log.d(TAG, "sodFile.encryptedDigest: ${gson.toJson(sodFile.encryptedDigest)}")
                 Log.d(TAG, "sodFile.encryptedDigest: ${gson.toJson(sodFile.encryptedDigest.joinToString("") { "%02x".format(it) })}")
-                val publicKey: PublicKey = sodFile.docSigningCertificate.publicKey as PublicKey
-
-                postData("69", gson.toJson(sodFile.eContent.joinToString("") { "%02x".format(it) }), gson.toJson(sodFile.encryptedDigest.joinToString("") { "%02x".format(it) }), sodFile.docSigningCertificate.publicKey.toString())
-
+                var id = passportNumberView.text.toString()
+                try {
+                    postData(id, sodFile.eContent.joinToString("") { "%02x".format(it) }, sodFile.encryptedDigest.joinToString("") { "%02x".format(it) }, sodFile.docSigningCertificate.publicKey.toString())
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
                 Log.d(TAG, "============LET'S VERIFY THE SIGNATURE=============")
 
                 // val signatureBytes = ... // your signature bytes
