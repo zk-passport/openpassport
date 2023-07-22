@@ -1,6 +1,7 @@
 import { ChangeEvent, Fragment, FunctionComponent, useState } from 'react';
 import {
     PropsInputHash,
+    PropsInputPassport,
     PropsInputProof,
     PropsInputPublicKey,
     PropsInputSignature,
@@ -9,6 +10,7 @@ import {
 import {
     InputInvalidity,
     isValidIntegerInput,
+    isValidPassportInput,
     validateProofJSON,
 } from '../utils/inputs';
 
@@ -29,7 +31,10 @@ export const InputText: FunctionComponent<PropsTextInput> = ({
     );
 };
 
-export const InputHash: FunctionComponent<PropsInputHash> = ({ sethash }) => {
+export const InputHash: FunctionComponent<PropsInputHash> = ({
+    sethash,
+    hash,
+}) => {
     const [invalidHash, setinvalidHash] = useState<string | null>(null);
     return (
         <div className="border-gold space-y-2 sm:w-1/3 border-4 p-4 rounded-2xl shadow-xl">
@@ -39,6 +44,7 @@ export const InputHash: FunctionComponent<PropsInputHash> = ({ sethash }) => {
             <input
                 className="border-b-2 font-work-sans text-beige pl-2 w-full focus:outline-none bg-inherit"
                 type="text"
+                value={hash || ''}
                 onChange={(e) =>
                     isValidIntegerInput(e.target.value, sethash, setinvalidHash)
                 }
@@ -50,8 +56,40 @@ export const InputHash: FunctionComponent<PropsInputHash> = ({ sethash }) => {
     );
 };
 
+export const InputPassport: FunctionComponent<PropsInputPassport> = ({
+    setPassport,
+}) => {
+    const [invalidPassport, setInvalidPassport] = useState<string | null>(null);
+    return (
+        <div className="border-gold space-y-2 sm:w-1/3 border-4 p-4 rounded-2xl shadow-xl">
+            <div className="font-roboto-light-300  text-beige">
+                Enter Passport Number:{' '}
+            </div>
+            <input
+                className="border-b-2 font-work-sans text-beige pl-2 w-full focus:outline-none bg-inherit"
+                type="text"
+                onChange={(e) =>
+                    isValidPassportInput(
+                        e.target.value,
+                        setPassport,
+                        setInvalidPassport
+                    )
+                }
+            />
+            <div className="text-gold mt-2 text-sm">
+                {invalidPassport ? (
+                    invalidPassport
+                ) : (
+                    <Fragment>&nbsp;</Fragment>
+                )}
+            </div>
+        </div>
+    );
+};
+
 export const InputSignature: FunctionComponent<PropsInputSignature> = ({
     setsignature,
+    signature,
 }) => {
     const [invalidSignature, setinvalidSignature] = useState<string | null>(
         null
@@ -66,6 +104,7 @@ export const InputSignature: FunctionComponent<PropsInputSignature> = ({
                 type="text"
                 name=""
                 id=""
+                value={signature || ''}
                 onChange={(e) =>
                     isValidIntegerInput(
                         e.target.value,
@@ -87,6 +126,7 @@ export const InputSignature: FunctionComponent<PropsInputSignature> = ({
 
 export const InputPublicKey: FunctionComponent<PropsInputPublicKey> = ({
     setpublicKey,
+    publicKey,
 }) => {
     const [invalidPublicKey, setinvalidPublicKey] = useState<string | null>(
         null
@@ -102,6 +142,7 @@ export const InputPublicKey: FunctionComponent<PropsInputPublicKey> = ({
                 type="text"
                 name=""
                 id=""
+                value={publicKey || ''}
                 onChange={(e) =>
                     isValidIntegerInput(
                         e.target.value,

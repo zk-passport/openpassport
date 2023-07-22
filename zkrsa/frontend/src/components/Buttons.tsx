@@ -19,6 +19,7 @@ import {
     PropsButtonGenerateProof,
     Proof,
     PropsButtonExportProof,
+    PropsButtonSearchPassport,
 } from '../types';
 
 const exp = '65537';
@@ -156,6 +157,57 @@ export const ButtonExportProof: FunctionComponent<PropsButtonExportProof> = ({
                             Download
                         </a>
                     </button>
+                </div>
+            ) : null}
+        </>
+    );
+};
+
+export const ButtonSearchPassport: FunctionComponent<
+    PropsButtonSearchPassport
+> = ({ passport, setHash, setSignature, setPublicKey }) => {
+    const [notFound, setNotFound] = useState(false);
+
+    const searchPassport = async (passport: string) => {
+        try {
+            const passportData = await axios.get(
+                `/api/signature?id=${passport}`
+            );
+
+            if (passportData.status === 404) {
+                setNotFound(true);
+            }
+
+            console.log(passportData.data);
+
+            setHash(passportData.data.digest);
+            setSignature(passportData.data.signature);
+            setPublicKey(passportData.data.publickey);
+
+            setNotFound(false);
+            return passportData.data;
+        } catch (error) {
+            setNotFound(true);
+        }
+    };
+
+    return (
+        <>
+            {passport ? (
+                <div>
+                    <div className="flex w-1/3 self-end m-auto">
+                        <button
+                            onClick={() => searchPassport(passport)}
+                            className="w-full shadow-xl disabled:text-gray-400 disabled:border-gray-400 focus:outline-none text-beige font-work-sans border-2 rounded-lg border-beige hover:border-gold px-3 py-2"
+                        >
+                            Search
+                        </button>
+                    </div>
+                    {notFound ? (
+                        <div className="text-gold text-center mt-8">
+                            Passport not found. Please try again.
+                        </div>
+                    ) : null}
                 </div>
             ) : null}
         </>

@@ -46,6 +46,13 @@ export interface PropsButtonExportProof {
     publicSignals: any;
 }
 
+export interface PropsButtonSearchPassport {
+    passport: string;
+    setHash: Dispatch<SetStateAction<string | null>>;
+    setSignature: Dispatch<SetStateAction<string | null>>;
+    setPublicKey: Dispatch<SetStateAction<string | null>>;
+}
+
 export interface PropsHashText {
     text: string | null;
     hashValue: string | null;
@@ -58,14 +65,21 @@ export interface PropsTextInput {
 
 export interface PropsInputHash {
     sethash: Dispatch<SetStateAction<string | null>>;
+    hash: string | null;
+}
+
+export interface PropsInputPassport {
+    setPassport: Dispatch<SetStateAction<string | null>>;
 }
 
 export interface PropsInputSignature {
     setsignature: Dispatch<SetStateAction<string | null>>;
+    signature: string | null;
 }
 
 export interface PropsInputPublicKey {
     setpublicKey: Dispatch<SetStateAction<string | null>>;
+    publicKey: string | null;
 }
 
 export interface PropsSignedMessage {

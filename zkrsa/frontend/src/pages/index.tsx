@@ -1,8 +1,13 @@
 import type { NextPage } from 'next';
 import { useState } from 'react';
-import { ButtonGenerateProof, ButtonExportProof } from '../components/Buttons';
+import {
+    ButtonGenerateProof,
+    ButtonExportProof,
+    ButtonSearchPassport,
+} from '../components/Buttons';
 import {
     InputHash,
+    InputPassport,
     InputPublicKey,
     InputSignature,
 } from '../components/Inputs';
@@ -22,6 +27,7 @@ const Home: NextPage<PropsAppPage> = ({
     vkeyProof,
 }) => {
     const [hash, sethash] = useState<null | string>(null);
+    const [passport, setPassport] = useState<null | string>(null);
     const [signature, setsignature] = useState<null | string>(null);
     const [publicKey, setpublicKey] = useState<null | string>(null);
     const [publicSignals, setpublicSignals] = useState<null | any>(null);
@@ -33,9 +39,26 @@ const Home: NextPage<PropsAppPage> = ({
             <Description></Description>
             <NavMenu></NavMenu>
             <div className="flex flex-col space-y-10 items-center">
-                <InputHash sethash={sethash}></InputHash>
-                <InputSignature setsignature={setsignature}></InputSignature>
-                <InputPublicKey setpublicKey={setpublicKey}></InputPublicKey>
+                <InputPassport setPassport={setPassport}></InputPassport>
+                {passport && (
+                    <div className="w-1/3 m-auto">
+                        <ButtonSearchPassport
+                            passport={passport}
+                            setHash={sethash}
+                            setSignature={setsignature}
+                            setPublicKey={setpublicKey}
+                        />
+                    </div>
+                )}
+                <InputHash sethash={sethash} hash={hash}></InputHash>
+                <InputSignature
+                    setsignature={setsignature}
+                    signature={signature}
+                ></InputSignature>
+                <InputPublicKey
+                    setpublicKey={setpublicKey}
+                    publicKey={publicKey}
+                ></InputPublicKey>
             </div>
             <div className="mt-4 flex flex-col w-11/12">
                 <ButtonGenerateProof
