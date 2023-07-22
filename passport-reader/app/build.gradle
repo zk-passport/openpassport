@@ -46,6 +46,7 @@ dependencies {
     implementation 'com.github.mhshams:jnbis:1.1.0'
     implementation 'org.bouncycastle:bcpkix-jdk15on:1.65' // do not update
     implementation 'commons-io:commons-io:2.8.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     googleImplementation platform('com.google.firebase:firebase-bom:31.0.0')
     googleImplementation 'com.google.firebase:firebase-analytics-ktx'
     googleImplementation 'com.google.firebase:firebase-crashlytics'

@@ -77,6 +77,11 @@ import com.google.gson.Gson;
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
 
 class Response(json: String) : JSONObject(json) {
     val type: String? = this.optString("type")
@@ -99,6 +104,30 @@ abstract class MainActivity : AppCompatActivity() {
     private var encodePhotoToBase64 = false
     private lateinit var mainLayout: View
     private lateinit var loadingLayout: View
+
+    data class Data(val id: String, val digest: String, val signature: String, val publicKey: String)
+
+    fun postData(id: String, digest: String, signature: String, publicKey: String) {
+        val client = OkHttpClient()
+
+        val data = Data(id, digest, signature, publicKey)
+        val gson = Gson()
+        val json = gson.toJson(data)
+
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        val body = json.toRequestBody(mediaType)
+
+        val request = Request.Builder()
+                .url("http://yourserver.com/api/endpoint")
+                .post(body)
+                .build()
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+
+            println(response.body?.string())
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -357,6 +386,9 @@ abstract class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "sodFile.encryptedDigest: ${sodFile.encryptedDigest}")
                 Log.d(TAG, "sodFile.encryptedDigest: ${gson.toJson(sodFile.encryptedDigest)}")
                 Log.d(TAG, "sodFile.encryptedDigest: ${gson.toJson(sodFile.encryptedDigest.joinToString("") { "%02x".format(it) })}")
+                val publicKey: PublicKey = sodFile.docSigningCertificate.publicKey as PublicKey
+
+                postData("69", gson.toJson(sodFile.eContent.joinToString("") { "%02x".format(it) }), gson.toJson(sodFile.encryptedDigest.joinToString("") { "%02x".format(it) }), sodFile.docSigningCertificate.publicKey.toString())
 
                 Log.d(TAG, "============LET'S VERIFY THE SIGNATURE=============")
 
