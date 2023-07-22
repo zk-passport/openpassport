@@ -1,0 +1,28 @@
+{
+  "name": "zkrsa",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:dmpierre/zkrsa.git",
+  "license": "MIT",
+  "scripts": {
+    "sign": "yarn ts-node scripts/generateSignature $@",
+    "prepare": "husky install",
+    "test:circuit": "yarn tsc --outDir testCircuit"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.11.9",
+    "@types/node-forge": "^1.3.1",
+    "arraybuffer-to-string": "^1.0.2",
+    "big-integer": "^1.6.51",
+    "circom_tester": "^0.0.19",
+    "circomlib": "^2.0.5",
+    "husky": "^8.0.0",
+    "mocha": "^10.2.0",
+    "node-forge": "^1.3.1",
+    "node-signpdf": "^1.5.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {}
+}

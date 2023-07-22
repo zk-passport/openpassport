@@ -1,0 +1,31 @@
+{
+  "name": "circom-bigint",
+  "version": "0.1.0",
+  "description": "Implementation of big integers for Circom",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --max-old-space-size=4000 -t 10s"
+  },
+  "keywords": [
+    "circuit",
+    "circom",
+    "zksnark",
+    "bigint"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iden3/circomlib.git"
+  },
+  "author": "aozdemir",
+  "license": "GPL-3.0",
+  "dependencies": {},
+  "devDependencies": {
+    "circom": "alex-ozdemir/circom#a5215f6",
+    "snarkjs": "^0.1.11",
+    "mocha": "^5.2.0",
+    "chai": "^4.1.0"
+  }
+}

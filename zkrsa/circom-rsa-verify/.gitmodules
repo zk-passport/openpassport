@@ -1,0 +1,6 @@
+[submodule "circomlib"]
+	path = circomlib
+	url = https://github.com/iden3/circomlib.git
+[submodule "circom-bigint"]
+	path = circom-bigint
+	url = https://github.com/jacksoom/circom-bigint.git
