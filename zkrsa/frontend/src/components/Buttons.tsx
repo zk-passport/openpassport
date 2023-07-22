@@ -21,6 +21,7 @@ import {
     PropsButtonExportProof,
     PropsButtonSearchPassport,
 } from '../types';
+import bigInt from 'big-integer';
 
 const exp = '65537';
 const devHash = process.env['NEXT_PUBLIC_HASH'] as string | null;
@@ -37,7 +38,15 @@ export const theme = createTheme({
 
 export const ButtonGenerateProof: FunctionComponent<
     PropsButtonGenerateProof
-> = ({ setpublicSignals, setproof, hash, signature, publicKey, vkeyProof }) => {
+> = ({
+    setpublicSignals,
+    setproof,
+    hash,
+    signature,
+    publicKey,
+    address,
+    vkeyProof,
+}) => {
     const buttonDisabled = hash && signature && publicKey ? false : true;
     const [loading, setloading] = useState(false);
     const workerRef = useRef<Worker>();
@@ -82,17 +91,26 @@ export const ButtonGenerateProof: FunctionComponent<
                         disabled={buttonDisabled}
                         onClick={async () => {
                             try {
+                                console.log('address:', address);
+                                // const a = bigInt(
+                                //     (address as string).substring(2),
+                                //     16
+                                // );
+                                // console.log('a', a);
+                                // console.log('a.toString(10)', a.toString(10));
+
                                 setloading(true);
                                 seterrorMessage(null);
-                                if (devHash) {
-                                    // @dev handle dev environment here
-                                    hash = devHash;
-                                    signature = devSignature;
-                                    publicKey = devPublicKey;
-                                }
+                                // if (devHash) {
+                                //     // @dev handle dev environment here
+                                //     hash = devHash;
+                                //     signature = devSignature;
+                                //     publicKey = devPublicKey;
+                                // }
                                 setcurrentStep(
                                     'Downloading circuit and vkeys...'
                                 );
+                                console.log('Downloading circuit and vkeys...');
                                 const data = await (
                                     await axios.get(
                                         process.env[
@@ -100,6 +118,7 @@ export const ButtonGenerateProof: FunctionComponent<
                                         ] as any
                                     )
                                 ).data;
+                                console.log('got circuit');
                                 const circuit = new snarkjs.Circuit(data);
                                 const vkeyProof = (
                                     await axios.get(
@@ -108,6 +127,7 @@ export const ButtonGenerateProof: FunctionComponent<
                                         ] as string
                                     )
                                 ).data;
+                                console.log('got vKey');
                                 const input = Object.assign(
                                     {},
                                     splitToWords(signature, 64, 32, 'sign'),
@@ -115,8 +135,23 @@ export const ButtonGenerateProof: FunctionComponent<
                                     splitToWords(publicKey, 64, 32, 'modulus'),
                                     splitToWords(hash, 64, 4, 'hashed')
                                 );
+                                if (!address) {
+                                    console.log('no address');
+                                    return;
+                                }
+                                console.log('address:', address);
+                                input.address = bigInt(
+                                    address.substring(2),
+                                    16
+                                ).toString(10);
+                                console.log('input:', input);
+
                                 const witness = circuit.calculateWitness(input);
+                                console.log('Generating proof...');
                                 setcurrentStep('Generating proof...');
+                                console.log('witness:', witness);
+                                console.log('vkeyProof:', vkeyProof);
+                                console.log('circuit:', circuit);
                                 workerRef.current!.postMessage({
                                     vkeyProof,
                                     witness,

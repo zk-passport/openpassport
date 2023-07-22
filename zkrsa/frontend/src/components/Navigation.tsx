@@ -54,7 +54,7 @@ export const Footer: NextComponentType = () => {
                     rel={'noreferrer'}
                     href="https://appliedzkp.org/"
                 >
-                    A P.S.E. project
+                    A Bangr Labs project with help from P.S.E.
                 </a>
             </div>
         </div>

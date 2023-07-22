@@ -31,12 +31,15 @@ const main = () => {
   const hashed = bigInt(
     "68047946378308475289293787357717828552636626916964367437434418622917273241319"
   );
-  const address = bigInt("70997970C51812dc3A010C7d01b50e0d17dc79C8", 16);
+  const address = bigInt("9D392187c08fc28A86e1354aD63C70897165b982", 16);
 
-  console.log("address", address.toString(10));
+  console.log("address", address);
+  console.log("address.toString(10)", address.toString(10));
 
+  // my test account: 0x9D392187c08fc28A86e1354aD63C70897165b982
   // hardhat otherAccount: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
   // hardhat owner: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+
   const input = Object.assign(
     {},
     splitToWords(sign, 64, 32, "sign"),
@@ -46,26 +49,26 @@ const main = () => {
     // splitToWords(address, 64, 4, "address")
   );
 
-  // input["address[0]"] = address.toString(10).padStart(64, "0");
   input["address"] = address.toString(10);
 
   console.log("input:", input);
   console.log("Calculating witness...");
   const witness = circuit.calculateWitness(input);
 
-  // CAUTION: this is loading old hardcoded ones
+  console.log("witness", witness);
+
   console.log("Loading vk proof...");
   const vkProof = JSON.parse(
-    fs.readFileSync(`./vkeys/${circuitName}.vk_proof`, "utf8")
+    fs.readFileSync(`./groth16_zkey_prove.json`, "utf8")
   );
 
   console.log("Loading vk verifier...");
   const vkVerifier = JSON.parse(
-    fs.readFileSync(`./vkeys/${circuitName}.vk_verifier`, "utf8")
+    fs.readFileSync(`./groth16_zkey_verify.json`, "utf8")
   );
 
   console.log("Generating proof...");
-  const { proof, publicSignals } = snarkjs.original.genProof(
+  const { proof, publicSignals } = snarkjs.groth.genProof(
     unstringifyBigInts(vkProof),
     unstringifyBigInts(witness)
   );
@@ -73,7 +76,7 @@ const main = () => {
   console.log("publicSignals:", publicSignals);
 
   if (
-    snarkjs.original.isValid(
+    snarkjs.groth.isValid(
       unstringifyBigInts(vkVerifier),
       unstringifyBigInts(proof),
       unstringifyBigInts(publicSignals)

@@ -32,8 +32,13 @@ const Home: NextPage<PropsAppPage> = ({
     const [passport, setPassport] = useState<null | string>(null);
     const [signature, setsignature] = useState<null | string>(null);
     const [publicKey, setpublicKey] = useState<null | string>(null);
-    const [publicSignals, setpublicSignals] = useState<null | any>(null);
+    const [publicSignals, setpublicSignals] = useState<null | any>(null); //
     const [compiledCircuit, setcompiledCircuit] = useState(null);
+
+    // TODO : set the right address. For now, mine hardcoded
+    const [address, setAddress] = useState(
+        '0x9D392187c08fc28A86e1354aD63C70897165b982'
+    );
 
     return (
         <div>
@@ -75,6 +80,7 @@ const Home: NextPage<PropsAppPage> = ({
                 <ButtonGenerateProof
                     vkeyVerifier={vkeyVerifier}
                     vkeyProof={vkeyProof}
+                    address={address}
                     setcompiledCircuit={setcompiledCircuit}
                     setpublicSignals={setpublicSignals}
                     hash={hash}
