@@ -1,6 +1,0 @@
-[submodule "passport-reader"]
-	path = passport-reader
-	url = git@github.com:tananaev/passport-reader.git
-[submodule "zkrsa"]
-	path = zkrsa
-	url = git@github.com:dmpierre/zkrsa.git

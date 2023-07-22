@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="512mm"
+   height="512mm"
+   viewBox="0 0 512 512"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91+devel+osxmenu r12922"
+   sodipodi:docname="icon.svg"
+   inkscape:export-filename="/Users/user/Documents/passport-reader/icon.png"
+   inkscape:export-xdpi="50.799999"
+   inkscape:export-ydpi="50.799999">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="1"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="972.88293"
+     inkscape:cy="902.85714"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1916"
+     inkscape:window-height="1155"
+     inkscape:window-x="4"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,215)">
+    <g
+       id="g3348"
+       transform="matrix(4.0506448,0,0,4.0506448,43.341148,-76.468698)"
+       style="fill:#009688;fill-opacity:1">
+      <path
+         id="path3338"
+         d="m 5,5 0,21.5 31.71875,0 C 37.92598,18.860978 44.52329,13 52.5,13 c 7.97671,10e-7 14.57402,5.860978 15.78125,13.5 L 100,26.5 100,5 Z m 0,26.5 0,21.5 95,0 0,-21.5 -31.71875,0 C 67.07402,39.139022 60.47671,45 52.5,45 44.52329,44.999999 37.92598,39.139022 36.71875,31.5 Z"
+         inkscape:connector-curvature="0"
+         style="fill:#009688;fill-opacity:1" />
+      <circle
+         id="circle3340"
+         r="11"
+         cy="29"
+         cx="52.5"
+         style="fill:#009688;fill-opacity:1" />
+    </g>
+  </g>
+</svg>
