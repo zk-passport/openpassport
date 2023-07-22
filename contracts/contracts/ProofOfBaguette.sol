@@ -4,21 +4,23 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import {Pairing} from "./RsaSha256Verifier.sol";
+import {Verifier} from "./RsaSha256Verifier.sol";
 
 contract ProofOfBaguette is ERC721Enumerable, Ownable {
     using Counters for Counters.Counter;
 
     Verifier public immutable verifier;
-    address public cscaPubkey = 0x0000000
+    address public cscaPubkey = 0x0000000000000000000000000000000000000000;
 
-    constructor(Verifier v, address _owner) {
-      verifier = v;
-      transferOwnership(_owner);
+    Counters.Counter public tokenCounter;
+
+    constructor(Verifier v) ERC721("ProofOfPassport", "ProofOfPassport") {
+        verifier = v;
+        transferOwnership(msg.sender);
     }
 
     function setCSCApubKey(address _CSCApubKey) public onlyOwner {
-      cscaPubkey = _CSCApubKey;
+        cscaPubkey = _CSCApubKey;
     }
 
     // function check(
@@ -30,9 +32,12 @@ contract ProofOfBaguette is ERC721Enumerable, Ownable {
     //     require(Pairing.verifyProof(a, b, c, inputs), "Invalid Proof");
     // }
 
-    function mint(uint256[2] memory a, uint256[2][2] memory b, uint256[2] memory c, uint256[100] memory inputs)
-        public
-    {
+    function mint(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[100] memory inputs
+    ) public {
         // Check eth address committed to in proof matches msg.sender, to avoid replayability
         // require(address(uint160(inputs[addressIndexInSignals])) == msg.sender, "Invalid address");
 
@@ -49,12 +54,15 @@ contract ProofOfBaguette is ERC721Enumerable, Ownable {
 
         // Effects: Mint token
         uint256 tokenId = tokenCounter.current() + 1;
-        tokenIDToName[tokenId] = messageBytes;
         _mint(msg.sender, tokenId);
         tokenCounter.increment();
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal {
         require(from == address(0), "Cannot transfer - Passport is soulbound");
     }
 }
