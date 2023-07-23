@@ -8,7 +8,7 @@ addEventListener(
     async (event: MessageEvent<{ vkeyProof: any; witness: any }>) => {
         const { proof, publicSignals } = snarkjs.groth.genProof(
             unstringifyBigInts(event.data.vkeyProof),
-            unstringifyBigInts(event.data.witness)
+            event.data.witness
         );
         postMessage({
             proof,
