@@ -30,6 +30,7 @@ We forked two repositories and added functionality to make everything work.
 
 Deployments :
 
+- gnosis: 0x9c891A2C692D672059a171b4499eC3c61093eC34
 - goerli: 0x64390f86E8986FEb2f0E2E38e9392d5eBa0d0C48
 - polygon: 0x9c891A2C692D672059a171b4499eC3c61093eC34
 - neon evm devnet: 0xBf79f2F49e9c4F1284149ddEFfB5CA4325bf4226
