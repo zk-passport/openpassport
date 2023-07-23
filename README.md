@@ -27,3 +27,10 @@ We forked two repositories and added functionality to make everything work.
 - ✅ Modify the Android app to let people send their signature data to the Next.js backend (and store it temporarily)
 - 🚧 Safe Module to claim a Safe if holding the right SBT
 - 🚧 Using Sismo Data Groups or EAS Attestations to let people prove they own such an SBT without revealing which one
+
+Deployments :
+
+- goerli: 0x64390f86E8986FEb2f0E2E38e9392d5eBa0d0C48
+- polygon: 0x9c891A2C692D672059a171b4499eC3c61093eC34
+- neon evm devnet: 0xBf79f2F49e9c4F1284149ddEFfB5CA4325bf4226
+- celo alfajores: 0x9c891A2C692D672059a171b4499eC3c61093eC34
