@@ -47,6 +47,16 @@ export interface PropsButtonExportProof {
     publicSignals: any;
 }
 
+export interface PropsButtonMint {
+    proof: any;
+    publicSignals: any;
+    a: any;
+    b: any;
+    c: any;
+    inputs: any;
+    tx: any;
+}
+
 export interface PropsButtonSearchPassport {
     passport: string;
     setHash: Dispatch<SetStateAction<string | null>>;
