@@ -54,6 +54,7 @@ export interface PropsButtonMint {
     b: any;
     c: any;
     inputs: any;
+    tx: any;
 }
 
 export interface PropsButtonSearchPassport {
