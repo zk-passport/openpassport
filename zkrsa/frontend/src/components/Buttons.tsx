@@ -23,7 +23,12 @@ import {
     PropsButtonMint,
 } from '../types';
 import bigInt from 'big-integer';
-import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
+import {
+    useAccount,
+    useContractWrite,
+    usePrepareContractWrite,
+    useSendTransaction,
+} from 'wagmi';
 import ProofOfBaguette from '../ProofOfBaguette.json';
 
 const exp = '65537';
@@ -208,15 +213,13 @@ export const ButtonMint: FunctionComponent<PropsButtonMint> = ({
     b,
     c,
     inputs,
+    tx,
 }) => {
     const { address } = useAccount();
-    const { config } = usePrepareContractWrite({
-        address: '0xecb504d39723b0be0e3a9aa33d646642d1051ee1',
-        abi: ProofOfBaguette.abi,
-        functionName: 'mint',
-        args: [a, b, c, inputs],
+    const { data, isLoading, isSuccess, sendTransaction } = useSendTransaction({
+        to: '0x64390f86E8986FEb2f0E2E38e9392d5eBa0d0C48',
+        data: tx,
     });
-    const { data, isLoading, isSuccess, write } = useContractWrite(config);
 
     useEffect(() => {
         console.log(proof);
@@ -226,7 +229,7 @@ export const ButtonMint: FunctionComponent<PropsButtonMint> = ({
 
     const sendToChain = () => {
         try {
-            write?.();
+            sendTransaction();
         } catch (error) {
             console.log(error);
         }
