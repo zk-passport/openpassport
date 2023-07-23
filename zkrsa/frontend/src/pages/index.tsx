@@ -5,6 +5,7 @@ import {
     ButtonExportProof,
     ButtonSearchPassport,
     ButtonMint,
+    ButtonRequestAttestation,
 } from '../components/Buttons';
 import {
     InputHash,
@@ -407,15 +408,25 @@ const Home: NextPage<PropsAppPage> = ({
                     setproof={setproof}
                 ></ButtonGenerateProof>
                 {tx ? (
-                    <ButtonMint
-                        publicSignals={publicSignals}
-                        proof={proof}
-                        a={a}
-                        b={b}
-                        c={c}
-                        inputs={inputs}
-                        tx={tx}
-                    ></ButtonMint>
+                    <>
+                        <ButtonMint
+                            publicSignals={publicSignals}
+                            proof={proof}
+                            a={a}
+                            b={b}
+                            c={c}
+                            inputs={inputs}
+                            tx={tx}
+                        ></ButtonMint>
+                        <ButtonRequestAttestation
+                            publicSignals={publicSignals}
+                            proof={proof}
+                            a={a}
+                            b={b}
+                            c={c}
+                            inputs={inputs}
+                        ></ButtonRequestAttestation>
+                    </>
                 ) : null}
             </div>
             <Footer></Footer>

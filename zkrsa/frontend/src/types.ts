@@ -57,6 +57,15 @@ export interface PropsButtonMint {
     tx: any;
 }
 
+export interface PropsButtonRequest {
+    proof: any;
+    publicSignals: any;
+    a: any;
+    b: any;
+    c: any;
+    inputs: any;
+}
+
 export interface PropsButtonSearchPassport {
     passport: string;
     setHash: Dispatch<SetStateAction<string | null>>;

@@ -22,6 +22,7 @@ import {
     PropsButtonExportProof,
     PropsButtonSearchPassport,
     PropsButtonMint,
+    PropsButtonRequest,
 } from '../types';
 import bigInt from 'big-integer';
 import {
@@ -240,12 +241,51 @@ export const ButtonMint: FunctionComponent<PropsButtonMint> = ({
     return (
         <>
             {true ? (
-                <div className="flex w-1/3 self-end">
+                <div className="flex w-1/3 mb-4 self-end">
                     <button
                         onClick={sendToChain}
                         className="shadow-xl disabled:text-gray-400 disabled:border-gray-400 focus:outline-none text-beige font-work-sans border-2 rounded-lg border-beige hover:border-gold px-3 py-2"
                     >
                         Mint
+                    </button>
+                </div>
+            ) : null}
+        </>
+    );
+};
+export const ButtonRequestAttestation: FunctionComponent<
+    PropsButtonRequest
+> = ({ proof, publicSignals, a, b, c, inputs }) => {
+    const { address } = useAccount();
+
+    const request = async () => {
+        try {
+            // send an axios post request to the /easRequest endpoint with the proof and public signals
+            const res = await axios.post('/api/easRequest', {
+                proof,
+                publicSignals,
+                address: address ?? '',
+            });
+
+            // const newAttestationUID = await tx.wait();
+
+            // console.log('New attestation UID:', newAttestationUID, tx);
+
+            console.log(res);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    return (
+        <>
+            {true ? (
+                <div className="flex w-1/3 self-end">
+                    <button
+                        onClick={request}
+                        className="shadow-xl disabled:text-gray-400 disabled:border-gray-400 focus:outline-none text-beige font-work-sans border-2 rounded-lg border-beige hover:border-gold px-3 py-2"
+                    >
+                        Request Attestation
                     </button>
                 </div>
             ) : null}
