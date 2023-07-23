@@ -11,12 +11,20 @@ import {
 import { Web3Modal } from '@web3modal/react';
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 import { arbitrum, mainnet, polygon, goerli } from 'wagmi/chains';
+import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
 
 const chains = [goerli];
 // const projectId = "995f7eebe283b9908e661cf08b88b492";
 const projectId = '34a216df947456c22da1f6034129afa7';
 
-const { publicClient } = configureChains(chains, [w3mProvider({ projectId })]);
+const { publicClient } = configureChains(chains, [
+    w3mProvider({ projectId }),
+    jsonRpcProvider({
+        rpc: (chain: any) => ({
+            http: `https://chaotic-twilight-arm.ethereum-goerli.discover.quiknode.pro/923e597570b20405106e4a50d36a5e938baa8d0f/`,
+        }),
+    }),
+]);
 const wagmiConfig = createConfig({
     autoConnect: true,
     connectors: w3mConnectors({ projectId, chains }),
