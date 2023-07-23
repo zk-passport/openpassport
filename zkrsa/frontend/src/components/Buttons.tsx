@@ -20,8 +20,11 @@ import {
     Proof,
     PropsButtonExportProof,
     PropsButtonSearchPassport,
+    PropsButtonMint,
 } from '../types';
 import bigInt from 'big-integer';
+import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
+import ProofOfBaguette from '../ProofOfBaguette.json';
 
 const exp = '65537';
 const devHash = process.env['NEXT_PUBLIC_HASH'] as string | null;
@@ -191,6 +194,53 @@ export const ButtonExportProof: FunctionComponent<PropsButtonExportProof> = ({
                         >
                             Download
                         </a>
+                    </button>
+                </div>
+            ) : null}
+        </>
+    );
+};
+
+export const ButtonMint: FunctionComponent<PropsButtonMint> = ({
+    proof,
+    publicSignals,
+    a,
+    b,
+    c,
+    inputs,
+}) => {
+    const { address } = useAccount();
+    const { config } = usePrepareContractWrite({
+        address: '0xecb504d39723b0be0e3a9aa33d646642d1051ee1',
+        abi: ProofOfBaguette.abi,
+        functionName: 'mint',
+        args: [a, b, c, inputs],
+    });
+    const { data, isLoading, isSuccess, write } = useContractWrite(config);
+
+    useEffect(() => {
+        console.log(proof);
+        console.log(publicSignals);
+        console.log(address);
+    }, [address]);
+
+    const sendToChain = () => {
+        try {
+            write?.();
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    return (
+        <>
+            {true ? (
+                <div className="flex w-1/3 self-end">
+                    <button
+                        onClick={sendToChain}
+                        className="shadow-xl disabled:text-gray-400 disabled:border-gray-400 focus:outline-none text-beige font-work-sans border-2 rounded-lg border-beige hover:border-gold px-3 py-2"
+                    >
+                        Mint
                     </button>
                 </div>
             ) : null}

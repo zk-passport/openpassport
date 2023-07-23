@@ -4,6 +4,7 @@ import {
     ButtonGenerateProof,
     ButtonExportProof,
     ButtonSearchPassport,
+    ButtonMint,
 } from '../components/Buttons';
 import {
     InputHash,
@@ -22,6 +23,13 @@ import { Web3Button } from '@web3modal/react';
     return this.toString();
 };
 
+function p256(n: any) {
+    let nstr = n.toString(16);
+    while (nstr.length < 64) nstr = '0' + nstr;
+    nstr = `"0x${nstr}"`;
+    return nstr;
+}
+
 const Home: NextPage<PropsAppPage> = ({
     proof,
     setproof,
@@ -34,6 +42,38 @@ const Home: NextPage<PropsAppPage> = ({
     const [publicKey, setpublicKey] = useState<null | string>(null);
     const [publicSignals, setpublicSignals] = useState<null | any>(null); //
     const [compiledCircuit, setcompiledCircuit] = useState(null);
+    const [a, setA] = useState<any>(undefined);
+    const [b, setB] = useState<any>(undefined);
+    const [c, setC] = useState<any>(undefined);
+    const [inputs, setInputs] = useState<any>(undefined);
+
+    const convertToCalldata = () => {
+        let inputs = '';
+        for (let i = 0; i < publicSignals.length; i++) {
+            if (inputs != '') inputs = inputs + ',';
+            inputs = inputs + p256(publicSignals[i]);
+        }
+        let S;
+
+        S =
+            `{"a": [${p256(proof.pi_a[0])}, ${p256(proof.pi_a[1])}],` +
+            `"b": [[${p256(proof.pi_b[0][1])}, ${p256(
+                proof.pi_b[0][0]
+            )}],[${p256(proof.pi_b[1][1])}, ${p256(proof.pi_b[1][0])}]],` +
+            `"c": [${p256(proof.pi_c[0])}, ${p256(proof.pi_c[1])}],` +
+            `"inputs": [${inputs}]}`;
+
+        const calldata = JSON.parse(S);
+        console.log(calldata);
+        setA(calldata.a);
+        setB(calldata.b);
+        setC(calldata.c);
+        setInputs(calldata.inputs);
+    };
+
+    useEffect(() => {
+        if (proof && publicSignals) convertToCalldata();
+    }, [proof, publicSignals]);
 
     // TODO : set the right address. For now, mine hardcoded
     const [address, setAddress] = useState(
@@ -88,11 +128,15 @@ const Home: NextPage<PropsAppPage> = ({
                     publicKey={publicKey}
                     setproof={setproof}
                 ></ButtonGenerateProof>
-                {proof ? (
-                    <ButtonExportProof
+                {a && b && c && inputs ? (
+                    <ButtonMint
                         publicSignals={publicSignals}
                         proof={proof}
-                    ></ButtonExportProof>
+                        a={a}
+                        b={b}
+                        c={c}
+                        inputs={inputs}
+                    ></ButtonMint>
                 ) : null}
             </div>
             <Footer></Footer>
