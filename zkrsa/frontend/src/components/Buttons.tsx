@@ -9,6 +9,7 @@ import {
 import { splitToWords } from '../utils/crypto';
 //@ts-ignore
 import snarkjs from 'snarkjs';
+import { ethers } from 'ethers';
 
 //@ts-ignore
 import axios from 'axios';
@@ -166,6 +167,7 @@ export const ButtonGenerateProof: FunctionComponent<
                                 });
                             } catch (error) {
                                 setloading(false);
+                                console.log('error', error);
                                 seterrorMessage(
                                     'An error was encountered during proof generation.'
                                 );
@@ -266,11 +268,27 @@ export const ButtonSearchPassport: FunctionComponent<
                 setNotFound(true);
             }
 
-            console.log(passportData.data);
+            console.log('passportData.data', passportData.data);
 
-            setHash(passportData.data.digest);
-            setSignature(passportData.data.signature);
-            setPublicKey(passportData.data.publickey);
+            const data = Buffer.from(passportData.data.digest, 'hex');
+            const hash = ethers.sha256(data);
+
+            const decimalHash = BigInt(hash).toString();
+            const decimalSig = bigInt(
+                passportData.data.signature,
+                16
+            ).toString();
+            const decimalPubkey = bigInt(
+                passportData.data.publickey,
+                16
+            ).toString();
+
+            setHash(decimalHash);
+            setSignature(decimalSig);
+            setPublicKey(decimalPubkey);
+            console.log('set hash to', decimalHash);
+            console.log('set decimalSig to', decimalSig);
+            console.log('set decimalPubkey to', decimalPubkey);
 
             setNotFound(false);
             return passportData.data;
