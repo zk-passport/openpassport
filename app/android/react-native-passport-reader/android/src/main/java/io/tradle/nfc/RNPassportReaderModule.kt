@@ -26,7 +26,6 @@ import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.AsyncTask
 import android.os.Bundle
-// import android.preference.PreferenceManager
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Base64
@@ -34,9 +33,7 @@ import android.util.Log
 import android.widget.EditText
 
 import androidx.appcompat.app.AppCompatActivity
-// import com.google.android.material.snackbar.Snackbar
-// import com.io.tradle.nfc.ImageUtil.decodeImage
-// import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
+import io.tradle.nfc.ImageUtil.decodeImage
 import net.sf.scuba.smartcards.CardService
 import org.apache.commons.io.IOUtils
 
@@ -75,7 +72,6 @@ import java.security.spec.PSSParameterSpec
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
-
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
@@ -86,6 +82,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+
 import com.google.gson.Gson;
 
 import com.facebook.react.ReactPackage
@@ -330,13 +327,11 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
 
                 Log.d(TAG, "other data :")
 
-                var data = sodFile.dataGroupHashes
                 Log.d(TAG, "sodFile.docSigningCertificate: ${sodFile.docSigningCertificate}")
                 Log.d(TAG, "publicKey: ${sodFile.docSigningCertificate.publicKey}")
                 Log.d(TAG, "publicKey: ${sodFile.docSigningCertificate.publicKey.toString()}")
                 Log.d(TAG, "publicKey: ${sodFile.docSigningCertificate.publicKey.format}")
                 Log.d(TAG, "publicKey: ${Base64.encodeToString(sodFile.docSigningCertificate.publicKey.encoded, Base64.DEFAULT)}")
-
 
                 Log.d(TAG, "sodFile.docSigningCertificate: ${gson.toJson(sodFile.docSigningCertificate)}")
                 val hexMap = sodFile.dataGroupHashes.mapValues { (_, value) ->
@@ -385,8 +380,8 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                     val buffer = ByteArray(imageLength)
                     dataInputStream.readFully(buffer, 0, imageLength)
                     val inputStream: InputStream = ByteArrayInputStream(buffer, 0, imageLength)
-                    // bitmap = decodeImage(this@MainActivity, faceImageInfo.mimeType, inputStream)
-                    // imageBase64 = Base64.encodeToString(buffer, Base64.DEFAULT)
+                    bitmap = decodeImage(reactContext, faceImageInfo.mimeType, inputStream)
+                    imageBase64 = Base64.encodeToString(buffer, Base64.DEFAULT)
                 }
             } catch (e: Exception) {
                 return e
