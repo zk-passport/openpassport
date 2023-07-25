@@ -1,11 +1,4 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -18,6 +11,8 @@ import {
   Button,
   // NativeModules,
   DeviceEventEmitter,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 
 import {
@@ -29,29 +24,22 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 // @ts-ignore
 import PassportReader from 'react-native-passport-reader';
+import {checkInputs} from './utils/checks';
 
 // const {PassportReaderModule} = NativeModules;
 
-const NewModuleButton = () => {
-  const onPress = () => {
-    PassportReader.createCalendarEvent('testName', 'testLocation');
-  };
-
-  return (
-    <Button
-      title="Click to invoke your native module!"
-      color="#841584"
-      onPress={onPress}
-    />
-  );
-};
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): JSX.Element {
+function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+  const [passportNumber, setPassportNumber] = useState('19HA34828');
+  const [dateOfBirth, setDateOfBirth] = useState('000719');
+  const [dateOfExpiry, setDateOfExpiry] = useState('291209');
+  const [address, setAddress] = useState('');
+  const [step, setStep] = useState('enterDetails');
+  const [firstName, setFirstName] = useState('');
+
+  const backgroundStyle = {
+    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  };
 
   useEffect(() => {
     const logEventListener = DeviceEventEmitter.addListener('LOG_EVENT', e => {
@@ -62,69 +50,6 @@ function Section({children, title}: SectionProps): JSX.Element {
       logEventListener.remove();
     };
   }, []);
-
-  // useEffect(() => {
-  //   const nfcEventListener = DeviceEventEmitter.addListener(
-  //     'ReadDataTaskCompleted',
-  //     event => {
-  //       const passportData = JSON.parse(event.passportData);
-  //       console.log('NFC data was read. Data: ', passportData);
-  //     },
-  //   );
-
-  //   return () => {
-  //     nfcEventListener.remove();
-  //   };
-  // }, []);
-
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  async function scan() {
-    // 1. start a scan
-    // 2. press the back of your android phone against the passport
-    // 3. wait for the scan(...) Promise to get resolved/rejected
-    console.log('scanning...');
-    try {
-      const response = await PassportReader.scan({
-        documentNumber: '19HA34828',
-        dateOfBirth: '000719',
-        dateOfExpiry: '291209',
-      });
-      console.log('scanned');
-      handleResponse(response);
-    } catch (e) {
-      console.log('error :', e);
-    }
-  }
 
   async function handleResponse(response: any) {
     const {
@@ -155,12 +80,42 @@ function App(): JSX.Element {
     console.log('eContent', JSON.parse(eContent));
     console.log('encryptedDigest', JSON.parse(encryptedDigest));
 
+    setFirstName(firstName);
+
     const {base64, width, height} = photo;
 
-    // Let's compute the eContent from the dg1File
+    // 1. Compute the eContent from the dg1File
+
+    // 2. Format all the data as calldata for the verifier contract
+
+    // 3. Call the verifier contract with the calldata
+
+    setStep('scanCompleted');
   }
 
-  scan();
+  async function scan() {
+    checkInputs(passportNumber, dateOfBirth, dateOfExpiry);
+    // 1. start a scan
+    // 2. press the back of your android phone against the passport
+    // 3. wait for the scan(...) Promise to get resolved/rejected
+    console.log('scanning...');
+    setStep('scanning');
+    try {
+      const response = await PassportReader.scan({
+        documentNumber: passportNumber,
+        dateOfBirth: dateOfBirth,
+        dateOfExpiry: dateOfExpiry,
+      });
+      console.log('scanned');
+      handleResponse(response);
+    } catch (e) {
+      console.log('error :', e);
+    }
+  }
+
+  const handleMint = () => {
+    // mint "Proof of Passport" NFT to the address logic here
+  };
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -171,26 +126,58 @@ function App(): JSX.Element {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
-        <Header />
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <NewModuleButton />
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+          {step === 'enterDetails' ? (
+            <View style={styles.sectionContainer}>
+              <Text style={styles.header}>Enter Your Passport Details</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={setPassportNumber}
+                value={passportNumber}
+                placeholder="Passport Number"
+              />
+              <TextInput
+                style={styles.input}
+                onChangeText={setDateOfBirth}
+                value={dateOfBirth}
+                placeholder="Date of Birth (YYYY-MM-DD)"
+              />
+              <TextInput
+                style={styles.input}
+                onChangeText={setDateOfExpiry}
+                value={dateOfExpiry}
+                placeholder="Date of Expiry (YYYY-MM-DD)"
+              />
+              <Button title="Scan Passport with NFC" onPress={scan} />
+            </View>
+          ) : null}
+          {step === 'scanning' ? (
+            <View style={styles.sectionContainer}>
+              <Text style={styles.header}>Put your phone on your passport</Text>
+              <ActivityIndicator
+                size="large"
+                color="#00ff00"
+                style={{marginTop: 20}}
+              />
+            </View>
+          ) : null}
+          {step === 'scanCompleted' ? (
+            <View style={styles.sectionContainer}>
+              <Text style={styles.header}>Connection successful</Text>
+              <Text style={styles.sectionDescription}>Hi {firstName} </Text>
+              <Text style={styles.header}>Input your address or ens</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={setAddress}
+                value={address}
+                placeholder="Your Address or ens name"
+              />
+              <Button title="Mint Proof of Passport" onPress={handleMint} />
+            </View>
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -213,6 +200,18 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
   },
 });
 
