@@ -14,6 +14,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
+import RNFS from 'react-native-fs';
 
 import {
   Colors,
@@ -60,12 +61,25 @@ function App(): JSX.Element {
       nationality,
       photo,
       dg1File,
+      dg2File,
+      dg2InSave,
       publicKey,
       publicKeyOldSchool,
       dataGroupHashes,
+      sodFile,
+      signedData,
       eContent,
       encryptedDigest,
     } = response;
+
+    // const responseJSON = JSON.stringify(response, null, 2);
+    // const responseJSONPath = RNFS. + '/response.json';
+
+    // console.log('responseJSONPath', responseJSONPath);
+
+    // RNFS.writeFile(responseJSONPath, responseJSON, 'utf8')
+    //   .then(success => console.log('FILE WRITTEN!'))
+    //   .catch(err => console.log(err.message));
 
     console.log('firstName', firstName);
     console.log('lastName', lastName);
@@ -74,11 +88,30 @@ function App(): JSX.Element {
     console.log('nationality', nationality);
     console.log('photo', photo);
     console.log('dg1File', JSON.parse(dg1File));
+    // console.log('dg2File', JSON.parse(dg2File));
+    console.log('dg2InSave', JSON.parse(dg2InSave));
     console.log('publicKey', publicKey);
     console.log('publicKeyOldSchool', publicKeyOldSchool);
-    console.log('dataGroupHashes', JSON.parse(dataGroupHashes));
+    // console.log('dataGroupHashes', JSON.parse(dataGroupHashes));
     console.log('eContent', JSON.parse(eContent));
     console.log('encryptedDigest', JSON.parse(encryptedDigest));
+    console.log('sodFile', JSON.parse(sodFile));
+    console.log('signedData', JSON.parse(signedData));
+
+    // copilot, please write dg2File and dg2InSave to disk as JSON files, in js
+
+    fetch('http://192.168.1.22:3000/data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: sodFile,
+    })
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch(error => {
+        console.error('Error:', error);
+      });
 
     setFirstName(firstName);
 
