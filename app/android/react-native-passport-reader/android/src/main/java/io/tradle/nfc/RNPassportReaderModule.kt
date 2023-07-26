@@ -58,6 +58,7 @@ import org.jmrtd.lds.icao.DG14File
 import org.jmrtd.lds.icao.DG1File
 import org.jmrtd.lds.icao.DG2File
 import org.jmrtd.lds.iso19794.FaceImageInfo
+
 import org.json.JSONObject
 
 import java.io.ByteArrayInputStream
