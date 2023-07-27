@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -14,7 +13,6 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
-import RNFS from 'react-native-fs';
 
 import {
   Colors,
@@ -25,18 +23,33 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 // @ts-ignore
 import PassportReader from 'react-native-passport-reader';
-import {checkInputs} from './utils/checks';
+import {checkInputs, getFirstName} from './utils/checks';
+import {DEFAULT_PNUMBER, DEFAULT_DOB, DEFAULT_DOE, DEFAULT_ADDRESS} from '@env';
 
-// const {PassportReaderModule} = NativeModules;
+console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
+
+const CACHE_DATA_IN_LOCAL_SERVER = true;
+const SKIP_SCAN = true;
+
+type PassportData = {
+  mrzInfo: any;
+  publicKey: any;
+  publicKeyPEM: any;
+  dataGroupHashes: any;
+  eContent: any;
+  encryptedDigest: any;
+  contentBytes: any;
+  eContentDecomposed: any;
+};
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-  const [passportNumber, setPassportNumber] = useState('19HA34828');
-  const [dateOfBirth, setDateOfBirth] = useState('000719');
-  const [dateOfExpiry, setDateOfExpiry] = useState('291209');
-  const [address, setAddress] = useState('');
+  const [passportNumber, setPassportNumber] = useState(DEFAULT_PNUMBER ?? '');
+  const [dateOfBirth, setDateOfBirth] = useState(DEFAULT_DOB ?? '');
+  const [dateOfExpiry, setDateOfExpiry] = useState(DEFAULT_DOE ?? '');
+  const [address, setAddress] = useState(DEFAULT_ADDRESS ?? '');
+  const [passportData, setPassportData] = useState<PassportData | null>(null);
   const [step, setStep] = useState('enterDetails');
-  const [firstName, setFirstName] = useState('');
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -52,70 +65,67 @@ function App(): JSX.Element {
     };
   }, []);
 
+  if (SKIP_SCAN && passportData === null) {
+    console.log('skipping scan step...');
+    fetch('http://192.168.1.22:3000/passportData')
+      .then(response => response.json())
+      .then(data => {
+        console.log('passport data fetched');
+        setPassportData(data);
+        setStep('scanCompleted');
+      });
+  }
+
   async function handleResponse(response: any) {
     const {
-      firstName,
-      lastName,
-      gender,
-      issuer,
-      nationality,
-      photo,
-      dg1File,
-      dg2File,
-      dg2InSave,
+      mrzInfo,
       publicKey,
-      publicKeyOldSchool,
+      publicKeyPEM,
       dataGroupHashes,
-      sodFile,
-      signedData,
       eContent,
       encryptedDigest,
+      contentBytes,
+      eContentDecomposed,
     } = response;
 
-    // const responseJSON = JSON.stringify(response, null, 2);
-    // const responseJSONPath = RNFS. + '/response.json';
+    const passportData = {
+      mrzInfo: JSON.parse(mrzInfo),
+      publicKey: publicKey,
+      publicKeyPEM: publicKeyPEM,
+      dataGroupHashes: JSON.parse(dataGroupHashes),
+      eContent: JSON.parse(eContent),
+      encryptedDigest: JSON.parse(encryptedDigest),
+      contentBytes: JSON.parse(contentBytes),
+      eContentDecomposed: JSON.parse(eContentDecomposed),
+    };
 
-    // console.log('responseJSONPath', responseJSONPath);
+    console.log('mrzInfo', passportData.mrzInfo);
+    console.log('publicKey', passportData.publicKey);
+    console.log('publicKeyPEM', passportData.publicKeyPEM);
+    console.log('dataGroupHashes', passportData.dataGroupHashes);
+    console.log('eContent', passportData.eContent);
+    console.log('encryptedDigest', passportData.encryptedDigest);
+    console.log('contentBytes', passportData.contentBytes);
+    console.log('eContentDecomposed', passportData.eContentDecomposed);
 
-    // RNFS.writeFile(responseJSONPath, responseJSON, 'utf8')
-    //   .then(success => console.log('FILE WRITTEN!'))
-    //   .catch(err => console.log(err.message));
+    setPassportData(passportData);
 
-    console.log('firstName', firstName);
-    console.log('lastName', lastName);
-    console.log('gender', gender);
-    console.log('issuer', issuer);
-    console.log('nationality', nationality);
-    console.log('photo', photo);
-    console.log('dg1File', JSON.parse(dg1File));
-    // console.log('dg2File', JSON.parse(dg2File));
-    console.log('dg2InSave', JSON.parse(dg2InSave));
-    console.log('publicKey', publicKey);
-    console.log('publicKeyOldSchool', publicKeyOldSchool);
-    // console.log('dataGroupHashes', JSON.parse(dataGroupHashes));
-    console.log('eContent', JSON.parse(eContent));
-    console.log('encryptedDigest', JSON.parse(encryptedDigest));
-    console.log('sodFile', JSON.parse(sodFile));
-    console.log('signedData', JSON.parse(signedData));
-
-    // copilot, please write dg2File and dg2InSave to disk as JSON files, in js
-
-    fetch('http://192.168.1.22:3000/data', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: sodFile,
-    })
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch(error => {
-        console.error('Error:', error);
-      });
-
-    setFirstName(firstName);
-
-    const {base64, width, height} = photo;
+    if (CACHE_DATA_IN_LOCAL_SERVER) {
+      // Caches data in local server to avoid having to scan the passport each time
+      // For development purposes only
+      fetch('http://192.168.1.22:3000/post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(passportData),
+      })
+        .then(response => response.json())
+        .then(data => console.log(data.message))
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
 
     // 1. Compute the eContent from the dg1File
 
@@ -145,6 +155,10 @@ function App(): JSX.Element {
       console.log('error :', e);
     }
   }
+
+  const handleProve = () => {
+    // Generate a proof of passport here
+  };
 
   const handleMint = () => {
     // mint "Proof of Passport" NFT to the address logic here
@@ -206,7 +220,9 @@ function App(): JSX.Element {
           {step === 'scanCompleted' ? (
             <View style={styles.sectionContainer}>
               <Text style={styles.header}>Connection successful</Text>
-              <Text style={styles.sectionDescription}>Hi {firstName} </Text>
+              <Text style={styles.header}>
+                Hi {getFirstName(passportData?.mrzInfo)} !{' '}
+              </Text>
               <Text style={styles.header}>Input your address or ens</Text>
               <TextInput
                 style={styles.input}
@@ -214,6 +230,13 @@ function App(): JSX.Element {
                 value={address}
                 placeholder="Your Address or ens name"
               />
+              <Button title="Generate zk proof" onPress={handleProve} />
+            </View>
+          ) : null}
+          {step === 'proofGenerated' ? (
+            <View style={styles.sectionContainer}>
+              <Text style={styles.header}>Zero-knowledge proof generated</Text>
+              <Text style={styles.header}>You can now mint your SBT</Text>
               <Button title="Mint Proof of Passport" onPress={handleMint} />
             </View>
           ) : null}
