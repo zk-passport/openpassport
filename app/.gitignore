@@ -66,3 +66,4 @@ yarn-error.log
 /coverage
 
 .env
+.expo/
