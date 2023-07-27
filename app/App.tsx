@@ -24,23 +24,20 @@ import {
 // @ts-ignore
 import PassportReader from 'react-native-passport-reader';
 import {checkInputs, getFirstName} from './utils/checks';
-import {DEFAULT_PNUMBER, DEFAULT_DOB, DEFAULT_DOE, DEFAULT_ADDRESS} from '@env';
+import {
+  DEFAULT_PNUMBER,
+  DEFAULT_DOB,
+  DEFAULT_DOE,
+  DEFAULT_ADDRESS,
+  LOCAL_IP,
+} from '@env';
+import {PassportData} from './types/passportData';
+import {dataHashesObjToArray} from './utils/utils';
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
 const CACHE_DATA_IN_LOCAL_SERVER = true;
-const SKIP_SCAN = true;
-
-type PassportData = {
-  mrzInfo: any;
-  publicKey: any;
-  publicKeyPEM: any;
-  dataGroupHashes: any;
-  eContent: any;
-  encryptedDigest: any;
-  contentBytes: any;
-  eContentDecomposed: any;
-};
+const SKIP_SCAN = false;
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -67,7 +64,7 @@ function App(): JSX.Element {
 
   if (SKIP_SCAN && passportData === null) {
     console.log('skipping scan step...');
-    fetch('http://192.168.1.22:3000/passportData')
+    fetch(`${LOCAL_IP}/passportData`)
       .then(response => response.json())
       .then(data => {
         console.log('passport data fetched');
@@ -92,7 +89,7 @@ function App(): JSX.Element {
       mrzInfo: JSON.parse(mrzInfo),
       publicKey: publicKey,
       publicKeyPEM: publicKeyPEM,
-      dataGroupHashes: JSON.parse(dataGroupHashes),
+      dataGroupHashes: dataHashesObjToArray(JSON.parse(dataGroupHashes)),
       eContent: JSON.parse(eContent),
       encryptedDigest: JSON.parse(encryptedDigest),
       contentBytes: JSON.parse(contentBytes),
@@ -113,7 +110,7 @@ function App(): JSX.Element {
     if (CACHE_DATA_IN_LOCAL_SERVER) {
       // Caches data in local server to avoid having to scan the passport each time
       // For development purposes only
-      fetch('http://192.168.1.22:3000/post', {
+      fetch(`${LOCAL_IP}/post`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,15 +120,9 @@ function App(): JSX.Element {
         .then(response => response.json())
         .then(data => console.log(data.message))
         .catch(error => {
-          console.error('Error:', error);
+          console.log('error caching data in local server', error);
         });
     }
-
-    // 1. Compute the eContent from the dg1File
-
-    // 2. Format all the data as calldata for the verifier contract
-
-    // 3. Call the verifier contract with the calldata
 
     setStep('scanCompleted');
   }
@@ -157,11 +148,27 @@ function App(): JSX.Element {
   }
 
   const handleProve = () => {
-    // Generate a proof of passport here
+    if (passportData === null) {
+      console.log('passport data is null');
+      return;
+    }
+
+    // const mrz = computeMrz(passportData);
+
+    // 1. Compute the eContent from the mrzInfo and the dataGroupHashes
+
+    // 2. check that it matches the eContent from the passportData
+
+    // 3. Check the signature in js
+
+    // 4. Format all the data as inputs for the circuit
+
+    // 5. Generate a proof of passport
   };
 
   const handleMint = () => {
-    // mint "Proof of Passport" NFT to the address logic here
+    // 6. Format the proof and publicInputs as calldata for the verifier contract
+    // 7. Call the verifier contract with the calldata
   };
 
   const handleNative = async () => {
