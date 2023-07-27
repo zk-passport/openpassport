@@ -7,16 +7,25 @@ const app = express();
 // parse application/json
 app.use(bodyParser.json());
 
-app.post('/data', (req: Request, res: Response) => {
+app.post('/post', (req: Request, res: Response) => {
   const data = req.body;
-  //   console.log('data:', data);
-  console.log('typeof data:', typeof data);
-  fs.writeFile('data2.json', JSON.stringify(data, null, 2), err => {
+  fs.writeFile('passportData.json', JSON.stringify(data, null, 2), err => {
     if (err) {
       console.log(err);
-      res.status(500).send('An error occurred while writing file');
+      res.status(500).json({message: 'An error occurred while writing file'});
     } else {
-      res.send('File written successfully');
+      res.json({message: 'File written successfully'});
+    }
+  });
+});
+
+app.get('/passportData', (req: Request, res: Response) => {
+  fs.readFile('passportData.json', (err, data) => {
+    if (err) {
+      console.log(err);
+      res.status(500).json({message: 'An error occurred while reading file'});
+    } else {
+      res.json(JSON.parse(data.toString()));
     }
   });
 });
