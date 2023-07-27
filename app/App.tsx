@@ -34,11 +34,22 @@ import {
 } from '@env';
 import {PassportData} from './types/passportData';
 import {dataHashesObjToArray} from './utils/utils';
+import {Buffer} from 'buffer';
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
 const CACHE_DATA_IN_LOCAL_SERVER = true;
 const SKIP_SCAN = false;
+
+const hexToBytes = (hex: string) => {
+  var bytes = [];
+
+  for (var c = 0; c < hex.length; c += 2) {
+    bytes.push(parseInt(hex.substr(c, 2), 16));
+  }
+
+  return bytes;
+};
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -172,7 +183,41 @@ function App(): JSX.Element {
       dateOfBirth,
       dateOfExpiry,
     );
-    console.log(`native tells us ${value}`);
+    console.log(`native tells us ${value[0]}`);
+    // const buffer = Buffer.from(value[3], 'base64');
+    // const bufString = buffer.toString('hex');
+    // console.log(bufString);
+    // console.log(hexToBytes(bufString));
+
+    const passportData: PassportData = {
+      mrzInfo: {
+        compositeCheckDigit: '0',
+        dateOfBirth: '000000',
+        dateOfBirthCheckDigit: '0',
+        dateOfExpiry: '000000',
+        dateOfExpiryCheckDigit: '0',
+        documentCode: '0',
+        documentNumber: '0',
+        documentNumberCheckDigit: '0',
+        documentType: 0,
+        gender: '0',
+        issuingState: '0',
+        nationality: '0',
+        optionalData1: '0',
+        primaryIdentifier: '0',
+        secondaryIdentifier: '0',
+      },
+      publicKey: '',
+      publicKeyPEM: '',
+      dataGroupHashes: [[0, [0]]],
+      eContent: '',
+      encryptedDigest: '',
+      contentBytes: '',
+      eContentDecomposed: '',
+    };
+
+    setPassportData(passportData);
+    setStep('scanCompleted');
   };
 
   const scan = () => {
