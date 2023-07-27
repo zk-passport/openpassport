@@ -151,7 +151,7 @@ function App(): JSX.Element {
   };
 
   const handleNative = async () => {
-    const value = await NativeModules.PassportReader.scanPassport();
+    const value = await NativeModules.PassportReader.scanPassport('', '', '');
     console.log(`native tells us ${value}`);
   };
 
