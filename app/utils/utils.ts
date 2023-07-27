@@ -74,7 +74,6 @@ export function findTimeOfSignature(eContentDecomposed: any) {
   }
 
   const timeFound = timeElement.elements[1].elements[0].time;
-  console.log('timeFound', timeFound);
 
   // Adding the 4 bytes of the ASN.1 tag and length
   // 49 : SET, 15 : LGT, 23 : UTCTIME, 13 : LGT
@@ -101,4 +100,63 @@ export function parsePubKeyString(pubKeyString: string) {
     modulus,
     exponent,
   };
+}
+
+export function formatAndConcatenateDataHashes(
+  mrzHash: number[],
+  dataHashes: DataHash[],
+) {
+  // Let's replace the first array with the MRZ hash
+  dataHashes.shift();
+  dataHashes.unshift([1, mrzHash]);
+  // Concaténons les dataHashes :
+  const concatenatedDataHashes: number[] = [].concat(
+    ...dataHashes.map((dataHash: any) => {
+      dataHash[1].unshift(...[48, 37, 2, 1, dataHash[0], 4, 32]);
+      return dataHash[1];
+    }),
+  );
+
+  // Starting sequence. Should be the same for everybody, but not sure
+  concatenatedDataHashes.unshift(
+    ...[
+      48, -126, 1, 37, 2, 1, 0, 48, 11, 6, 9, 96, -122, 72, 1, 101, 3, 4, 2, 1,
+      48, -126, 1, 17,
+    ],
+  );
+  return concatenatedDataHashes;
+}
+
+export function assembleEContent(
+  messageDigest: number[],
+  timeOfSignature: number[],
+) {
+  const constructedEContent = [];
+
+  // Detailed description is in private file r&d.ts for now
+  // First, the tag and length, assumed to be always the same
+  constructedEContent.push(...[49, 102]);
+
+  // 1.2.840.113549.1.9.3 is RFC_3369_CONTENT_TYPE_OID
+  constructedEContent.push(
+    ...[48, 21, 6, 9, 42, -122, 72, -122, -9, 13, 1, 9, 3],
+  );
+  // 2.23.136.1.1.1 is ldsSecurityObject
+  constructedEContent.push(...[49, 8, 6, 6, 103, -127, 8, 1, 1, 1]);
+
+  // 1.2.840.113549.1.9.5 is signing-time
+  constructedEContent.push(
+    ...[48, 28, 6, 9, 42, -122, 72, -122, -9, 13, 1, 9, 5],
+  );
+  // time of the signature
+  constructedEContent.push(...timeOfSignature);
+  // 1.2.840.113549.1.9.4 is RFC_3369_MESSAGE_DIGEST_OID
+  constructedEContent.push(
+    ...[48, 47, 6, 9, 42, -122, 72, -122, -9, 13, 1, 9, 4],
+  );
+  // TAG and length of the message digest
+  constructedEContent.push(...[49, 34, 4, 32]);
+
+  constructedEContent.push(...messageDigest);
+  return constructedEContent;
 }
