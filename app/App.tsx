@@ -9,7 +9,7 @@ import {
   useColorScheme,
   View,
   Button,
-  // NativeModules,
+  NativeModules,
   DeviceEventEmitter,
   TextInput,
   ActivityIndicator,
@@ -150,6 +150,11 @@ function App(): JSX.Element {
     // mint "Proof of Passport" NFT to the address logic here
   };
 
+  const handleNative = async () => {
+    const value = await NativeModules.PassportReader.scanPassport();
+    console.log(`native tells us ${value}`);
+  };
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
@@ -185,6 +190,7 @@ function App(): JSX.Element {
                 placeholder="Date of Expiry (YYYY-MM-DD)"
               />
               <Button title="Scan Passport with NFC" onPress={scan} />
+              <Button title="Call native method" onPress={handleNative} />
             </View>
           ) : null}
           {step === 'scanning' ? (
