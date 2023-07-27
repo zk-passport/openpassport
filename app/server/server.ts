@@ -7,7 +7,7 @@ const app = express();
 // parse application/json
 app.use(bodyParser.json());
 
-app.post('/passportData', (req: Request, res: Response) => {
+app.post('/post', (req: Request, res: Response) => {
   const data = req.body;
   fs.writeFile('passportData.json', JSON.stringify(data, null, 2), err => {
     if (err) {
@@ -15,6 +15,17 @@ app.post('/passportData', (req: Request, res: Response) => {
       res.status(500).json({message: 'An error occurred while writing file'});
     } else {
       res.json({message: 'File written successfully'});
+    }
+  });
+});
+
+app.get('/passportData', (req: Request, res: Response) => {
+  fs.readFile('passportData.json', (err, data) => {
+    if (err) {
+      console.log(err);
+      res.status(500).json({message: 'An error occurred while reading file'});
+    } else {
+      res.json(JSON.parse(data.toString()));
     }
   });
 });
