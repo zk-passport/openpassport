@@ -58,7 +58,6 @@ const hash = crypto.createHash('sha256');
 hash.update(Buffer.from(mrzCharcodes));
 const mrzHash = Array.from(hash.digest()).map(x => (x < 128 ? x : x - 256));
 
-// Ça correspond bien :
 console.log('mrzHash:', mrzHash);
 console.log('dataHashes["1"]:', dataHashes['1']);
 console.log('Are they equal ?', arraysAreEqual(mrzHash, dataHashes['1']));
@@ -82,7 +81,6 @@ concatenatedDataHashes.unshift(
   ],
 );
 
-// They are equal !
 console.log('concatenatedDataHashes', concatenatedDataHashes);
 console.log('contentBytes', contentBytes);
 console.log(
