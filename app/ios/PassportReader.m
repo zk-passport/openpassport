@@ -10,6 +10,10 @@
 
 @interface RCT_EXTERN_MODULE(PassportReader, NSObject)
 
-RCT_EXTERN_METHOD(scanPassport:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(scanPassport:(NSString *)passportNumber
+                  dateOfBirth:(NSString *)dateOfBirth
+                  dateOfExpiry:(NSString *)dateOfExpiry
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
 
 @end
