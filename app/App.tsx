@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -14,7 +13,6 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
-import RNFS from 'react-native-fs';
 
 import {
   Colors,
@@ -27,7 +25,7 @@ import {
 import PassportReader from 'react-native-passport-reader';
 import {checkInputs} from './utils/checks';
 
-// const {PassportReaderModule} = NativeModules;
+const CACHE_PASSPORT_DATA = true;
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -54,68 +52,58 @@ function App(): JSX.Element {
 
   async function handleResponse(response: any) {
     const {
-      firstName,
-      lastName,
-      gender,
-      issuer,
-      nationality,
-      photo,
-      dg1File,
-      dg2File,
-      dg2InSave,
+      mrzInfo,
       publicKey,
-      publicKeyOldSchool,
+      publicKeyPEM,
       dataGroupHashes,
-      sodFile,
-      signedData,
       eContent,
       encryptedDigest,
+      contentBytes,
+      eContentDecomposed,
     } = response;
 
-    // const responseJSON = JSON.stringify(response, null, 2);
-    // const responseJSONPath = RNFS. + '/response.json';
+    const passportData = {
+      mrzInfo: JSON.parse(mrzInfo),
+      publicKey: publicKey,
+      publicKeyPEM: publicKeyPEM,
+      dataGroupHashes: JSON.parse(dataGroupHashes),
+      eContent: JSON.parse(eContent),
+      encryptedDigest: JSON.parse(encryptedDigest),
+      contentBytes: JSON.parse(contentBytes),
+      eContentDecomposed: JSON.parse(eContentDecomposed),
+    };
 
-    // console.log('responseJSONPath', responseJSONPath);
+    console.log('mrzInfo', passportData.mrzInfo);
+    console.log('publicKey', passportData.publicKey);
+    console.log('publicKeyPEM', passportData.publicKeyPEM);
+    console.log('dataGroupHashes', passportData.dataGroupHashes);
+    console.log('eContent', passportData.eContent);
+    console.log('encryptedDigest', passportData.encryptedDigest);
+    console.log('contentBytes', passportData.contentBytes);
+    console.log('eContentDecomposed', passportData.eContentDecomposed);
 
-    // RNFS.writeFile(responseJSONPath, responseJSON, 'utf8')
-    //   .then(success => console.log('FILE WRITTEN!'))
-    //   .catch(err => console.log(err.message));
+    // Stores data in local server to avoid having to scan the passport each time
+    // For development purposes only
 
-    console.log('firstName', firstName);
-    console.log('lastName', lastName);
-    console.log('gender', gender);
-    console.log('issuer', issuer);
-    console.log('nationality', nationality);
-    console.log('photo', photo);
-    console.log('dg1File', JSON.parse(dg1File));
-    // console.log('dg2File', JSON.parse(dg2File));
-    console.log('dg2InSave', JSON.parse(dg2InSave));
-    console.log('publicKey', publicKey);
-    console.log('publicKeyOldSchool', publicKeyOldSchool);
-    // console.log('dataGroupHashes', JSON.parse(dataGroupHashes));
-    console.log('eContent', JSON.parse(eContent));
-    console.log('encryptedDigest', JSON.parse(encryptedDigest));
-    console.log('sodFile', JSON.parse(sodFile));
-    console.log('signedData', JSON.parse(signedData));
+    if (CACHE_PASSPORT_DATA) {
+      fetch('http://192.168.1.22:3000/passportData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(passportData),
+      })
+        .then(response => response.json())
+        .then(data => console.log(data.message))
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
 
-    // copilot, please write dg2File and dg2InSave to disk as JSON files, in js
-
-    fetch('http://192.168.1.22:3000/data', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: sodFile,
-    })
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch(error => {
-        console.error('Error:', error);
-      });
-
-    setFirstName(firstName);
-
-    const {base64, width, height} = photo;
+    const firstName = passportData.mrzInfo.secondaryIdentifier.split('<')[0];
+    setFirstName(
+      firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase(),
+    );
 
     // 1. Compute the eContent from the dg1File
 
@@ -145,6 +133,10 @@ function App(): JSX.Element {
       console.log('error :', e);
     }
   }
+
+  const handleProve = () => {
+    // Generate a proof of passport here
+  };
 
   const handleMint = () => {
     // mint "Proof of Passport" NFT to the address logic here
@@ -208,6 +200,13 @@ function App(): JSX.Element {
                 value={address}
                 placeholder="Your Address or ens name"
               />
+              <Button title="Generate zk proof" onPress={handleProve} />
+            </View>
+          ) : null}
+          {step === 'proofGenerated' ? (
+            <View style={styles.sectionContainer}>
+              <Text style={styles.header}>Zero-knowledge proof generated</Text>
+              <Text style={styles.header}>You can now mint your SBT</Text>
               <Button title="Mint Proof of Passport" onPress={handleMint} />
             </View>
           ) : null}
