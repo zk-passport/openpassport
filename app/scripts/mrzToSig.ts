@@ -6,9 +6,12 @@ import {
   assembleMrz,
   findTimeOfSignature,
   parsePubKeyString,
+  formatAndConcatenateDataHashes,
+  assembleEContent,
 } from '../utils/utils';
 import * as forge from 'node-forge';
 import passportData from '../server/passportData.json';
+import {DataHash} from '../types/passportData';
 
 // This script tests the whole flow from MRZ to signature
 // The passportData is imported from passportData.json written by the server
@@ -18,38 +21,20 @@ const mrz = assembleMrz(passportData.mrzInfo);
 console.log('mrz: ', mrz);
 
 // Transforms the dataHashes object into an array of arrays
-const dataHashesAsArray = dataHashesObjToArray(passportData.dataGroupHashes);
+const dataHashes = passportData.dataGroupHashes as DataHash[];
 
-const formmattedMrz = formatMrz(mrz);
-
-const hash = crypto.createHash('sha256');
-hash.update(Buffer.from(formmattedMrz));
-const mrzHash = Array.from(hash.digest()).map(x => (x < 128 ? x : x - 256));
+const mrzHash = hash(formatMrz(mrz));
 
 console.log('mrzHash:', mrzHash);
-console.log('dataHashesAsArray[0][1]:', dataHashesAsArray[0][1]);
+console.log('dataHashes[0][1]:', dataHashes[0][1]);
 console.log(
   'Are they equal ?',
-  arraysAreEqual(mrzHash, dataHashesAsArray[0][1]),
+  arraysAreEqual(mrzHash, dataHashes[0][1] as number[]),
 );
 
-// Let's replace the first array with the MRZ hash
-dataHashesAsArray.shift();
-dataHashesAsArray.unshift([1, mrzHash]);
-// Concaténons les dataHashes :
-const concatenatedDataHashes: number[] = [].concat(
-  ...dataHashesAsArray.map((dataHash: any) => {
-    dataHash[1].unshift(...[48, 37, 2, 1, dataHash[0], 4, 32]);
-    return dataHash[1];
-  }),
-);
-
-// Starting sequence. Should be the same for everybody, but not sure
-concatenatedDataHashes.unshift(
-  ...[
-    48, -126, 1, 37, 2, 1, 0, 48, 11, 6, 9, 96, -122, 72, 1, 101, 3, 4, 2, 1,
-    48, -126, 1, 17,
-  ],
+const concatenatedDataHashes = formatAndConcatenateDataHashes(
+  mrzHash,
+  dataHashes,
 );
 
 console.log('concatenatedDataHashes', concatenatedDataHashes);
@@ -65,50 +50,20 @@ console.log(
   ),
 );
 
-// please hash concatenatedDataHashes
-const concatenatedDataHashesHash = crypto.createHash('sha256');
-concatenatedDataHashesHash.update(Buffer.from(concatenatedDataHashes));
-const concatenatedDataHashesHashDigest = Array.from(
-  concatenatedDataHashesHash.digest(),
-).map(x => (x < 128 ? x : x - 256));
+const concatenatedDataHashesHashDigest = hash(concatenatedDataHashes);
 
-// Now let's reconstruct the eContent
+const timeOfSignature = findTimeOfSignature(passportData.eContentDecomposed);
 
-const constructedEContent = [];
-
-// Detailed description is in private file r&d.ts for now
-// First, the tag and length, assumed to be always the same
-constructedEContent.push(...[49, 102]);
-
-// 1.2.840.113549.1.9.3 is RFC_3369_CONTENT_TYPE_OID
-constructedEContent.push(
-  ...[48, 21, 6, 9, 42, -122, 72, -122, -9, 13, 1, 9, 3],
+const eContent = assembleEContent(
+  concatenatedDataHashesHashDigest,
+  timeOfSignature,
 );
-// 2.23.136.1.1.1 is ldsSecurityObject
-constructedEContent.push(...[49, 8, 6, 6, 103, -127, 8, 1, 1, 1]);
 
-// 1.2.840.113549.1.9.5 is signing-time
-constructedEContent.push(
-  ...[48, 28, 6, 9, 42, -122, 72, -122, -9, 13, 1, 9, 5],
-);
-// time of the signature
-constructedEContent.push(
-  ...findTimeOfSignature(passportData.eContentDecomposed),
-);
-// 1.2.840.113549.1.9.4 is RFC_3369_MESSAGE_DIGEST_OID
-constructedEContent.push(
-  ...[48, 47, 6, 9, 42, -122, 72, -122, -9, 13, 1, 9, 4],
-);
-// TAG and length of the message digest
-constructedEContent.push(...[49, 34, 4, 32]);
-
-constructedEContent.push(...concatenatedDataHashesHashDigest);
-
-console.log('constructedEContent', constructedEContent);
+console.log('eContent reconstructed', eContent);
 console.log('passportData.eContent', passportData.eContent);
 console.log(
   'Are they equal ?',
-  arraysAreEqual(constructedEContent, passportData.eContent),
+  arraysAreEqual(eContent, passportData.eContent),
 );
 
 // now let's verify the signature
@@ -122,7 +77,7 @@ const publicKey = rsa.setPublicKey(
 
 // SHA-256 hash of the eContent
 const md = forge.md.sha256.create();
-md.update(forge.util.binary.raw.encode(new Uint8Array(constructedEContent)));
+md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
 const hashOfEContent = md.digest().getBytes();
 
 // Signature verification
@@ -135,4 +90,10 @@ if (valid) {
   console.log('The signature is valid.');
 } else {
   console.log('The signature is not valid.');
+}
+
+function hash(bytesArray: number[]): number[] {
+  const hash = crypto.createHash('sha256');
+  hash.update(Buffer.from(bytesArray));
+  return Array.from(hash.digest()).map(x => (x < 128 ? x : x - 256));
 }

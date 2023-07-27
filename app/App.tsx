@@ -32,12 +32,13 @@ import {
   LOCAL_IP,
 } from '@env';
 import {PassportData} from './types/passportData';
-import {dataHashesObjToArray} from './utils/utils';
+import {arraysAreEqual, dataHashesObjToArray} from './utils/utils';
+import {computeAndCheckEContent} from './utils/computeEContent';
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
 const CACHE_DATA_IN_LOCAL_SERVER = true;
-const SKIP_SCAN = false;
+const SKIP_SCAN = true;
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -85,7 +86,7 @@ function App(): JSX.Element {
       eContentDecomposed,
     } = response;
 
-    const passportData = {
+    const passportData: PassportData = {
       mrzInfo: JSON.parse(mrzInfo),
       publicKey: publicKey,
       publicKeyPEM: publicKeyPEM,
@@ -147,28 +148,32 @@ function App(): JSX.Element {
     }
   }
 
-  const handleProve = () => {
+  const handleProve = async () => {
     if (passportData === null) {
       console.log('passport data is null');
       return;
     }
 
-    // const mrz = computeMrz(passportData);
-
     // 1. Compute the eContent from the mrzInfo and the dataGroupHashes
+    const computedEContent = computeAndCheckEContent(passportData);
 
-    // 2. check that it matches the eContent from the passportData
+    if (!arraysAreEqual(computedEContent, passportData.eContent)) {
+      throw new Error(
+        'computed eContent does not match the one from passportData',
+      );
+    }
 
-    // 3. Check the signature in js
+    // 2. TODO : check RSA signature to make sure the proof will work
+    // Did not manage to do it cuz js crypto libs suck
 
-    // 4. Format all the data as inputs for the circuit
+    // 3. Format all the data as inputs for the circuit
 
-    // 5. Generate a proof of passport
+    // 4. Generate a proof of passport
   };
 
   const handleMint = () => {
-    // 6. Format the proof and publicInputs as calldata for the verifier contract
-    // 7. Call the verifier contract with the calldata
+    // 5. Format the proof and publicInputs as calldata for the verifier contract
+    // 6. Call the verifier contract with the calldata
   };
 
   const handleNative = async () => {
