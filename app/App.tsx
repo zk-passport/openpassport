@@ -23,18 +23,33 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 // @ts-ignore
 import PassportReader from 'react-native-passport-reader';
-import {checkInputs} from './utils/checks';
+import {checkInputs, getFirstName} from './utils/checks';
+import {DEFAULT_PNUMBER, DEFAULT_DOB, DEFAULT_DOE, DEFAULT_ADDRESS} from '@env';
 
-const CACHE_PASSPORT_DATA = true;
+console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
+
+const CACHE_DATA_IN_LOCAL_SERVER = true;
+const SKIP_SCAN = true;
+
+type PassportData = {
+  mrzInfo: any;
+  publicKey: any;
+  publicKeyPEM: any;
+  dataGroupHashes: any;
+  eContent: any;
+  encryptedDigest: any;
+  contentBytes: any;
+  eContentDecomposed: any;
+};
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-  const [passportNumber, setPassportNumber] = useState('19HA34828');
-  const [dateOfBirth, setDateOfBirth] = useState('000719');
-  const [dateOfExpiry, setDateOfExpiry] = useState('291209');
-  const [address, setAddress] = useState('');
+  const [passportNumber, setPassportNumber] = useState(DEFAULT_PNUMBER ?? '');
+  const [dateOfBirth, setDateOfBirth] = useState(DEFAULT_DOB ?? '');
+  const [dateOfExpiry, setDateOfExpiry] = useState(DEFAULT_DOE ?? '');
+  const [address, setAddress] = useState(DEFAULT_ADDRESS ?? '');
+  const [passportData, setPassportData] = useState<PassportData | null>(null);
   const [step, setStep] = useState('enterDetails');
-  const [firstName, setFirstName] = useState('');
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -49,6 +64,17 @@ function App(): JSX.Element {
       logEventListener.remove();
     };
   }, []);
+
+  if (SKIP_SCAN && passportData === null) {
+    console.log('skipping scan step...');
+    fetch('http://192.168.1.22:3000/passportData')
+      .then(response => response.json())
+      .then(data => {
+        console.log('passport data fetched');
+        setPassportData(data);
+        setStep('scanCompleted');
+      });
+  }
 
   async function handleResponse(response: any) {
     const {
@@ -82,11 +108,12 @@ function App(): JSX.Element {
     console.log('contentBytes', passportData.contentBytes);
     console.log('eContentDecomposed', passportData.eContentDecomposed);
 
-    // Stores data in local server to avoid having to scan the passport each time
-    // For development purposes only
+    setPassportData(passportData);
 
-    if (CACHE_PASSPORT_DATA) {
-      fetch('http://192.168.1.22:3000/passportData', {
+    if (CACHE_DATA_IN_LOCAL_SERVER) {
+      // Caches data in local server to avoid having to scan the passport each time
+      // For development purposes only
+      fetch('http://192.168.1.22:3000/post', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,11 +126,6 @@ function App(): JSX.Element {
           console.error('Error:', error);
         });
     }
-
-    const firstName = passportData.mrzInfo.secondaryIdentifier.split('<')[0];
-    setFirstName(
-      firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase(),
-    );
 
     // 1. Compute the eContent from the dg1File
 
@@ -192,7 +214,9 @@ function App(): JSX.Element {
           {step === 'scanCompleted' ? (
             <View style={styles.sectionContainer}>
               <Text style={styles.header}>Connection successful</Text>
-              <Text style={styles.sectionDescription}>Hi {firstName} </Text>
+              <Text style={styles.header}>
+                Hi {getFirstName(passportData?.mrzInfo)} !{' '}
+              </Text>
               <Text style={styles.header}>Input your address or ens</Text>
               <TextInput
                 style={styles.input}
