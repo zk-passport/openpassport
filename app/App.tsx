@@ -12,6 +12,7 @@ import {
   DeviceEventEmitter,
   TextInput,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 
 import {
@@ -127,13 +128,7 @@ function App(): JSX.Element {
     setStep('scanCompleted');
   }
 
-  async function scan() {
-    checkInputs(passportNumber, dateOfBirth, dateOfExpiry);
-    // 1. start a scan
-    // 2. press the back of your android phone against the passport
-    // 3. wait for the scan(...) Promise to get resolved/rejected
-    console.log('scanning...');
-    setStep('scanning');
+  async function scanAndroid() {
     try {
       const response = await PassportReader.scan({
         documentNumber: passportNumber,
@@ -171,13 +166,29 @@ function App(): JSX.Element {
     // 7. Call the verifier contract with the calldata
   };
 
-  const handleNative = async () => {
+  const scanIphone = async () => {
     const value = await NativeModules.PassportReader.scanPassport(
       passportNumber,
       dateOfBirth,
       dateOfExpiry,
     );
     console.log(`native tells us ${value}`);
+  };
+
+  const scan = () => {
+    checkInputs(passportNumber, dateOfBirth, dateOfExpiry);
+
+    // 1. start a scan
+    // 2. press the back of your android phone against the passport
+    // 3. wait for the scan(...) Promise to get resolved/rejected
+    console.log('scanning...');
+    setStep('scanning');
+
+    if (Platform.OS === 'android') {
+      scanAndroid();
+    } else {
+      scanIphone();
+    }
   };
 
   return (
@@ -215,7 +226,6 @@ function App(): JSX.Element {
                 placeholder="Date of Expiry (YYYY-MM-DD)"
               />
               <Button title="Scan Passport with NFC" onPress={scan} />
-              <Button title="Call native method" onPress={handleNative} />
             </View>
           ) : null}
           {step === 'scanning' ? (
