@@ -71,3 +71,5 @@ yarn-error.log
 /scripts/env.ts
 /scripts/retd.ts
 /server/passportData.json
+
+.expo/
