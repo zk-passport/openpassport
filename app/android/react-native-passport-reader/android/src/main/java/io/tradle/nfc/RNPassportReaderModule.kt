@@ -143,11 +143,6 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         return "RNPassportReader"
     }
 
-    @ReactMethod
-    fun createCalendarEvent(name: String, location: String) {
-        Log.d("CalendarModule", "Create event called with name: $name and location: $location")
-    }
-
     fun sendDataToJS(passportData: PassportData) {
       val gson = Gson()
 
@@ -242,7 +237,6 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
 
         private lateinit var dg1File: DG1File
         private lateinit var dg2File: DG2File
-        private lateinit var dg2InSave: InputStream
         private lateinit var dg14File: DG14File
         private lateinit var sodFile: SODFile
         private var imageBase64: String? = null
@@ -291,67 +285,48 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                     }
                 }
 
-                Log.d(TAG, "============FIRST CONSOLE LOG=============")
                 val gson = Gson()
-
+                
                 val dg1In = service.getInputStream(PassportService.EF_DG1)
-                dg1File = DG1File(dg1In)
-                Log.d(TAG, "dg1File: " + gson.toJson(dg1File)) //
-
-
+                dg1File = DG1File(dg1In)   
                 val dg2In = service.getInputStream(PassportService.EF_DG2)
-                dg2File = DG2File(dg2In)
-                dg2InSave = dg2In
-                Log.d(TAG, "dg2In:")
-                Log.d(TAG, gson.toJson(dg2In))
-                Log.d(TAG, gson.toJson(dg2File))
-
+                dg2File = DG2File(dg2In)                
                 val sodIn = service.getInputStream(PassportService.EF_SOD)
-
                 sodFile = SODFile(sodIn)
-
-                Log.d(TAG, "other data :")
-
+                
+                // Log.d(TAG, "============FIRST CONSOLE LOG=============")
+                // Log.d(TAG, "dg1File: " + gson.toJson(dg1File))
+                // Log.d(TAG, "dg2File: " + gson.toJson(dg2File))
                 // Log.d(TAG, "sodFile.docSigningCertificate: ${sodFile.docSigningCertificate}")
-                Log.d(TAG, "publicKey: ${sodFile.docSigningCertificate.publicKey}")
-                Log.d(TAG, "publicKey: ${sodFile.docSigningCertificate.publicKey.toString()}")
-                Log.d(TAG, "publicKey: ${sodFile.docSigningCertificate.publicKey.format}")
-                Log.d(TAG, "publicKey: ${Base64.encodeToString(sodFile.docSigningCertificate.publicKey.encoded, Base64.DEFAULT)}")
-
-                Log.d(TAG, "sodFile.docSigningCertificate: ${gson.toJson(sodFile.docSigningCertificate)}")
-                val hexMap = sodFile.dataGroupHashes.mapValues { (_, value) ->
-                    value.joinToString("") { "%02x".format(it) }
-                }
-                Log.d(TAG, "hexMap: ${gson.toJson(hexMap)}")
-                Log.d(TAG, "sodFile.dataGroupHashes: ${sodFile.dataGroupHashes}")
-                Log.d(TAG, "sodFile.dataGroupHashes: ${gson.toJson(sodFile.dataGroupHashes)}")
-
-
-                // var concatenated = concatenateHashes(sodFile.dataGroupHashes)
+                // Log.d(TAG, "publicKey: ${sodFile.docSigningCertificate.publicKey}")
+                // Log.d(TAG, "publicKey: ${sodFile.docSigningCertificate.publicKey.toString()}")
+                // Log.d(TAG, "publicKey: ${sodFile.docSigningCertificate.publicKey.format}")
+                // Log.d(TAG, "publicKey: ${Base64.encodeToString(sodFile.docSigningCertificate.publicKey.encoded, Base64.DEFAULT)}")
+                // Log.d(TAG, "sodFile.docSigningCertificate: ${gson.toJson(sodFile.docSigningCertificate)}")
+                // Log.d(TAG, "sodFile.dataGroupHashes: ${sodFile.dataGroupHashes}")
+                // Log.d(TAG, "sodFile.dataGroupHashes: ${gson.toJson(sodFile.dataGroupHashes)}")
                 // Log.d(TAG, "concatenated: $concatenated")
                 // Log.d(TAG, "concatenated: ${gson.toJson(concatenated)}")
                 // Log.d(TAG, "concatenated: ${gson.toJson(concatenated.joinToString("") { "%02x".format(it) })}")
-                Log.d(TAG, "sodFile.eContent: ${sodFile.eContent}")
-                Log.d(TAG, "sodFile.eContent: ${gson.toJson(sodFile.eContent)}")
-                Log.d(TAG, "sodFile.eContent: ${gson.toJson(sodFile.eContent.joinToString("") { "%02x".format(it) })}")
-                Log.d(TAG, "sodFile.encryptedDigest: ${sodFile.encryptedDigest}")
-                Log.d(TAG, "sodFile.encryptedDigest: ${gson.toJson(sodFile.encryptedDigest)}")
-                Log.d(TAG, "sodFile.encryptedDigest: ${gson.toJson(sodFile.encryptedDigest.joinToString("") { "%02x".format(it) })}")
+                // Log.d(TAG, "sodFile.eContent: ${sodFile.eContent}")
+                // Log.d(TAG, "sodFile.eContent: ${gson.toJson(sodFile.eContent)}")
+                // Log.d(TAG, "sodFile.eContent: ${gson.toJson(sodFile.eContent.joinToString("") { "%02x".format(it) })}")
+                // Log.d(TAG, "sodFile.encryptedDigest: ${sodFile.encryptedDigest}")
+                // Log.d(TAG, "sodFile.encryptedDigest: ${gson.toJson(sodFile.encryptedDigest)}")
+                // Log.d(TAG, "sodFile.encryptedDigest: ${gson.toJson(sodFile.encryptedDigest.joinToString("") { "%02x".format(it) })}")
                 // var id = passportNumberView.text.toString()
                 // try {
                 //     postData(id, sodFile.eContent.joinToString("") { "%02x".format(it) }, sodFile.encryptedDigest.joinToString("") { "%02x".format(it) }, sodFile.docSigningCertificate.publicKey.toString())
                 // } catch (e: IOException) {
                 //     e.printStackTrace()
                 // }
-                Log.d(TAG, "============LET'S VERIFY THE SIGNATURE=============")
+                // Log.d(TAG, "============LET'S VERIFY THE SIGNATURE=============")
 
                 doChipAuth(service)
                 doPassiveAuth()
 
-                Log.d(TAG, "============SIGNATURE VERIFIED=============")
-
+                // Log.d(TAG, "============SIGNATURE VERIFIED=============")
                 // sendDataToJS(PassportData(dg1File, dg2File, sodFile))
-
                 // Log.d(TAG, "============DATA SENT TO JS=============")
 
                 val allFaceImageInfo: MutableList<FaceImageInfo> = ArrayList()
@@ -399,56 +374,34 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
 
         private fun doPassiveAuth() {
             try {
-                fun concatenateHashes(dataGroupHashes: Map<Int, ByteArray>): ByteArray {
-                    val allHashes = ArrayList<ByteArray>()
-
-                    // Order the data group hashes by their keys and concatenate them
-                    for (i in dataGroupHashes.keys.sorted()) {
-                        allHashes.add(dataGroupHashes[i]!!)
-                    }
-
-                    // Combine all the byte arrays into one
-                    val combinedSize = allHashes.sumOf { it.size }
-                    val result = ByteArray(combinedSize)
-                    var pos = 0
-                    for (hash in allHashes) {
-                        hash.copyInto(result, pos)
-                        pos += hash.size
-                    }
-
-                    return result
-                }
-
                 Log.d(TAG, "Starting passive authentication...")
                 val digest = MessageDigest.getInstance(sodFile.digestAlgorithm)
                 Log.d(TAG, "Using digest algorithm: ${sodFile.digestAlgorithm}")
 
                 val gson = Gson()
-                Log.d(TAG, "Using digest algorithm: ${gson.toJson(sodFile)}")
                 
                 val dataHashes = sodFile.dataGroupHashes
-                Log.d(TAG, "dataHashes " + gson.toJson(dataHashes))
-                val hexMap = sodFile.dataGroupHashes.mapValues { (_, value) ->
-                    value.joinToString("") { "%02x".format(it) }
-                }
-                Log.d(TAG, "hexMap: ${gson.toJson(hexMap)}")
-                var concatenated = concatenateHashes(sodFile.dataGroupHashes)
-                Log.d(TAG, "concatenated: $concatenated")
-                Log.d(TAG, "concatenated: ${gson.toJson(concatenated)}")
-                Log.d(TAG, "concatenated: ${gson.toJson(concatenated.joinToString("") { "%02x".format(it) })}")
                 
                 val dg14Hash = if (chipAuthSucceeded) digest.digest(dg14Encoded) else ByteArray(0)
                 val dg1Hash = digest.digest(dg1File.encoded)
-
-                Log.d(TAG, "dg1File.encoded " + gson.toJson(dg1File.encoded))
-                Log.d(TAG, "dg1File.encoded.joinToString " + gson.toJson(dg1File.encoded.joinToString("") { "%02x".format(it) }))
-                Log.d(TAG, "dg1Hash " + gson.toJson(dg1Hash))
-                Log.d(TAG, "dg1Hash.joinToString " + gson.toJson(dg1Hash.joinToString("") { "%02x".format(it) }))
                 val dg2Hash = digest.digest(dg2File.encoded)
-                Log.d(TAG, "dg2File.encoded " + gson.toJson(dg2File.encoded))
-                Log.d(TAG, "dg2File.encoded.joinToString " + gson.toJson(dg2File.encoded.joinToString("") { "%02x".format(it) }))
-                Log.d(TAG, "dg2Hash " + gson.toJson(dg2Hash))
-                Log.d(TAG, "dg2HashjoinToString " + gson.toJson(dg2Hash.joinToString("") { "%02x".format(it) }))
+                
+                // Log.d(TAG, "dataHashes " + gson.toJson(dataHashes))
+                // val hexMap = sodFile.dataGroupHashes.mapValues { (_, value) ->
+                //     value.joinToString("") { "%02x".format(it) }
+                // }
+                // Log.d(TAG, "hexMap: ${gson.toJson(hexMap)}")
+                // Log.d(TAG, "concatenated: $concatenated")
+                // Log.d(TAG, "concatenated: ${gson.toJson(concatenated)}")
+                // Log.d(TAG, "concatenated: ${gson.toJson(concatenated.joinToString("") { "%02x".format(it) })}")
+                // Log.d(TAG, "dg1File.encoded " + gson.toJson(dg1File.encoded))
+                // Log.d(TAG, "dg1File.encoded.joinToString " + gson.toJson(dg1File.encoded.joinToString("") { "%02x".format(it) }))
+                // Log.d(TAG, "dg1Hash " + gson.toJson(dg1Hash))
+                // Log.d(TAG, "dg1Hash.joinToString " + gson.toJson(dg1Hash.joinToString("") { "%02x".format(it) }))
+                // Log.d(TAG, "dg2File.encoded " + gson.toJson(dg2File.encoded))
+                // Log.d(TAG, "dg2File.encoded.joinToString " + gson.toJson(dg2File.encoded.joinToString("") { "%02x".format(it) }))
+                // Log.d(TAG, "dg2Hash " + gson.toJson(dg2Hash))
+                // Log.d(TAG, "dg2HashjoinToString " + gson.toJson(dg2Hash.joinToString("") { "%02x".format(it) }))
 
                 Log.d(TAG, "Comparing data group hashes...")
 
@@ -463,24 +416,20 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                     val cf = CertificateFactory.getInstance("X.509")
 
                     var p: ASN1Primitive?
-                    Log.d(TAG, "Reading ASN1 sequence...")
                     var obj = asn1InputStream.readObject()
 
                     while (obj != null) {
                         p = obj
-                        // Your processing code for ASN1Primitive p goes here
                         val asn1 = ASN1Sequence.getInstance(p)
                         if (asn1 == null || asn1.size() == 0) {
                             throw IllegalArgumentException("Null or empty sequence passed.")
                         }
-                        Log.d(TAG, "asn1" + asn1.toString()) //byte sequence
 
                         if (asn1.size() != 2) {
                             throw IllegalArgumentException("Incorrect sequence size: " + asn1.size())
                         }
                         val certSet = ASN1Set.getInstance(asn1.getObjectAt(1))
                         for (i in 0 until certSet.size()) {
-                            // Log.d(TAG, "Processing certificate: $i")
                             val certificate = Certificate.getInstance(certSet.getObjectAt(i))
                             val pemCertificate = certificate.encoded
                             val javaCertificate = cf.generateCertificate(ByteArrayInputStream(pemCertificate))
@@ -495,7 +444,6 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                     for (docSigningCertificate: X509Certificate in docSigningCertificates) {
                         docSigningCertificate.checkValidity()
                         Log.d(TAG, "Certificate: ${docSigningCertificate.subjectDN} is valid.")
-                        // Log.d(TAG, docSigningCertificate.toString())
                     }
 
                     val cp = cf.generateCertPath(docSigningCertificates)
@@ -509,12 +457,10 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                     if ((sodDigestEncryptionAlgorithm == "SSAwithRSA/PSS")) {
                         sodDigestEncryptionAlgorithm = "SHA256withRSA/PSS"
                         isSSA = true
-                        //Log.d(TAG, sodDigestEncryptionAlgorithm)
 
                     }
                     val sign = Signature.getInstance(sodDigestEncryptionAlgorithm)
                     if (isSSA) {
-                        //Log.d(TAG, isSSA.toString())
                         sign.setParameter(PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 32, 1))
                     }
                     sign.initVerify(sodFile.docSigningCertificate)
@@ -522,7 +468,6 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
 
                     passiveAuthSuccess = sign.verify(sodFile.encryptedDigest)
                     Log.d(TAG, "Passive authentication success: $passiveAuthSuccess")
-                    Log.d(TAG, "============LAST CONSOLE LOG=============")
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Exception in passive authentication", e)
@@ -555,50 +500,35 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
           val signedDataField = SODFile::class.java.getDeclaredField("signedData")
           signedDataField.isAccessible = true
           
-          val signedData = signedDataField.get(sodFile)
+          val signedData = signedDataField.get(sodFile) as SignedData
+          
+          val eContentAsn1InputStream = ASN1InputStream(sodFile.eContent.inputStream())
+          val eContentDecomposed: ASN1Primitive = eContentAsn1InputStream.readObject()
 
+          val passport = Arguments.createMap()
+          passport.putString("mrzInfo", gson.toJson(mrzInfo))
+          passport.putString("dg2File", gson.toJson(dg2File))
+          passport.putString("publicKey", sodFile.docSigningCertificate.publicKey.toString())
+          passport.putString("publicKeyPEM", Base64.encodeToString(sodFile.docSigningCertificate.publicKey.encoded, Base64.DEFAULT))
+          passport.putString("dataGroupHashes", gson.toJson(sodFile.dataGroupHashes))
+          passport.putString("eContent", gson.toJson(sodFile.eContent))
+          passport.putString("encryptedDigest", gson.toJson(sodFile.encryptedDigest))
+          passport.putString("contentBytes", gson.toJson(signedData.getEncapContentInfo()))
+          passport.putString("eContentDecomposed", gson.toJson(eContentDecomposed))
+
+          // Another way to get signing time is to get into signedData.signerInfos, then search for the ICO identifier 1.2.840.113549.1.9.5 
+          // passport.putString("signerInfos", gson.toJson(signedData.signerInfos))
+          
+          //   Log.d(TAG, "signedData.digestAlgorithms: ${gson.toJson(signedData.digestAlgorithms)}")
+          //   Log.d(TAG, "signedData.signerInfos: ${gson.toJson(signedData.signerInfos)}")
+          //   Log.d(TAG, "signedData.certificates: ${gson.toJson(signedData.certificates)}")
+          
           val base64 = bitmap?.let { toBase64(it, quality) }
           val photo = Arguments.createMap()
           photo.putString("base64", base64 ?: "")
           photo.putInt("width", bitmap?.width ?: 0)
           photo.putInt("height", bitmap?.height ?: 0)
-
-          val firstName = mrzInfo.secondaryIdentifier.replace("<", "")
-          val lastName = mrzInfo.primaryIdentifier.replace("<", "")
-          val passport = Arguments.createMap()
-          passport.putString("firstName", firstName)
-          passport.putString("lastName", lastName)
-          passport.putString("nationality", mrzInfo.nationality)
-          passport.putString("gender", mrzInfo.gender.toString())
-          passport.putString("issuer", mrzInfo.issuingState)
           passport.putMap("photo", photo)
-          passport.putString("dg1File", gson.toJson(dg1File))
-          passport.putString("dg2File", gson.toJson(dg2File))
-          passport.putString("dg2InSave", gson.toJson(dg2InSave))
-          passport.putString("signedData", gson.toJson(signedData))
-          passport.putString("sodFile", gson.toJson(sodFile))
-          passport.putString("publicKey", sodFile.docSigningCertificate.publicKey.toString())
-          passport.putString("publicKeyOldSchool", Base64.encodeToString(sodFile.docSigningCertificate.publicKey.encoded, Base64.DEFAULT))
-          passport.putString("dataGroupHashes", gson.toJson(sodFile.dataGroupHashes))
-          passport.putString("eContent", gson.toJson(sodFile.eContent.joinToString("") { "%02x".format(it) }))
-          passport.putString("eContent", gson.toJson(sodFile.eContent.joinToString("") { "%02x".format(it) }))
-          passport.putString("encryptedDigest", gson.toJson(sodFile.encryptedDigest.joinToString("") { "%02x".format(it) }))
-
-          val asn1InputStream = ASN1InputStream(sodFile.eContent.inputStream())
-          val asn1Primitive: ASN1Primitive = asn1InputStream.readObject()
-
-        //   Log.d(TAG, "signedData: ${signedData}")
-        //   Log.d(TAG, "signedData: ${signedData.toString()}")
-        //   Log.d(TAG, "signedData: ${gson.toJson(signedData)}")
-
-          Log.d(TAG, "asn1Primitive: ${asn1Primitive}")
-          Log.d(TAG, "asn1Primitive: ${asn1Primitive.toString()}")
-          Log.d(TAG, "asn1Primitive: ${gson.toJson(asn1Primitive)}")
-          // Log.d(TAG, "publicKey: ${sodFile.docSigningCertificate.publicKey}")
-          // Log.d(TAG, "publicKey: ${Base64.encodeToString(sodFile.docSigningCertificate.publicKey.encoded, Base64.DEFAULT)}")
-          // Log.d(TAG, "sodFile.dataGroupHashes: ${sodFile.dataGroupHashes}")
-          // Log.d(TAG, "sodFile.eContent: ${gson.toJson(sodFile.eContent.joinToString("") { "%02x".format(it) })}")
-          // Log.d(TAG, "sodFile.encryptedDigest: ${gson.toJson(sodFile.encryptedDigest.joinToString("") { "%02x".format(it) })}")
 
           scanPromise?.resolve(passport)
           resetState()

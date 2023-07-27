@@ -66,5 +66,8 @@ yarn-error.log
 /coverage
 
 .env
+
+# Contains personal information
 /scripts/env.ts
 /scripts/retd.ts
+/server/passportData.json
