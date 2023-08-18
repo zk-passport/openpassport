@@ -89,8 +89,8 @@ export function parsePubKeyString(pubKeyString: string) {
   const modulus = modulusMatch ? modulusMatch[1] : null;
   const exponent = publicExponentMatch ? publicExponentMatch[1] : null;
 
-  console.log('Modulus:', modulus);
-  console.log('Public Exponent:', exponent);
+  // console.log('Modulus:', modulus);
+  // console.log('Public Exponent:', exponent);
 
   if (!modulus || !exponent) {
     throw new Error('Could not parse public key string');

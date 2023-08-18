@@ -80,6 +80,15 @@ const md = forge.md.sha256.create();
 md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
 const hashOfEContent = md.digest().getBytes();
 
+console.log('modulus', hexToDecimal(modulus));
+console.log('eContent', bytesToBigDecimal(passportData.eContent));
+console.log('signature', bytesToBigDecimal(passportData.encryptedDigest));
+// Convert the hash to a single decimal number
+
+const hashBigNumber = BigInt('0x' + forge.util.bytesToHex(hashOfEContent));
+
+console.log('hashOfEContent in big decimal', hashBigNumber.toString());
+
 // Signature verification
 const signatureBytes = Buffer.from(passportData.encryptedDigest).toString(
   'binary',
@@ -96,4 +105,16 @@ function hash(bytesArray: number[]): number[] {
   const hash = crypto.createHash('sha256');
   hash.update(Buffer.from(bytesArray));
   return Array.from(hash.digest()).map(x => (x < 128 ? x : x - 256));
+}
+
+function bytesToBigDecimal(arr: number[]): string {
+  let result = BigInt(0);
+  for (let i = 0; i < arr.length; i++) {
+    result = result * BigInt(256) + BigInt(arr[i] & 0xff);
+  }
+  return result.toString();
+}
+
+function hexToDecimal(hex: string): string {
+  return BigInt(`0x${hex}`).toString();
 }
