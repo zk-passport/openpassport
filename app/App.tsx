@@ -48,6 +48,7 @@ function App(): JSX.Element {
   const [passportData, setPassportData] = useState<PassportData | null>(null);
   const [step, setStep] = useState('enterDetails');
   const [result, setResult] = useState<string>('');
+  const [proofResult, setProofResult] = useState<string>('');
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -184,6 +185,24 @@ function App(): JSX.Element {
     });
   };
 
+  const proveRust = async () => {
+    const start = Date.now();
+    NativeModules.RNPassportReader.proveRust((err: any, res: any) => {
+      const end = Date.now();
+      if (err) {
+        console.error(err);
+        setProofResult(
+          err.toString() + ' time elapsed: ' + (end - start) + 'ms',
+        );
+      } else {
+        console.log(res);
+        setProofResult(
+          res.toString() + ' time elapsed: ' + (end - start) + 'ms',
+        );
+      }
+    });
+  };
+
   const handleNative = async () => {
     const value = await NativeModules.PassportReader.scanPassport('', '', '');
     console.log(`native tells us ${value}`);
@@ -264,6 +283,10 @@ function App(): JSX.Element {
         <View style={styles.sectionContainer}>
           <Button title="Call rust though java" onPress={callRustLib} />
           <Text style={styles.header}>{result}</Text>
+        </View>
+        <View style={styles.sectionContainer}>
+          <Button title="Prove" onPress={proveRust} />
+          <Text style={styles.header}>{proofResult}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

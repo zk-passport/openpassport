@@ -45,12 +45,11 @@ use rsa::{Hash, PaddingScheme, PublicKey, PublicKeyParts, RsaPrivateKey, RsaPubl
 use sha2::{Digest, Sha256};
 
 use halo2_rsa::{
-    BigUintConfig, BigUintInstructions, RSAConfig, RSAInstructions, RSAPubE, RSAPublicKey,
-    RSASignature, RSASignatureVerifier,
+    decompose_biguint, BigUintConfig, BigUintInstructions, RSAConfig, RSAInstructions, RSAPubE,
+    RSAPublicKey, RSASignature, RSASignatureVerifier,
 };
 
-use rand::rngs::OsRng;
-use rand::{thread_rng, Rng};
+use rand::{rngs::OsRng, thread_rng, Rng};
 
 #[derive(Debug, Clone)]
 pub struct PassportConfig<F: PrimeField> {
@@ -213,14 +212,107 @@ impl<F: PrimeField> Circuit<F> for PassportCircuit<F> {
     }
 }
 
+#[no_mangle]
+pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_proveInRust(
+    _: JNIEnv,
+    _: JClass,
+) -> c_int {
+    fn run<F: PrimeField>() -> Result<(), Error> {
+        let mut rng = thread_rng();
+        let private_key = RsaPrivateKey::new(&mut rng, PassportCircuit::<F>::BITS_LEN)
+            .expect("failed to generate a key");
+        let public_key = RsaPublicKey::from(&private_key);
+        let n = BigUint::from_radix_le(&public_key.n().to_radix_le(16), 16).unwrap();
+        let mut msg: [u8; 128] = [0; 128];
+        for i in 0..128 {
+            msg[i] = rng.gen();
+        }
+        let hashed_msg = Sha256::digest(&msg);
+
+        let circuit = PassportCircuit::<Fr> {
+            private_key,
+            public_key,
+            msg: msg.to_vec(),
+            _f: PhantomData,
+        };
+
+        let num_limbs = PassportCircuit::<F>::BITS_LEN / 64;
+        let limb_bits = 64;
+        let n_fes = decompose_biguint::<Fr>(&n, num_limbs, limb_bits);
+        let hash_fes = hashed_msg
+            .iter()
+            .map(|byte| Fr::from(*byte as u64))
+            .collect::<Vec<Fr>>();
+        let public_inputs = vec![n_fes, hash_fes];
+
+        let public_inputs_slices: Vec<&[Fr]> =
+            public_inputs.iter().map(|inner| inner.as_slice()).collect();
+        let intermediate: Vec<&[Fr]> = public_inputs_slices
+            .iter()
+            .map(|inner| inner.as_ref())
+            .collect();
+        let public_inputs_nested_slice: &[&[&[Fr]]] = &[intermediate.as_slice()];
+
+        let params = ParamsKZG::<Bn256>::setup(
+            PassportCircuit::<F>::CIRCUIT_DEGREE.try_into().unwrap(),
+            OsRng,
+        );
+
+        println!("Generating Verification Key");
+        let vk = keygen_vk(&params, &circuit).unwrap();
+
+        println!("Generating Proving Key from Verification Key");
+        let pk = keygen_pk(&params, vk, &circuit).unwrap();
+
+        let pf_time = start_timer!(|| "Creating proof");
+        let mut transcript = Blake2bWrite::<_, _, Challenge255<_>>::init(vec![]);
+        create_proof::<
+            KZGCommitmentScheme<Bn256>,
+            ProverSHPLONK<'_, Bn256>,
+            Challenge255<G1Affine>,
+            _,
+            Blake2bWrite<Vec<u8>, G1Affine, Challenge255<_>>,
+            _,
+        >(
+            &params,
+            &pk,
+            &[circuit],
+            &public_inputs_nested_slice,
+            OsRng,
+            &mut transcript,
+        )
+        .expect("prover should not fail");
+        let proof = transcript.finalize();
+        end_timer!(pf_time);
+
+        // verify the proof to make sure everything is ok
+        let verifier_params = params.verifier_params();
+        let strategy = SingleStrategy::new(&params);
+        let mut transcript = Blake2bRead::<_, _, Challenge255<_>>::init(&proof[..]);
+        let verification_result = verify_proof::<
+            KZGCommitmentScheme<Bn256>,
+            VerifierSHPLONK<'_, Bn256>,
+            Challenge255<G1Affine>,
+            Blake2bRead<&[u8], G1Affine, Challenge255<G1Affine>>,
+            SingleStrategy<'_, Bn256>,
+        >(
+            verifier_params,
+            pk.get_vk(),
+            strategy,
+            &public_inputs_nested_slice,
+            &mut transcript,
+        );
+        Ok(())
+    }
+    match run::<Fr>() {
+        Ok(_) => 6,   // return 6 to the Java side when everything is okay
+        Err(_) => -1, // return -1 or some other error code when there's an error
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
-    use halo2_base::halo2_proofs::{dev::MockProver, halo2curves::bn256::Fr};
-    use halo2_rsa::decompose_biguint;
-    use rand::{thread_rng, Rng};
-    use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
-    use sha2::{Digest, Sha256};
 
     #[test]
     fn test_valid_signature() {

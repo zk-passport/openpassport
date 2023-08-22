@@ -562,6 +562,17 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         callback.invoke(null, resultFromRust)
     }
 
+    external fun proveInRust(): Int
+
+    @ReactMethod
+    fun proveRust(callback: Callback) {
+        // Call the Rust function
+        val resultFromProof = proveInRust()
+        
+        // Return the result to JavaScript through the callback
+        callback.invoke(null, resultFromProof)
+    }
+
 
     companion object {
         private val TAG = RNPassportReaderModule::class.java.simpleName
