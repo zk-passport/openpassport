@@ -47,6 +47,7 @@ function App(): JSX.Element {
   const [address, setAddress] = useState(DEFAULT_ADDRESS ?? '');
   const [passportData, setPassportData] = useState<PassportData | null>(null);
   const [step, setStep] = useState('enterDetails');
+  const [result, setResult] = useState<string>('');
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -171,6 +172,18 @@ function App(): JSX.Element {
     // 7. Call the verifier contract with the calldata
   };
 
+  const callRustLib = async () => {
+    NativeModules.RNPassportReader.callRustLib((err: any, res: any) => {
+      if (err) {
+        console.error(err);
+        setResult(err.toString());
+      } else {
+        console.log(res); // Should log "5"
+        setResult(res.toString());
+      }
+    });
+  };
+
   const handleNative = async () => {
     const value = await NativeModules.PassportReader.scanPassport('', '', '');
     console.log(`native tells us ${value}`);
@@ -247,6 +260,10 @@ function App(): JSX.Element {
               <Button title="Mint Proof of Passport" onPress={handleMint} />
             </View>
           ) : null}
+        </View>
+        <View style={styles.sectionContainer}>
+          <Button title="Call rust though java" onPress={callRustLib} />
+          <Text style={styles.header}>{result}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
