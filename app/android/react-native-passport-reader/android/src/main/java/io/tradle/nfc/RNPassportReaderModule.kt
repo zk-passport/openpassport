@@ -99,6 +99,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.facebook.react.bridge.LifecycleEventListener
+import com.facebook.react.bridge.Callback
 
 class Response(json: String) : JSONObject(json) {
     val type: String? = this.optString("type")
@@ -547,6 +548,20 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         }
     }
 
+    //-------------functions related to calling rust lib----------------//
+
+    // Declare native method
+    external fun callRustCode(): Int
+
+    @ReactMethod
+    fun callRustLib(callback: Callback) {
+        // Call the Rust function
+        val resultFromRust = callRustCode()
+        
+        // Return the result to JavaScript through the callback
+        callback.invoke(null, resultFromRust)
+    }
+
 
     companion object {
         private val TAG = RNPassportReaderModule::class.java.simpleName
@@ -556,5 +571,8 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         const val JPEG_DATA_URI_PREFIX = "data:image/jpeg;base64,"
         private const val KEY_IS_SUPPORTED = "isSupported"
         var instance: RNPassportReaderModule? = null
+        init {
+            System.loadLibrary("halo2_passport")
+        }
     }
 }
