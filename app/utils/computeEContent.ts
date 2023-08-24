@@ -7,7 +7,6 @@ import {
   formatAndConcatenateDataHashes,
   formatMrz,
 } from './utils';
-// const sha256 = require('js-sha256');
 import {sha256} from 'js-sha256';
 
 export function computeAndCheckEContent(passportData: PassportData) {
