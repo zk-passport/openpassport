@@ -234,13 +234,13 @@ function App(): JSX.Element {
                 style={styles.input}
                 onChangeText={setDateOfBirth}
                 value={dateOfBirth}
-                placeholder="Date of Birth (YYYY-MM-DD)"
+                placeholder="Date of Birth (YYMMDD)"
               />
               <TextInput
                 style={styles.input}
                 onChangeText={setDateOfExpiry}
                 value={dateOfExpiry}
-                placeholder="Date of Expiry (YYYY-MM-DD)"
+                placeholder="Date of Expiry (YYMMDD)"
               />
               <Button title="Scan Passport with NFC" onPress={scan} />
               <Button title="Call native method" onPress={handleNative} />
