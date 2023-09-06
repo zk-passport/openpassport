@@ -1,6 +1,4 @@
-# Passport SBT - ETHGlobal Paris
-
-This is our submission for the ETHGlobal Paris Hackathon.
+# Proof of Baguette
 
 The goal is too let users scan the NFC chip in their government-issued passport to prove that
 it is valid. If valid, the user can generate a proof that can be verified onchain. We are using
