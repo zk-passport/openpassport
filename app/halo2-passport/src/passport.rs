@@ -4,6 +4,7 @@ use num_bigint::{BigInt, BigUint, Sign};
 use num_traits::{One, Signed, Zero};
 use std::marker::PhantomData;
 use std::os::raw::c_int;
+use std::time::Instant;
 
 extern crate jni;
 use jni::objects::JClass;
@@ -217,7 +218,7 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_proveInRust(
     _: JNIEnv,
     _: JClass,
 ) -> c_int {
-    fn run<F: PrimeField>() -> Result<(), Error> {
+    fn run<F: PrimeField>() -> Result<u128, &'static str> {
         let mut rng = thread_rng();
         let private_key = RsaPrivateKey::new(&mut rng, PassportCircuit::<F>::BITS_LEN)
             .expect("failed to generate a key");
@@ -264,7 +265,7 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_proveInRust(
         println!("Generating Proving Key from Verification Key");
         let pk = keygen_pk(&params, vk, &circuit).unwrap();
 
-        let pf_time = start_timer!(|| "Creating proof");
+        let start_time = std::time::Instant::now();
         let mut transcript = Blake2bWrite::<_, _, Challenge255<_>>::init(vec![]);
         create_proof::<
             KZGCommitmentScheme<Bn256>,
@@ -283,7 +284,8 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_proveInRust(
         )
         .expect("prover should not fail");
         let proof = transcript.finalize();
-        end_timer!(pf_time);
+        let elapsed_time = start_time.elapsed();
+        let elapsed_millis = elapsed_time.as_millis();
 
         // verify the proof to make sure everything is ok
         let verifier_params = params.verifier_params();
@@ -302,10 +304,10 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_proveInRust(
             &public_inputs_nested_slice,
             &mut transcript,
         );
-        Ok(())
+        Ok(elapsed_millis)
     }
     match run::<Fr>() {
-        Ok(_) => 6,   // return 6 to the Java side when everything is okay
+        Ok(elapsed_millis) => elapsed_millis as i32, // Assuming the elapsed time will fit in an i32
         Err(_) => -1, // return -1 or some other error code when there's an error
     }
 }
@@ -404,6 +406,8 @@ mod test {
     #[test]
     fn test_complete_proof() {
         fn run<F: PrimeField>() {
+            let start_time = Instant::now();
+
             let mut rng = thread_rng();
             let private_key = RsaPrivateKey::new(&mut rng, PassportCircuit::<F>::BITS_LEN)
                 .expect("failed to generate a key");
@@ -489,6 +493,8 @@ mod test {
                 &mut transcript
             )
             .is_ok());
+            let elapsed_time = start_time.elapsed();
+            println!("Elapsed time: {:?}", elapsed_time);
         }
         run::<Fr>();
     }
