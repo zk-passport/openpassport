@@ -36,9 +36,10 @@ import {arraysAreEqual, dataHashesObjToArray} from './utils/utils';
 import {computeAndCheckEContent} from './utils/computeEContent';
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
+console.log('LOCAL_IP', LOCAL_IP);
 
 const CACHE_DATA_IN_LOCAL_SERVER = true;
-const SKIP_SCAN = true;
+const SKIP_SCAN = false;
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -65,13 +66,17 @@ function App(): JSX.Element {
 
   if (SKIP_SCAN && passportData === null) {
     console.log('skipping scan step...');
-    fetch(`${LOCAL_IP}/passportData`)
-      .then(response => response.json())
-      .then(data => {
-        console.log('passport data fetched');
-        setPassportData(data);
-        setStep('scanCompleted');
-      });
+    try {
+      fetch(`${LOCAL_IP}/passportData`)
+        .then(response => response.json())
+        .then(data => {
+          console.log('passport data fetched');
+          setPassportData(data);
+          setStep('scanCompleted');
+        });
+    } catch (err) {
+      console.log('error fetching passport data', err);
+    }
   }
 
   async function handleResponse(response: any) {
@@ -88,8 +93,8 @@ function App(): JSX.Element {
 
     const passportData: PassportData = {
       mrzInfo: JSON.parse(mrzInfo),
-      publicKey: publicKey,
-      publicKeyPEM: publicKeyPEM,
+      publicKey: publicKey.replace(/\n/g, ''),
+      publicKeyPEM: publicKeyPEM.replace(/\n/g, ''),
       dataGroupHashes: dataHashesObjToArray(JSON.parse(dataGroupHashes)),
       eContent: JSON.parse(eContent),
       encryptedDigest: JSON.parse(encryptedDigest),
@@ -144,7 +149,7 @@ function App(): JSX.Element {
       console.log('scanned');
       handleResponse(response);
     } catch (e) {
-      console.log('error :', e);
+      console.log('error during scan :', e);
     }
   }
 
