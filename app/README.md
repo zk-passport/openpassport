@@ -1,3 +1,20 @@
+To build libhalo2_passport.so, run in /script:
+```
+./build_rust.sh
+```
+It will cross-compile using the config in app/android/react-native-passport-reader/android/build.gradle
+
+Then:
+yarn start => a or i
+
+
+
+
+
+
+
+
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
