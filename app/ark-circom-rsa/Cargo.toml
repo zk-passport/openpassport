@@ -1,0 +1,20 @@
+[package]
+name = "ark_circom_rsa"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "ark_circom_rsa"
+path = "src/rsa.rs"
+crate-type = ["cdylib"]
+
+
+[dependencies]
+ark-circom = { git = "https://github.com/0xturboblitz/circom-compat.git" }
+
+ark-bn254 = { version = "=0.4.0" }
+ark-groth16 = { version = "=0.4.0", default-features = false, features = ["parallel"] }
+ark-std = { version = "=0.4.0", default-features = false, features = ["parallel"] }
+ark-crypto-primitives = { version = "=0.4.0" }
+color-eyre = "=0.6.2"
+jni = "0.18" # Choose the version that best fits your needs
