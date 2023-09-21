@@ -197,12 +197,12 @@ function App(): JSX.Element {
       if (err) {
         console.error(err);
         setProofResult(
-          err.toString() + ' time elapsed: ' + (end - start) + 'ms',
+          "res:" + err.toString() + ' time elapsed: ' + (end - start) + 'ms',
         );
       } else {
         console.log(res);
         setProofResult(
-          res.toString() + ' time elapsed: ' + (end - start) + 'ms',
+          "res:" + res.toString() + ' time elapsed: ' + (end - start) + 'ms',
         );
       }
     });
