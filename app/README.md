@@ -4,6 +4,16 @@ To build libhalo2_passport.so, run in /script:
 ```
 It will cross-compile using the config in app/android/react-native-passport-reader/android/build.gradle
 
+You'll potentially need to set the rust-toolchain rust version as global default. Example:
+```
+rustup default 1.67.0
+```
+And install the targets like:
+```
+rustup target add aarch64-linux-android
+```
+
+
 Then:
 yarn start => a or i
 
