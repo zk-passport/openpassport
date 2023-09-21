@@ -551,7 +551,7 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
     //-------------functions related to calling rust lib----------------//
 
     // Declare native method
-    external fun callRustCode(): Int
+    external fun callRustCode(): String
 
     @ReactMethod
     fun callRustLib(callback: Callback) {
@@ -562,12 +562,12 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         callback.invoke(null, resultFromRust)
     }
 
-    external fun proveInRust(): Int
+    external fun proveRSAInRust(): Int
 
     @ReactMethod
     fun proveRust(callback: Callback) {
         // Call the Rust function
-        val resultFromProof = proveInRust()
+        val resultFromProof = proveRSAInRust()
         
         // Return the result to JavaScript through the callback
         callback.invoke(null, resultFromProof)
@@ -583,7 +583,7 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         private const val KEY_IS_SUPPORTED = "isSupported"
         var instance: RNPassportReaderModule? = null
         init {
-            System.loadLibrary("halo2_passport")
+            System.loadLibrary("ark_circom_rsa")
         }
     }
 }
