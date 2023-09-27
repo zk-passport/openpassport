@@ -16,7 +16,7 @@ import {DataHash} from '../types/passportData';
 // This script tests the whole flow from MRZ to signature
 // The passportData is imported from passportData.json written by the server
 
-const mrz = assembleMrz(passportData.mrzInfo);
+const mrz = passportData.mrz;
 
 console.log('mrz: ', mrz);
 
@@ -26,9 +26,8 @@ const dataHashes = passportData.dataGroupHashes as DataHash[];
 const mrzHash = hash(formatMrz(mrz));
 
 console.log('mrzHash:', mrzHash);
-console.log('dataHashes[0][1]:', dataHashes[0][1]);
 console.log(
-  'Are they equal ?',
+  'mrzHash === dataHashes[0][1] ?',
   arraysAreEqual(mrzHash, dataHashes[0][1] as number[]),
 );
 
@@ -37,50 +36,31 @@ const concatenatedDataHashes = formatAndConcatenateDataHashes(
   dataHashes,
 );
 
-console.log('concatenatedDataHashes', concatenatedDataHashes);
-console.log(
-  'passportData.contentBytes.content.string',
-  passportData.contentBytes.content.string,
-);
-console.log(
-  'Are they equal ?',
-  arraysAreEqual(
-    concatenatedDataHashes,
-    passportData.contentBytes.content.string,
-  ),
-);
-
 const concatenatedDataHashesHashDigest = hash(concatenatedDataHashes);
 
-const timeOfSignature = findTimeOfSignature(passportData.eContentDecomposed);
+// check that concatenatedDataHashesHashDigest is at the right place of passportData.eContent
+const sliceOfEContent = passportData.eContent.slice(72, 72 + 32);
 
-const eContent = assembleEContent(
-  concatenatedDataHashesHashDigest,
-  timeOfSignature,
-);
-
-console.log('eContent reconstructed', eContent);
-console.log('passportData.eContent', passportData.eContent);
 console.log(
   'Are they equal ?',
-  arraysAreEqual(eContent, passportData.eContent),
+  arraysAreEqual(sliceOfEContent, concatenatedDataHashesHashDigest),
 );
 
 // now let's verify the signature
-const {modulus, exponent} = parsePubKeyString(passportData.publicKey);
+// const {modulus, exponent} = parsePubKeyString(passportData.publicKey);
 // Create the public key
 const rsa = forge.pki.rsa;
 const publicKey = rsa.setPublicKey(
-  new forge.jsbn.BigInteger(modulus, 16),
-  new forge.jsbn.BigInteger(exponent, 16),
+  new forge.jsbn.BigInteger(passportData.modulus, 10),
+  new forge.jsbn.BigInteger("10001", 16),
 );
 
 // SHA-256 hash of the eContent
 const md = forge.md.sha256.create();
-md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
+md.update(forge.util.binary.raw.encode(new Uint8Array(passportData.eContent)));
 const hashOfEContent = md.digest().getBytes();
 
-console.log('modulus', hexToDecimal(modulus));
+console.log('modulus', passportData.modulus);
 console.log('eContent', bytesToBigDecimal(passportData.eContent));
 console.log('signature', bytesToBigDecimal(passportData.encryptedDigest));
 // Convert the hash to a single decimal number
@@ -106,7 +86,6 @@ function hash(bytesArray: number[]): number[] {
   hash.update(Buffer.from(bytesArray));
   return Array.from(hash.digest()).map(x => (x < 128 ? x : x - 256));
 }
-
 function bytesToBigDecimal(arr: number[]): string {
   let result = BigInt(0);
   for (let i = 0; i < arr.length; i++) {
