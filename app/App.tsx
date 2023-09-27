@@ -38,7 +38,7 @@ import {computeAndCheckEContent} from './utils/computeEContent';
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
 const CACHE_DATA_IN_LOCAL_SERVER = true;
-const SKIP_SCAN = true;
+const SKIP_SCAN = false;
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -78,35 +78,26 @@ function App(): JSX.Element {
 
   async function handleResponse(response: any) {
     const {
-      mrzInfo,
-      publicKey,
-      publicKeyPEM,
+      mrz,
+      modulus,
       dataGroupHashes,
       eContent,
       encryptedDigest,
-      contentBytes,
-      eContentDecomposed,
     } = response;
 
     const passportData: PassportData = {
-      mrzInfo: JSON.parse(mrzInfo),
-      publicKey: publicKey,
-      publicKeyPEM: publicKeyPEM,
+      mrz: mrz,
+      modulus: modulus,
       dataGroupHashes: dataHashesObjToArray(JSON.parse(dataGroupHashes)),
       eContent: JSON.parse(eContent),
       encryptedDigest: JSON.parse(encryptedDigest),
-      contentBytes: JSON.parse(contentBytes),
-      eContentDecomposed: JSON.parse(eContentDecomposed),
     };
 
-    console.log('mrzInfo', passportData.mrzInfo);
-    console.log('publicKey', passportData.publicKey);
-    console.log('publicKeyPEM', passportData.publicKeyPEM);
+    console.log('mrz', passportData.mrz);
+    console.log('modulus', passportData.modulus);
     console.log('dataGroupHashes', passportData.dataGroupHashes);
     console.log('eContent', passportData.eContent);
     console.log('encryptedDigest', passportData.encryptedDigest);
-    console.log('contentBytes', passportData.contentBytes);
-    console.log('eContentDecomposed', passportData.eContentDecomposed);
 
     setPassportData(passportData);
 
@@ -143,6 +134,7 @@ function App(): JSX.Element {
         dateOfBirth: dateOfBirth,
         dateOfExpiry: dateOfExpiry,
       });
+      console.log('response', response);
       console.log('scanned');
       handleResponse(response);
     } catch (e) {
@@ -265,7 +257,7 @@ function App(): JSX.Element {
             <View style={styles.sectionContainer}>
               <Text style={styles.header}>Connection successful</Text>
               <Text style={styles.header}>
-                Hi {getFirstName(passportData?.mrzInfo)} !{' '}
+                {passportData && `Hi ${getFirstName(passportData.mrz)} ! `}
               </Text>
               <Text style={styles.header}>Input your address or ens</Text>
               <TextInput

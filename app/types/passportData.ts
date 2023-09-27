@@ -19,12 +19,9 @@ export type MrzInfo = {
 export type DataHash = [number, number[]];
 
 export type PassportData = {
-  mrzInfo: MrzInfo;
-  publicKey: any;
-  publicKeyPEM: string;
+  mrz: string;
+  modulus: string;
   dataGroupHashes: DataHash[];
-  eContent: any;
-  encryptedDigest: any;
-  contentBytes: any;
-  eContentDecomposed: any;
+  eContent: number[];
+  encryptedDigest: number[];
 };

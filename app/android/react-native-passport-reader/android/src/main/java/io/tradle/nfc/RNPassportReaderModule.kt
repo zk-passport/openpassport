@@ -76,6 +76,7 @@ import java.security.cert.X509Certificate
 import java.security.spec.MGF1ParameterSpec
 import java.security.spec.PSSParameterSpec
 import java.text.ParseException
+import java.security.interfaces.RSAPublicKey
 import java.text.SimpleDateFormat
 import java.util.*
 import java.security.PublicKey
@@ -505,18 +506,15 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
           
           val eContentAsn1InputStream = ASN1InputStream(sodFile.eContent.inputStream())
           val eContentDecomposed: ASN1Primitive = eContentAsn1InputStream.readObject()
+          val rsaPublicKey = sodFile.docSigningCertificate.publicKey as RSAPublicKey
 
           val passport = Arguments.createMap()
-          passport.putString("mrzInfo", gson.toJson(mrzInfo))
-          passport.putString("dg2File", gson.toJson(dg2File))
-          passport.putString("publicKey", sodFile.docSigningCertificate.publicKey.toString())
-          passport.putString("publicKeyPEM", Base64.encodeToString(sodFile.docSigningCertificate.publicKey.encoded, Base64.DEFAULT))
+          passport.putString("mrz", mrzInfo.toString())
+          passport.putString("modulus", rsaPublicKey.modulus.toString())
           passport.putString("dataGroupHashes", gson.toJson(sodFile.dataGroupHashes))
           passport.putString("eContent", gson.toJson(sodFile.eContent))
           passport.putString("encryptedDigest", gson.toJson(sodFile.encryptedDigest))
-          passport.putString("contentBytes", gson.toJson(signedData.getEncapContentInfo()))
-          passport.putString("eContentDecomposed", gson.toJson(eContentDecomposed))
-
+          
           // Another way to get signing time is to get into signedData.signerInfos, then search for the ICO identifier 1.2.840.113549.1.9.5 
           // passport.putString("signerInfos", gson.toJson(signedData.signerInfos))
           
@@ -524,13 +522,14 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
           //   Log.d(TAG, "signedData.signerInfos: ${gson.toJson(signedData.signerInfos)}")
           //   Log.d(TAG, "signedData.certificates: ${gson.toJson(signedData.certificates)}")
           
-          val base64 = bitmap?.let { toBase64(it, quality) }
-          val photo = Arguments.createMap()
-          photo.putString("base64", base64 ?: "")
-          photo.putInt("width", bitmap?.width ?: 0)
-          photo.putInt("height", bitmap?.height ?: 0)
-          passport.putMap("photo", photo)
-
+          //   val base64 = bitmap?.let { toBase64(it, quality) }
+          //   val photo = Arguments.createMap()
+          //   photo.putString("base64", base64 ?: "")
+          //   photo.putInt("width", bitmap?.width ?: 0)
+          //   photo.putInt("height", bitmap?.height ?: 0)
+          //   passport.putMap("photo", photo)
+            //   passport.putString("dg2File", gson.toJson(dg2File))
+          
           scanPromise?.resolve(passport)
           resetState()
       }
