@@ -86,7 +86,7 @@ function App(): JSX.Element {
     } = response;
 
     const passportData: PassportData = {
-      mrz: mrz,
+      mrz: mrz.replace(/\n/g, ''),
       modulus: modulus,
       dataGroupHashes: dataHashesObjToArray(JSON.parse(dataGroupHashes)),
       eContent: JSON.parse(eContent),

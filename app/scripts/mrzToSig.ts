@@ -63,11 +63,6 @@ const hashOfEContent = md.digest().getBytes();
 console.log('modulus', passportData.modulus);
 console.log('eContent', bytesToBigDecimal(passportData.eContent));
 console.log('signature', bytesToBigDecimal(passportData.encryptedDigest));
-// Convert the hash to a single decimal number
-
-const hashBigNumber = BigInt('0x' + forge.util.bytesToHex(hashOfEContent));
-
-console.log('hashOfEContent in big decimal', hashBigNumber.toString());
 
 // Signature verification
 const signatureBytes = Buffer.from(passportData.encryptedDigest).toString(
