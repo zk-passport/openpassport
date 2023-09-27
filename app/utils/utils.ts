@@ -83,7 +83,7 @@ export function findTimeOfSignature(eContentDecomposed: any) {
 }
 
 export function parsePubKeyString(pubKeyString: string) {
-  const modulusMatch = pubKeyString.match(/modulus: (\w+)/);
+  const modulusMatch = pubKeyString.match(/modulus: ([\w\d]+)\s*public/);
   const publicExponentMatch = pubKeyString.match(/public exponent: (\w+)/);
 
   const modulus = modulusMatch ? modulusMatch[1] : null;
