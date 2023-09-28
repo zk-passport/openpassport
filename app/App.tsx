@@ -31,14 +31,14 @@ import {
   DEFAULT_ADDRESS,
   LOCAL_IP,
 } from '@env';
-import {PassportData} from './types/passportData';
-import {arraysAreEqual, dataHashesObjToArray} from './utils/utils';
-import {computeAndCheckEContent} from './utils/computeEContent';
+import {DataHash, PassportData} from './types/passportData';
+import {arraysAreEqual, bytesToBigDecimal, dataHashesObjToArray, formatAndConcatenateDataHashes, formatMrz, splitToWords} from './utils/utils';
+import {hash, toUnsignedByte} from './utils/computeEContent';
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
 const CACHE_DATA_IN_LOCAL_SERVER = true;
-const SKIP_SCAN = false;
+const SKIP_SCAN = true;
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -67,13 +67,17 @@ function App(): JSX.Element {
 
   if (SKIP_SCAN && passportData === null) {
     console.log('skipping scan step...');
-    fetch(`${LOCAL_IP}/passportData`)
+    try {
+      fetch(`${LOCAL_IP}/passportData`)
       .then(response => response.json())
       .then(data => {
         console.log('passport data fetched');
         setPassportData(data);
         setStep('scanCompleted');
       });
+    } catch(e) {
+      console.log('error fetching passport data', e);
+    }
   }
 
   async function handleResponse(response: any) {
@@ -148,21 +152,52 @@ function App(): JSX.Element {
       return;
     }
 
-    // 1. Compute the eContent from the mrzInfo and the dataGroupHashes
-    const computedEContent = computeAndCheckEContent(passportData);
+    // 1. TODO check signature to make sure the proof will work
 
-    if (!arraysAreEqual(computedEContent, passportData.eContent)) {
-      throw new Error(
-        'computed eContent does not match the one from passportData',
-      );
+    // 2. Format all the data as inputs for the circuit
+    const formattedMrz = formatMrz(passportData.mrz);
+    const mrzHash = hash(formatMrz(passportData.mrz));
+    const concatenatedDataHashes = formatAndConcatenateDataHashes(
+      mrzHash,
+      passportData.dataGroupHashes as DataHash[],
+    );
+    
+    const reveal_bitmap = Array.from({ length: 88 }, (_, i) => (i >= 16 && i <= 22) ? '1' : '0');
+
+    const inputs = {
+      mrz: Array.from(formattedMrz).map(byte => String(byte)),
+      reveal_bitmap: Array.from(reveal_bitmap).map(byte => String(byte)),
+      dataHashes: Array.from(concatenatedDataHashes.map(toUnsignedByte)).map(byte => String(byte)),
+      eContentBytes: Array.from(passportData.eContent.map(toUnsignedByte)).map(byte => String(byte)),
+      signature: splitToWords(
+        BigInt(bytesToBigDecimal(passportData.encryptedDigest)),
+        BigInt(64),
+        BigInt(32)
+      ),
+      pubkey: splitToWords(
+        BigInt(passportData.modulus),
+        BigInt(64),
+        BigInt(32)
+      ),
+      address,
     }
+    // 3. Generate a proof of passport
 
-    // 2. TODO : check RSA signature to make sure the proof will work
-    // Did not manage to do it cuz js crypto libs suck
-
-    // 3. Format all the data as inputs for the circuit
-
-    // 4. Generate a proof of passport
+    const start = Date.now();
+    NativeModules.RNPassportReader.provePassport(inputs, (err: any, res: any) => {
+      const end = Date.now();
+      if (err) {
+        console.error(err);
+        setProofResult(
+          "res:" + err.toString() + ' time elapsed: ' + (end - start) + 'ms',
+        );
+      } else {
+        console.log(res);
+        setProofResult(
+          "res:" + res.toString() + ' time elapsed: ' + (end - start) + 'ms',
+        );
+      }
+    });
   };
 
   const handleMint = () => {
@@ -271,19 +306,17 @@ function App(): JSX.Element {
           ) : null}
           {step === 'proofGenerated' ? (
             <View style={styles.sectionContainer}>
-              <Text style={styles.header}>Zero-knowledge proof generated</Text>
+              <Text style={styles.sectionDescription}>Zero-knowledge proof generated</Text>
               <Text style={styles.header}>You can now mint your SBT</Text>
               <Button title="Mint Proof of Passport" onPress={handleMint} />
             </View>
           ) : null}
         </View>
-        <View style={styles.sectionContainer}>
+        <View style={{...styles.sectionContainer, marginTop: 80}}>
           <Button title="Call rust though java" onPress={callRustLib} />
-          <Text style={styles.header}>{result}</Text>
-        </View>
-        <View style={styles.sectionContainer}>
-          <Button title="Prove" onPress={proveRust} />
-          <Text style={styles.header}>{proofResult}</Text>
+          <Text style={styles.sectionDescription}>{result}</Text>
+          <Button title="Test sample proof with arkworks" onPress={proveRust} />
+          <Text style={styles.sectionDescription}>{proofResult}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
