@@ -56,9 +56,9 @@ dependencies {
 apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 
 cargo {
-    module  = "../../../ark-circom-rsa" // this works
+    module  = "../../../ark-circom-passport" // this works
     // module  = "/Users/turboblitz/code/my-code/passport-sbt/app/halo2-passport"
-    libname = "ark_circom_rsa"          // Or whatever matches Cargo.toml's [package] name.
+    libname = "ark_circom_passport"          // Or whatever matches Cargo.toml's [package] name.
     // targets = ["arm", "x86"]  // failing
     targets = ["arm64", "darwin-aarch64"]  // Those work
     apiLevel = 29

@@ -92,6 +92,7 @@ import com.google.gson.Gson;
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
+import com.facebook.react.bridge.ReadableNativeMap
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -571,7 +572,34 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         // Return the result to JavaScript through the callback
         callback.invoke(null, resultFromProof)
     }
+    
+    external fun provePassport(
+        mrz: List<String>,
+        reveal_bitmap: List<String>,
+        dataHashes: List<String>,
+        eContentBytes: List<String>,
+        signature: List<String>,
+        pubkey: List<String>,
+        address: String
+    ): Int
 
+    @ReactMethod
+    fun provePassport(inputs: ReadableMap, callback: Callback) {
+        Log.d(TAG, "inputsaaa: " + inputs.toString())
+        
+        val mrz = inputs.getArray("mrz")?.toArrayList()?.map { it as String } ?: listOf()
+        val reveal_bitmap = inputs.getArray("reveal_bitmap")?.toArrayList()?.map { it as String } ?: listOf()
+        val data_hashes = inputs.getArray("dataHashes")?.toArrayList()?.map { it as String } ?: listOf()
+        val e_content_bytes = inputs.getArray("eContentBytes")?.toArrayList()?.map { it as String } ?: listOf()
+        val signature = inputs.getArray("signature")?.toArrayList()?.map { it as String } ?: listOf()
+        val pubkey = inputs.getArray("pubkey")?.toArrayList()?.map { it as String } ?: listOf()
+        val address = inputs.getString("address") ?: ""
+
+        val resultFromProof = provePassport(mrz, reveal_bitmap, data_hashes, e_content_bytes, signature, pubkey, address)
+
+        // Return the result to JavaScript through the callback
+        callback.invoke(null, resultFromProof)
+    }
 
     companion object {
         private val TAG = RNPassportReaderModule::class.java.simpleName
@@ -582,7 +610,7 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         private const val KEY_IS_SUPPORTED = "isSupported"
         var instance: RNPassportReaderModule? = null
         init {
-            System.loadLibrary("ark_circom_rsa")
+            System.loadLibrary("ark_circom_passport")
         }
     }
 }
