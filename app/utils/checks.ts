@@ -15,7 +15,8 @@ export function checkInputs(
   return true;
 }
 
-export function getFirstName(mrzInfo: any): string {
-  const firstName = mrzInfo.secondaryIdentifier.split('<')[0];
-  return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+export function getFirstName(mrz: string): string {
+  const names = mrz.split("<<");
+  const firstName = names[1].split("<")[0].trim();
+  return firstName || "Unknown";
 }

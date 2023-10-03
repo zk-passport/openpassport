@@ -22,11 +22,6 @@ import io.tradle.nfc.RNPassportReaderModule;
 
 public class MainActivity extends ReactActivity {
 
-  //   private NfcAdapter nfcAdapter;
-  //   private PendingIntent pendingIntent;
-  //   private IntentFilter[] intentFilters;
-  //   private String[][] techList;
-
   /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule
    * rendering of the component.
@@ -50,70 +45,6 @@ public class MainActivity extends ReactActivity {
       DefaultNewArchitectureEntryPoint.getFabricEnabled()
     );
   }
-
-  //   @Override
-  //   protected void onCreate(Bundle savedInstanceState) {
-  //       super.onCreate(savedInstanceState);
-  //       Log.d("MainActivity", "onCreate");
-
-  //       nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-
-  //       Intent nfcIntent = new Intent(this, getClass());
-  //       nfcIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-  //       pendingIntent = PendingIntent.getActivity(this, 0, nfcIntent, PendingIntent.FLAG_IMMUTABLE);
-
-  //       intentFilters = new IntentFilter[] {
-  //           new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
-  //       };
-
-  //       techList = new String[][] {
-  //           new String[] { IsoDep.class.getName() }
-  //       };
-  //   }
-
-  //   @Override
-  //   protected void onResume() {
-  //       super.onResume();
-  //       Log.d("MainActivity", "onResume");
-  //       if (nfcAdapter != null) {
-  //           nfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFilters, techList);
-  //       }
-  //   }
-
-  //   @Override
-  //   protected void onPause() {
-  //       super.onPause();
-  //       Log.d("MainActivity", "onPause");
-  //       if (nfcAdapter != null) {
-  //           nfcAdapter.disableForegroundDispatch(this);
-  //       }
-  //   }
-
-  //   @Override
-  //   public void onNewIntent(Intent intent) {
-  //       super.onNewIntent(intent);
-  //       Log.d("MainActivity", "Intent: " + intent.toString());
-
-  //       // Check if this intent is a NFC discovery intent
-  //       if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
-  //           try {
-  //               // Get the PassportReaderModule instance from the ReactApplicationContext
-  //               ReactApplication application = (ReactApplication) getApplication();
-  //               ReactNativeHost host = application.getReactNativeHost();
-  //               ReactInstanceManager reactInstanceManager = host.getReactInstanceManager();
-  //               ReactContext reactContext = reactInstanceManager.getCurrentReactContext();
-  //               Log.d("MainActivity", "ReactContext: " + reactContext);
-  //               PassportReaderModule passportReaderModule = reactContext.getNativeModule(PassportReaderModule.class);
-  //               Log.d("MainActivity", "PassportReaderModule: " + passportReaderModule);
-
-  //               // Call the method in the PassportReaderModule that handles the NFC intent
-  //               passportReaderModule.handleNFCIntent(intent);
-  //           } catch (Exception e) {
-  //               Log.e("MainActivity", "Error handling NFC intent", e);
-  //           }
-  //       }
-  //   }
 
   @Override
   public void onNewIntent(Intent intent) {

@@ -1,3 +1,0 @@
-*.vk_proof filter=lfs diff=lfs merge=lfs -text
-*.vk_verifier filter=lfs diff=lfs merge=lfs -text
-circom-rsa-verify/** linguist-vendored

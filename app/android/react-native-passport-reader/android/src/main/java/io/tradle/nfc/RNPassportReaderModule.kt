@@ -76,6 +76,7 @@ import java.security.cert.X509Certificate
 import java.security.spec.MGF1ParameterSpec
 import java.security.spec.PSSParameterSpec
 import java.text.ParseException
+import java.security.interfaces.RSAPublicKey
 import java.text.SimpleDateFormat
 import java.util.*
 import java.security.PublicKey
@@ -91,6 +92,7 @@ import com.google.gson.Gson;
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
+import com.facebook.react.bridge.ReadableNativeMap
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -99,6 +101,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.facebook.react.bridge.LifecycleEventListener
+import com.facebook.react.bridge.Callback
 
 class Response(json: String) : JSONObject(json) {
     val type: String? = this.optString("type")
@@ -504,18 +507,15 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
           
           val eContentAsn1InputStream = ASN1InputStream(sodFile.eContent.inputStream())
           val eContentDecomposed: ASN1Primitive = eContentAsn1InputStream.readObject()
+          val rsaPublicKey = sodFile.docSigningCertificate.publicKey as RSAPublicKey
 
           val passport = Arguments.createMap()
-          passport.putString("mrzInfo", gson.toJson(mrzInfo))
-          passport.putString("dg2File", gson.toJson(dg2File))
-          passport.putString("publicKey", sodFile.docSigningCertificate.publicKey.toString())
-          passport.putString("publicKeyPEM", Base64.encodeToString(sodFile.docSigningCertificate.publicKey.encoded, Base64.DEFAULT))
+          passport.putString("mrz", mrzInfo.toString())
+          passport.putString("modulus", rsaPublicKey.modulus.toString())
           passport.putString("dataGroupHashes", gson.toJson(sodFile.dataGroupHashes))
           passport.putString("eContent", gson.toJson(sodFile.eContent))
           passport.putString("encryptedDigest", gson.toJson(sodFile.encryptedDigest))
-          passport.putString("contentBytes", gson.toJson(signedData.getEncapContentInfo()))
-          passport.putString("eContentDecomposed", gson.toJson(eContentDecomposed))
-
+          
           // Another way to get signing time is to get into signedData.signerInfos, then search for the ICO identifier 1.2.840.113549.1.9.5 
           // passport.putString("signerInfos", gson.toJson(signedData.signerInfos))
           
@@ -523,13 +523,14 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
           //   Log.d(TAG, "signedData.signerInfos: ${gson.toJson(signedData.signerInfos)}")
           //   Log.d(TAG, "signedData.certificates: ${gson.toJson(signedData.certificates)}")
           
-          val base64 = bitmap?.let { toBase64(it, quality) }
-          val photo = Arguments.createMap()
-          photo.putString("base64", base64 ?: "")
-          photo.putInt("width", bitmap?.width ?: 0)
-          photo.putInt("height", bitmap?.height ?: 0)
-          passport.putMap("photo", photo)
-
+          //   val base64 = bitmap?.let { toBase64(it, quality) }
+          //   val photo = Arguments.createMap()
+          //   photo.putString("base64", base64 ?: "")
+          //   photo.putInt("width", bitmap?.width ?: 0)
+          //   photo.putInt("height", bitmap?.height ?: 0)
+          //   passport.putMap("photo", photo)
+            //   passport.putString("dg2File", gson.toJson(dg2File))
+          
           scanPromise?.resolve(passport)
           resetState()
       }
@@ -547,6 +548,58 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         }
     }
 
+    //-------------functions related to calling rust lib----------------//
+
+    // Declare native method
+    external fun callRustCode(): String
+
+    @ReactMethod
+    fun callRustLib(callback: Callback) {
+        // Call the Rust function
+        val resultFromRust = callRustCode()
+        
+        // Return the result to JavaScript through the callback
+        callback.invoke(null, resultFromRust)
+    }
+
+    external fun proveRSAInRust(): Int
+
+    @ReactMethod
+    fun proveRust(callback: Callback) {
+        // Call the Rust function
+        val resultFromProof = proveRSAInRust()
+        
+        // Return the result to JavaScript through the callback
+        callback.invoke(null, resultFromProof)
+    }
+    
+    external fun provePassport(
+        mrz: List<String>,
+        reveal_bitmap: List<String>,
+        dataHashes: List<String>,
+        eContentBytes: List<String>,
+        signature: List<String>,
+        pubkey: List<String>,
+        address: String
+    ): Int
+
+    @ReactMethod
+    fun provePassport(inputs: ReadableMap, callback: Callback) {
+        Log.d(TAG, "inputsaaa: " + inputs.toString())
+        
+        val mrz = inputs.getArray("mrz")?.toArrayList()?.map { it as String } ?: listOf()
+        val reveal_bitmap = inputs.getArray("reveal_bitmap")?.toArrayList()?.map { it as String } ?: listOf()
+        val data_hashes = inputs.getArray("dataHashes")?.toArrayList()?.map { it as String } ?: listOf()
+        val e_content_bytes = inputs.getArray("eContentBytes")?.toArrayList()?.map { it as String } ?: listOf()
+        val signature = inputs.getArray("signature")?.toArrayList()?.map { it as String } ?: listOf()
+        val pubkey = inputs.getArray("pubkey")?.toArrayList()?.map { it as String } ?: listOf()
+        val address = inputs.getString("address") ?: ""
+
+        val resultFromProof = provePassport(mrz, reveal_bitmap, data_hashes, e_content_bytes, signature, pubkey, address)
+
+        // Return the result to JavaScript through the callback
+        callback.invoke(null, resultFromProof)
+    }
 
     companion object {
         private val TAG = RNPassportReaderModule::class.java.simpleName
@@ -556,5 +609,8 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         const val JPEG_DATA_URI_PREFIX = "data:image/jpeg;base64,"
         private const val KEY_IS_SUPPORTED = "isSupported"
         var instance: RNPassportReaderModule? = null
+        init {
+            System.loadLibrary("ark_circom_passport")
+        }
     }
 }
