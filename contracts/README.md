@@ -1,6 +1,8 @@
 # Sample Hardhat Project
 
-Contracts for ProofOfPassport.
+Contracts for embassy.
+
+🚧 under heavy development 🚧
 
 Try running some of the following tasks:
 
