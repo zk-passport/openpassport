@@ -36,9 +36,10 @@ import {arraysAreEqual, bytesToBigDecimal, dataHashesObjToArray, formatAndConcat
 import {hash, toUnsignedByte} from './utils/computeEContent';
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
+console.log('LOCAL_IP', LOCAL_IP);
 
 const CACHE_DATA_IN_LOCAL_SERVER = true;
-const SKIP_SCAN = true;
+const SKIP_SCAN = false;
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -69,14 +70,14 @@ function App(): JSX.Element {
     console.log('skipping scan step...');
     try {
       fetch(`${LOCAL_IP}/passportData`)
-      .then(response => response.json())
-      .then(data => {
-        console.log('passport data fetched');
-        setPassportData(data);
-        setStep('scanCompleted');
-      });
-    } catch(e) {
-      console.log('error fetching passport data', e);
+        .then(response => response.json())
+        .then(data => {
+          console.log('passport data fetched');
+          setPassportData(data);
+          setStep('scanCompleted');
+        });
+    } catch (err) {
+      console.log('error fetching passport data', err);
     }
   }
 
@@ -142,7 +143,7 @@ function App(): JSX.Element {
       console.log('scanned');
       handleResponse(response);
     } catch (e) {
-      console.log('error :', e);
+      console.log('error during scan :', e);
     }
   }
 
