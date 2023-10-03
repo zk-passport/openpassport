@@ -31,9 +31,9 @@ import {
   DEFAULT_ADDRESS,
   LOCAL_IP,
 } from '@env';
-import {PassportData} from './types/passportData';
-import {arraysAreEqual, dataHashesObjToArray} from './utils/utils';
-import {computeAndCheckEContent} from './utils/computeEContent';
+import {DataHash, PassportData} from './types/passportData';
+import {arraysAreEqual, bytesToBigDecimal, dataHashesObjToArray, formatAndConcatenateDataHashes, formatMrz, splitToWords} from './utils/utils';
+import {hash, toUnsignedByte} from './utils/computeEContent';
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 console.log('LOCAL_IP', LOCAL_IP);
@@ -49,6 +49,8 @@ function App(): JSX.Element {
   const [address, setAddress] = useState(DEFAULT_ADDRESS ?? '');
   const [passportData, setPassportData] = useState<PassportData | null>(null);
   const [step, setStep] = useState('enterDetails');
+  const [result, setResult] = useState<string>('');
+  const [proofResult, setProofResult] = useState<string>('');
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -81,35 +83,26 @@ function App(): JSX.Element {
 
   async function handleResponse(response: any) {
     const {
-      mrzInfo,
-      publicKey,
-      publicKeyPEM,
+      mrz,
+      modulus,
       dataGroupHashes,
       eContent,
       encryptedDigest,
-      contentBytes,
-      eContentDecomposed,
     } = response;
 
     const passportData: PassportData = {
-      mrzInfo: JSON.parse(mrzInfo),
-      publicKey: publicKey.replace(/\n/g, ''),
-      publicKeyPEM: publicKeyPEM.replace(/\n/g, ''),
+      mrz: mrz.replace(/\n/g, ''),
+      modulus: modulus,
       dataGroupHashes: dataHashesObjToArray(JSON.parse(dataGroupHashes)),
       eContent: JSON.parse(eContent),
       encryptedDigest: JSON.parse(encryptedDigest),
-      contentBytes: JSON.parse(contentBytes),
-      eContentDecomposed: JSON.parse(eContentDecomposed),
     };
 
-    console.log('mrzInfo', passportData.mrzInfo);
-    console.log('publicKey', passportData.publicKey);
-    console.log('publicKeyPEM', passportData.publicKeyPEM);
+    console.log('mrz', passportData.mrz);
+    console.log('modulus', passportData.modulus);
     console.log('dataGroupHashes', passportData.dataGroupHashes);
     console.log('eContent', passportData.eContent);
     console.log('encryptedDigest', passportData.encryptedDigest);
-    console.log('contentBytes', passportData.contentBytes);
-    console.log('eContentDecomposed', passportData.eContentDecomposed);
 
     setPassportData(passportData);
 
@@ -146,6 +139,7 @@ function App(): JSX.Element {
         dateOfBirth: dateOfBirth,
         dateOfExpiry: dateOfExpiry,
       });
+      console.log('response', response);
       console.log('scanned');
       handleResponse(response);
     } catch (e) {
@@ -159,26 +153,87 @@ function App(): JSX.Element {
       return;
     }
 
-    // 1. Compute the eContent from the mrzInfo and the dataGroupHashes
-    const computedEContent = computeAndCheckEContent(passportData);
+    // 1. TODO check signature to make sure the proof will work
 
-    if (!arraysAreEqual(computedEContent, passportData.eContent)) {
-      throw new Error(
-        'computed eContent does not match the one from passportData',
-      );
+    // 2. Format all the data as inputs for the circuit
+    const formattedMrz = formatMrz(passportData.mrz);
+    const mrzHash = hash(formatMrz(passportData.mrz));
+    const concatenatedDataHashes = formatAndConcatenateDataHashes(
+      mrzHash,
+      passportData.dataGroupHashes as DataHash[],
+    );
+    
+    const reveal_bitmap = Array.from({ length: 88 }, (_, i) => (i >= 16 && i <= 22) ? '1' : '0');
+
+    const inputs = {
+      mrz: Array.from(formattedMrz).map(byte => String(byte)),
+      reveal_bitmap: Array.from(reveal_bitmap).map(byte => String(byte)),
+      dataHashes: Array.from(concatenatedDataHashes.map(toUnsignedByte)).map(byte => String(byte)),
+      eContentBytes: Array.from(passportData.eContent.map(toUnsignedByte)).map(byte => String(byte)),
+      signature: splitToWords(
+        BigInt(bytesToBigDecimal(passportData.encryptedDigest)),
+        BigInt(64),
+        BigInt(32)
+      ),
+      pubkey: splitToWords(
+        BigInt(passportData.modulus),
+        BigInt(64),
+        BigInt(32)
+      ),
+      address,
     }
+    // 3. Generate a proof of passport
 
-    // 2. TODO : check RSA signature to make sure the proof will work
-    // Did not manage to do it cuz js crypto libs suck
-
-    // 3. Format all the data as inputs for the circuit
-
-    // 4. Generate a proof of passport
+    const start = Date.now();
+    NativeModules.RNPassportReader.provePassport(inputs, (err: any, res: any) => {
+      const end = Date.now();
+      if (err) {
+        console.error(err);
+        setProofResult(
+          "res:" + err.toString() + ' time elapsed: ' + (end - start) + 'ms',
+        );
+      } else {
+        console.log(res);
+        setProofResult(
+          "res:" + res.toString() + ' time elapsed: ' + (end - start) + 'ms',
+        );
+      }
+    });
   };
 
   const handleMint = () => {
     // 5. Format the proof and publicInputs as calldata for the verifier contract
     // 6. Call the verifier contract with the calldata
+  };
+
+  const callRustLib = async () => {
+    NativeModules.RNPassportReader.callRustLib((err: any, res: any) => {
+      if (err) {
+        console.error(err);
+        setResult(err.toString());
+      } else {
+        console.log(res); // Should log "5"
+        setResult(res.toString());
+      }
+    });
+  };
+
+  const proveRust = async () => {
+    const start = Date.now();
+    NativeModules.RNPassportReader.proveRust((err: any, res: any) => {
+      const end = Date.now();
+      if (err) {
+        console.error(err);
+        setProofResult(
+          "res:" + err.toString() + ' time elapsed: ' + (end - start) + 'ms',
+        );
+      } else {
+        console.log(res);
+        setProofResult(
+          "res:" + res.toString() + ' time elapsed: ' + (end - start) + 'ms',
+        );
+      }
+    });
   };
 
   const handleNative = async () => {
@@ -212,13 +267,13 @@ function App(): JSX.Element {
                 style={styles.input}
                 onChangeText={setDateOfBirth}
                 value={dateOfBirth}
-                placeholder="Date of Birth (YYYY-MM-DD)"
+                placeholder="Date of Birth (YYMMDD)"
               />
               <TextInput
                 style={styles.input}
                 onChangeText={setDateOfExpiry}
                 value={dateOfExpiry}
-                placeholder="Date of Expiry (YYYY-MM-DD)"
+                placeholder="Date of Expiry (YYMMDD)"
               />
               <Button title="Scan Passport with NFC" onPress={scan} />
               <Button title="Call native method" onPress={handleNative} />
@@ -238,7 +293,7 @@ function App(): JSX.Element {
             <View style={styles.sectionContainer}>
               <Text style={styles.header}>Connection successful</Text>
               <Text style={styles.header}>
-                Hi {getFirstName(passportData?.mrzInfo)} !{' '}
+                {passportData && `Hi ${getFirstName(passportData.mrz)} ! `}
               </Text>
               <Text style={styles.header}>Input your address or ens</Text>
               <TextInput
@@ -252,11 +307,17 @@ function App(): JSX.Element {
           ) : null}
           {step === 'proofGenerated' ? (
             <View style={styles.sectionContainer}>
-              <Text style={styles.header}>Zero-knowledge proof generated</Text>
+              <Text style={styles.sectionDescription}>Zero-knowledge proof generated</Text>
               <Text style={styles.header}>You can now mint your SBT</Text>
               <Button title="Mint Proof of Passport" onPress={handleMint} />
             </View>
           ) : null}
+        </View>
+        <View style={{...styles.sectionContainer, marginTop: 80}}>
+          <Button title="Call rust though java" onPress={callRustLib} />
+          <Text style={styles.sectionDescription}>{result}</Text>
+          <Button title="Test sample proof with arkworks" onPress={proveRust} />
+          <Text style={styles.sectionDescription}>{proofResult}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

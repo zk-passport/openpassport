@@ -1,0 +1,22 @@
+[package]
+name = "ark_circom_passport"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "ark_circom_passport"
+path = "src/passport.rs"
+crate-type = ["cdylib"]
+
+
+[dependencies]
+ark-circom = { git = "https://github.com/0xturboblitz/circom-compat.git" }
+
+ark-bn254 = { version = "=0.4.0" }
+ark-groth16 = { version = "=0.4.0", default-features = false, features = ["parallel"] }
+ark-std = { version = "=0.4.0", default-features = false, features = ["parallel"] }
+ark-crypto-primitives = { version = "=0.4.0" }
+color-eyre = "=0.6.2"
+jni = "0.18" # Choose the version that best fits your needs
+log = "0.4"
+android_logger = "0.8"
