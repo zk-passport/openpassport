@@ -13,8 +13,8 @@ an official passport.
 - ✅ Modify the Next.js frontend of `zkrsa` in order to accept an endpoint that stores signature data from someone scanning their passports
 - ✅ Get zkrsa working with the signature format we are able to retrieve from the Android app
 - ✅ Contract to mint the SBT when proof is valid
-- 🚧 WalletConnect integration to get the address
-- 🚧 Let user send their proof onchain to mint the SBT
+- ✅ WalletConnect integration to get the address
+- ✅ Let user send their proof onchain to mint the SBT
 - ✅ Commit to minter address in circuit to avoid front-running
 - 🚧 On-chain registry of CSCA pubkeys based on the official ICAO masterlist
 - 🚧 Decompose the hashed eContent of the passport into the private user data and reconstitute them in the circuit
