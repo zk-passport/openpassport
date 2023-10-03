@@ -1,6 +1,6 @@
 import { hash } from "./computeEContent";
 import { DataHash } from "./types";
-import { assembleEContent, formatAndConcatenateDataHashes, formatMrz } from "./utils";
+import { assembleEContent, formatAndConcatenateDataHashes, formatMrz, hexToDecimal } from "./utils";
 import * as forge from 'node-forge';
 
 const sampleMRZ = "P<FRADUPONT<<ALPHONSE<HUGUES<ALBERT<<<<<<<<<24HB818324FRA0402111M3111115<<<<<<<<<<<<<<02"
@@ -65,7 +65,7 @@ export async function genSampleData() {
 
   return {
     "mrz": sampleMRZ,
-    modulus: modulus,
+    modulus: hexToDecimal(modulus),
     "dataGroupHashes": sampleDataHashes,
     "eContent": eContent,
     "encryptedDigest": signatureBytes,

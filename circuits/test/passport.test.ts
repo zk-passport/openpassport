@@ -1,7 +1,7 @@
 import { describe } from 'mocha'
 import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import { arraysAreEqual, bytesToBigDecimal, formatAndConcatenateDataHashes, formatMrz, hexToDecimal, splitToWords } from '../utils/utils'
+import { arraysAreEqual, bytesToBigDecimal, formatAndConcatenateDataHashes, formatMrz, splitToWords } from '../utils/utils'
 import { groth16 } from 'snarkjs'
 import { hash, toUnsignedByte } from '../utils/computeEContent'
 import { DataHash, PassportData } from '../utils/types'
@@ -21,7 +21,9 @@ describe('Circuit tests', function () {
       passportData = require('../inputs/passportData.json');
     } else {
       passportData = (await genSampleData()) as PassportData;
-      fs.mkdirSync('inputs');
+      if (!fs.existsSync("inputs/")) {
+        fs.mkdirSync("inputs/");
+      }
       fs.writeFileSync('inputs/passportData.json', JSON.stringify(passportData));
     }
 
@@ -74,7 +76,7 @@ describe('Circuit tests', function () {
     console.log('proof done');
 
     const revealChars = publicSignals.slice(0, 88).map((byte: string) => String.fromCharCode(parseInt(byte, 10))).join('');
-    console.log('reveal chars', revealChars);
+    // console.log('reveal chars', revealChars);
 
     const vKey = JSON.parse(fs.readFileSync("build/verification_key.json"));
     const verified = await groth16.verify(
@@ -173,7 +175,7 @@ describe('Circuit tests', function () {
     console.log('proof done');
     const revealChars = publicSignals.slice(0, 88).map((byte: string) => String.fromCharCode(parseInt(byte, 10)))
 
-    console.log('revealChars', revealChars)
+    // console.log('revealChars', revealChars)
 
     for(let i = 0; i < revealChars.length; i++) {
       if (bitmap[i] == '1') {
@@ -195,7 +197,7 @@ describe('Circuit tests', function () {
       }
     });
 
-    console.log('reveal', reveal)
+    // console.log('reveal', reveal)
 
     const vKey = JSON.parse(fs.readFileSync("build/verification_key.json"));
     const verified = await groth16.verify(
