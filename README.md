@@ -1,6 +1,7 @@
-# Embassy
+# Monorepo for Embassy, a proof of passport protocol.
 
-Monorepo for Embassy, a proof of passport protocol.
+![DALL·E 2023-10-25 11 57 47 - tight AF](https://github.com/zk-passport/embassy/assets/62038140/b49bc9bb-69a8-406b-9524-14f9f60a8844)
+
 
 Embassy lets users scan the NFC chip in their government-issued passport.
 If the signature is valid, the user can generate a proof that can be verified onchain.
