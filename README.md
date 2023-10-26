@@ -1,4 +1,4 @@
-# Embassy
+# Proof of Passport
 
 Monorepo for the Proof of Passport protocol.
 
