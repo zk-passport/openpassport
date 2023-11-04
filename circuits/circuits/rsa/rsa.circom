@@ -1,6 +1,6 @@
 pragma circom 2.1.5;
 
-include "./fp.circom";
+include "../helpers/fp.circom";
 
 // Computes base^65537 mod modulus
 // Does not necessarily reduce fully mod modulus (the answer could be
