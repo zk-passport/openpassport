@@ -129,15 +129,15 @@ describe('Circuit tests', function () {
     )).to.be.rejected;
   })
 
-  it('should support selective disclosure', async function () {
+  it.only('should support selective disclosure', async function () {
     const attributeToPosition = {
-      issuing_state: [2, 4],
-      name: [5, 43],
+      issuing_state: [2, 5],
+      name: [5, 44],
       passport_number: [44, 52],
-      nationality: [54, 56],
+      nationality: [54, 57],
       date_of_birth: [57, 63],
-      gender: [65],
-      expiry_date: [66, 72],
+      gender: [64, 65],
+      expiry_date: [65, 71],
     }
 
     const attributeToReveal = {
@@ -146,7 +146,7 @@ describe('Circuit tests', function () {
       passport_number: false,
       nationality: true,
       date_of_birth: false,
-      gender:false,
+      gender: false,
       expiry_date: false,
     }
 
@@ -173,9 +173,10 @@ describe('Circuit tests', function () {
     )
 
     console.log('proof done');
+    console.log('proof:', proof);
     const revealChars = publicSignals.slice(0, 88).map((byte: string) => String.fromCharCode(parseInt(byte, 10)))
 
-    // console.log('revealChars', revealChars)
+    console.log('revealChars', revealChars)
 
     for(let i = 0; i < revealChars.length; i++) {
       if (bitmap[i] == '1') {
@@ -197,7 +198,7 @@ describe('Circuit tests', function () {
       }
     });
 
-    // console.log('reveal', reveal)
+    console.log('reveal', reveal)
 
     const vKey = JSON.parse(fs.readFileSync("build/verification_key.json"));
     const verified = await groth16.verify(
