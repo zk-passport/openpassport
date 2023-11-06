@@ -45,6 +45,9 @@ import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.ASN1Set
 import org.bouncycastle.asn1.x509.Certificate
+import org.bouncycastle.jce.spec.ECNamedCurveSpec
+import org.bouncycastle.jce.interfaces.ECPublicKey
+
 
 import org.jmrtd.BACKey
 import org.jmrtd.BACKeySpec
@@ -507,15 +510,40 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
           
           val eContentAsn1InputStream = ASN1InputStream(sodFile.eContent.inputStream())
           val eContentDecomposed: ASN1Primitive = eContentAsn1InputStream.readObject()
-          val rsaPublicKey = sodFile.docSigningCertificate.publicKey as RSAPublicKey
 
           val passport = Arguments.createMap()
           passport.putString("mrz", mrzInfo.toString())
-          passport.putString("modulus", rsaPublicKey.modulus.toString())
+          passport.putString("signatureAlgorithm", sodFile.docSigningCertificate.sigAlgName) // this one is new
+
+          val publicKey = sodFile.docSigningCertificate.publicKey
+          if (publicKey is RSAPublicKey) {
+              passport.putString("modulus", publicKey.modulus.toString())
+          } else if (publicKey is ECPublicKey) {
+            // Handle the elliptic curve public key case
+            
+            val w = publicKey.getW()
+            passport.putString("publicKeyW", w.toString())
+            
+            val ecParams = publicKey.getParams()
+            passport.putInt("cofactor", ecParams.getCofactor())
+            passport.putString("curve", ecParams.getCurve().toString())
+            passport.putString("generator", ecParams.getGenerator().toString())
+            passport.putString("order", ecParams.getOrder().toString())
+            if (ecParams is ECNamedCurveSpec) {
+                passport.putString("curveName", ecParams.getName())
+            }
+
+            // Old one, probably wrong:
+            //   passport.putString("curveName", (publicKey.parameters as ECNamedCurveSpec).name)
+            // //   passport.putString("curveName", (publicKey.parameters.algorithm)) or maybe this
+            //   passport.putString("publicKeyQ", publicKey.q.toString())
+          }
+
           passport.putString("dataGroupHashes", gson.toJson(sodFile.dataGroupHashes))
           passport.putString("eContent", gson.toJson(sodFile.eContent))
           passport.putString("encryptedDigest", gson.toJson(sodFile.encryptedDigest))
-          
+
+
           // Another way to get signing time is to get into signedData.signerInfos, then search for the ICO identifier 1.2.840.113549.1.9.5 
           // passport.putString("signerInfos", gson.toJson(signedData.signerInfos))
           
@@ -581,7 +609,7 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         signature: List<String>,
         pubkey: List<String>,
         address: String
-    ): Int
+    ): String
 
     @ReactMethod
     fun provePassport(inputs: ReadableMap, callback: Callback) {
@@ -594,8 +622,10 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         val signature = inputs.getArray("signature")?.toArrayList()?.map { it as String } ?: listOf()
         val pubkey = inputs.getArray("pubkey")?.toArrayList()?.map { it as String } ?: listOf()
         val address = inputs.getString("address") ?: ""
-
+        
         val resultFromProof = provePassport(mrz, reveal_bitmap, data_hashes, e_content_bytes, signature, pubkey, address)
+
+        Log.d(TAG, "resultFromProof: " + resultFromProof.toString())
 
         // Return the result to JavaScript through the callback
         callback.invoke(null, resultFromProof)
