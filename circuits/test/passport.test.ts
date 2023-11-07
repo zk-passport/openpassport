@@ -130,7 +130,7 @@ describe('Circuit tests', function () {
     )).to.be.rejected;
   })
 
-  it.only('should support selective disclosure', async function () {
+  it('should support selective disclosure', async function () {
     const attributeToPosition = {
       issuing_state: [2, 5],
       name: [5, 44],
