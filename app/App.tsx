@@ -36,7 +36,6 @@ import {
 } from "@gluestack-ui/themed"
 import { config } from "@gluestack-ui/config" // Optional if you want to use default theme
 
-
 // @ts-ignore
 import PassportReader from 'react-native-passport-reader';
 import {checkInputs, getFirstName} from './utils/checks';
@@ -186,6 +185,9 @@ function App(): JSX.Element {
     setStep('scanCompleted');
   }
 
+
+  
+
   async function scan() {
     checkInputs(passportNumber, dateOfBirth, dateOfExpiry);
     // 1. start a scan
@@ -238,9 +240,9 @@ function App(): JSX.Element {
       }
     }
 
-    if (!passportData.pubKey.modulus) {
-      console.log('ECDSA not supported for proof right now.');
-      setError('ECDSA not supported for proof right now.');
+    if (passportData.signatureAlgorithm !== "SHA256withRSA") {
+      console.log(`${passportData.signatureAlgorithm} not supported for proof right now.`);
+      setError(`${passportData.signatureAlgorithm} not supported for proof right now.`);
       return;
     }
 
@@ -255,14 +257,14 @@ function App(): JSX.Element {
         BigInt(32)
       ),
       pubkey: splitToWords(
-        BigInt(passportData.pubKey.modulus),
+        BigInt(passportData.pubKey.modulus as string),
         BigInt(64),
         BigInt(32)
       ),
       address,
     }
-    // 3. Generate a proof of passport
 
+    // 3. Generate a proof of passport
     const start = Date.now();
     NativeModules.RNPassportReader.provePassport(inputs, (err: any, res: any) => {
       const end = Date.now();
@@ -408,6 +410,11 @@ function App(): JSX.Element {
                   marginBottom={20}
                 >
                   <Text
+                    marginBottom={5}
+                  >
+                    Signature algorithm: {passportData.signatureAlgorithm}
+                  </Text>
+                  <Text
                     marginBottom={10}
                   >
                     What do you want to disclose ?
@@ -512,7 +519,7 @@ function App(): JSX.Element {
               </View>
             ) : null}
           </View>
-          <View style={{...styles.sectionContainer, marginTop: 80}}>
+          <View style={{...styles.sectionContainer, ...styles.testSection, marginTop: 80}}>
             <Text style={{...styles.sectionDescription, textAlign: "center"}}>Test functions</Text>
 
             <Button
@@ -571,6 +578,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 20,
+  },
+  testSection: {
+    backgroundColor: '#f2f2f2', // different background color
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#dcdcdc', // adding a border top with a light color
+    marginTop: 15,
   },
 });
 
