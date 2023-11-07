@@ -521,22 +521,22 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
           } else if (publicKey is ECPublicKey) {
             // Handle the elliptic curve public key case
             
-            val w = publicKey.getW()
-            passport.putString("publicKeyW", w.toString())
+            // val w = publicKey.getW()
+            // passport.putString("publicKeyW", w.toString())
             
-            val ecParams = publicKey.getParams()
-            passport.putInt("cofactor", ecParams.getCofactor())
-            passport.putString("curve", ecParams.getCurve().toString())
-            passport.putString("generator", ecParams.getGenerator().toString())
-            passport.putString("order", ecParams.getOrder().toString())
-            if (ecParams is ECNamedCurveSpec) {
-                passport.putString("curveName", ecParams.getName())
-            }
+            // val ecParams = publicKey.getParams()
+            // passport.putInt("cofactor", ecParams.getCofactor())
+            // passport.putString("curve", ecParams.getCurve().toString())
+            // passport.putString("generator", ecParams.getGenerator().toString())
+            // passport.putString("order", ecParams.getOrder().toString())
+            // if (ecParams is ECNamedCurveSpec) {
+            //     passport.putString("curveName", ecParams.getName())
+            // }
 
             // Old one, probably wrong:
-            //   passport.putString("curveName", (publicKey.parameters as ECNamedCurveSpec).name)
-            // //   passport.putString("curveName", (publicKey.parameters.algorithm)) or maybe this
-            //   passport.putString("publicKeyQ", publicKey.q.toString())
+              passport.putString("curveName", (publicKey.parameters as ECNamedCurveSpec).name)
+            //   passport.putString("curveName", (publicKey.parameters.algorithm)) or maybe this
+              passport.putString("publicKeyQ", publicKey.q.toString())
           }
 
           passport.putString("dataGroupHashes", gson.toJson(sodFile.dataGroupHashes))
