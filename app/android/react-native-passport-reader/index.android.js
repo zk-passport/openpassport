@@ -9,7 +9,7 @@ module.exports = {
   scan
 }
 
-function scan ({ documentNumber, dateOfBirth, dateOfExpiry, quality=1 }) {
+function scan({ documentNumber, dateOfBirth, dateOfExpiry, quality=1 }) {
   assert(typeof documentNumber === 'string', 'expected string "documentNumber"')
   assert(isDate(dateOfBirth), 'expected string "dateOfBirth" in format "yyMMdd"')
   assert(isDate(dateOfExpiry), 'expected string "dateOfExpiry" in format "yyMMdd"')
