@@ -5,7 +5,9 @@ use std::os::raw::c_int;
 
 use ark_bn254::Bn254;
 use ark_crypto_primitives::snark::SNARK;
-use ark_groth16::Groth16;
+use ark_groth16::{Groth16, Proof};
+// use ark_ff::QuadExtField;
+use ark_ec::AffineRepr;
 
 use std::time::Instant;
 use std::convert::TryInto;
@@ -15,21 +17,38 @@ type GrothBn = Groth16<Bn254>;
 extern crate jni;
 use jni::objects::{JClass, JObject, JValue, JString};
 use jni::JNIEnv;
+use jni::sys::jobject;
+use jni::sys::jstring;
 
 use log::Level;
 use android_logger::Config;
+
+extern crate serde;
+extern crate serde_json;
+use serde_json::json;
+#[macro_use]
+extern crate serde_derive;
+
 
 #[no_mangle]
 pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_callRustCode(
     env: JNIEnv,
     _: JClass,
-) -> jni::sys::jstring {
+) -> jstring {
     android_logger::init_once(Config::default().with_min_level(Level::Trace));
     log::warn!("log before imports");
 
-    let current_dir = std::env::current_dir().unwrap();
-    let path_str = current_dir.to_str().unwrap();
-    let output = env.new_string(path_str).expect("Couldn't create java string!");
+    let my_int: c_int = -1;
+    let my_str: String = "no_proof".to_string();
+    
+    let combined = json!({
+        "my_int": my_int,
+        "my_str": my_str
+    });
+    
+    let combined_str = combined.to_string();
+    let output = env.new_string(combined_str).expect("Couldn't create java string!");
+
     output.into_inner()
 }
 
@@ -62,7 +81,7 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_provePassport(
     signature: JObject,
     pubkey: JObject,
     address: JString,
-) -> c_int {
+) -> jstring {
     
     log::warn!("formatting inputsaaaa...");
     fn run_proof(
@@ -74,7 +93,7 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_provePassport(
         pubkey: JObject,
         address: JString,
         env: JNIEnv
-    ) -> Result<u128, Box<dyn std::error::Error>> {
+    ) -> Result<jstring, Box<dyn std::error::Error>> {
         android_logger::init_once(Config::default().with_min_level(Level::Trace));
 
         log::warn!("formatting inputs...");
@@ -138,6 +157,11 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_provePassport(
         let start1 = Instant::now();
         
         let proof = GrothBn::prove(&params, circom, &mut rng)?;
+        
+        let proof_str = proof_to_proof_str(&proof);
+
+        let serialized_proof = serde_json::to_string(&proof_str).unwrap();
+
         let duration1 = start1.elapsed();
         println!("proof generated. Took: {:?}", duration1);
         
@@ -151,7 +175,15 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_provePassport(
 
         assert!(verified);
 
-        Ok(duration1.as_millis())
+        let combined = json!({
+            "duration": duration1.as_millis(),
+            "serialized_proof": serialized_proof
+        });
+        
+        let combined_str = combined.to_string();
+        let output = env.new_string(combined_str).expect("Couldn't create java string!");
+    
+        Ok(output.into_inner())
     }
 
     match run_proof(
@@ -164,8 +196,8 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_provePassport(
         address,
         env
     ) {
-        Ok(elapsed_millis) => elapsed_millis as i32, // Assuming the elapsed time will fit in an i32
-        Err(_) => -1, // return -1 or some other error code when there's an error
+        Ok(output) => output,
+        Err(_) => env.new_string("error").expect("Couldn't create java string!").into_inner(),
     }
 }
 
@@ -182,6 +214,29 @@ fn java_arraylist_to_rust_vec(env: &JNIEnv, java_list: JObject) -> Result<Vec<St
     Ok(vec)
 }
 
-
-
 // -message:"BpfCoordinator"  -message:"MATCH" -message:"maximum"  -message:"exception" level:WARN
+
+#[derive(Debug)]
+#[derive(Serialize)]
+struct ProofStr {
+    a: (String, String),
+    b: ((String, String), (String, String)), // Represent each QuadExtField by two BaseFields
+    c: (String, String),
+}
+
+fn proof_to_proof_str(proof: &Proof<Bn254>) -> ProofStr {
+    let a_xy = proof.a.xy().unwrap();
+    let b_xy = proof.b.xy().unwrap();
+    let c_xy = proof.c.xy().unwrap();
+
+    let b_c0_c0 = b_xy.0.c0.to_string();
+    let b_c0_c1 = b_xy.0.c1.to_string();
+    let b_c1_c0 = b_xy.1.c0.to_string();
+    let b_c1_c1 = b_xy.1.c1.to_string();
+
+    ProofStr {
+        a: (a_xy.0.to_string(), a_xy.1.to_string()),
+        b: ((b_c0_c0, b_c0_c1), (b_c1_c0, b_c1_c1)),
+        c: (c_xy.0.to_string(), c_xy.1.to_string()),
+    }
+}

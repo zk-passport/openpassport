@@ -16,7 +16,11 @@ ark-bn254 = { version = "=0.4.0" }
 ark-groth16 = { version = "=0.4.0", default-features = false, features = ["parallel"] }
 ark-std = { version = "=0.4.0", default-features = false, features = ["parallel"] }
 ark-crypto-primitives = { version = "=0.4.0" }
+ark-ec = { version = "=0.4.1" }
 color-eyre = "=0.6.2"
 jni = "0.18" # Choose the version that best fits your needs
 log = "0.4"
 android_logger = "0.8"
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
