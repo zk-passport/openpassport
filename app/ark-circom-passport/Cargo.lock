@@ -282,11 +282,15 @@ dependencies = [
  "ark-bn254",
  "ark-circom",
  "ark-crypto-primitives",
+ "ark-ec",
  "ark-groth16",
  "ark-std",
  "color-eyre",
  "jni",
  "log",
+ "serde",
+ "serde_derive",
+ "serde_json",
 ]
 
 [[package]]
