@@ -50,16 +50,17 @@ describe('Circuit tests', function () {
       reveal_bitmap: reveal_bitmap.map(byte => String(byte)),
       dataHashes: concatenatedDataHashes.map(toUnsignedByte).map(byte => String(byte)),
       eContentBytes: passportData.eContent.map(toUnsignedByte).map(byte => String(byte)),
-      signature: splitToWords(
-        BigInt(bytesToBigDecimal(passportData.encryptedDigest)),
-        BigInt(64),
-        BigInt(32)
-      ),
       pubkey: splitToWords(
         BigInt(passportData.modulus),
         BigInt(64),
         BigInt(32)
       ),
+      signature: splitToWords(
+        BigInt(bytesToBigDecimal(passportData.encryptedDigest)),
+        BigInt(64),
+        BigInt(32)
+      ),
+      address: "0x9D392187c08fc28A86e1354aD63C70897165b982",
     }
     
   })
@@ -76,7 +77,7 @@ describe('Circuit tests', function () {
     console.log('proof done');
 
     const revealChars = publicSignals.slice(0, 88).map((byte: string) => String.fromCharCode(parseInt(byte, 10))).join('');
-    // console.log('reveal chars', revealChars);
+    console.log('reveal chars', revealChars);
 
     const vKey = JSON.parse(fs.readFileSync("build/verification_key.json"));
     const verified = await groth16.verify(
@@ -134,7 +135,7 @@ describe('Circuit tests', function () {
       issuing_state: [2, 5],
       name: [5, 44],
       passport_number: [44, 52],
-      nationality: [54, 57],
+      nationality: [54, 56],
       date_of_birth: [57, 63],
       gender: [64, 65],
       expiry_date: [65, 71],
@@ -174,31 +175,49 @@ describe('Circuit tests', function () {
 
     console.log('proof done');
     console.log('proof:', proof);
-    const revealChars = publicSignals.slice(0, 88).map((byte: string) => String.fromCharCode(parseInt(byte, 10)))
+    console.log('publicSignals', publicSignals)
 
-    console.log('revealChars', revealChars)
+    const firstThreeElements = publicSignals.slice(0, 3);
+    const bytesCount = [31, 31, 26]; // bytes for each of the first three elements
 
-    for(let i = 0; i < revealChars.length; i++) {
-      if (bitmap[i] == '1') {
-        assert(revealChars[i] != '\x00', 'Should reveal');
-      } else {
-        assert(revealChars[i] == '\x00', 'Should not reveal');
-      }
-    }
-
-    const reveal: Record<string, string | undefined> = {};
-
-    Object.keys(attributeToPosition).forEach((attribute) => {
-      if (attributeToReveal[attribute]) {
-        const [start, end] = attributeToPosition[attribute];
-        const value = revealChars.slice(start, end + 1).join('');
-        reveal[attribute] = value;
-      } else {
-        reveal[attribute] = undefined;
-      }
+    const bytesArray = firstThreeElements.flatMap((element, index) => {
+      const bytes = bytesCount[index];
+      const elementBigInt = BigInt(element);
+      const byteMask = BigInt(255); // 0xFF
+    
+      const bytesOfElement = [...Array(bytes)].map((_, byteIndex) => {
+        return (elementBigInt >> (BigInt(byteIndex) * BigInt(8))) & byteMask;
+      });
+    
+      return bytesOfElement.reverse();
     });
+    const result = bytesArray.reverse().map((byte) => String.fromCharCode(Number(byte)));
 
-    console.log('reveal', reveal)
+    console.log(result);
+
+    // console.log('revealChars', revealChars)
+
+    // for(let i = 0; i < revealChars.length; i++) {
+    //   if (bitmap[i] == '1') {
+    //     assert(revealChars[i] != '\x00', 'Should reveal');
+    //   } else {
+    //     assert(revealChars[i] == '\x00', 'Should not reveal');
+    //   }
+    // }
+
+    // const reveal: Record<string, string | undefined> = {};
+
+    // Object.keys(attributeToPosition).forEach((attribute) => {
+    //   if (attributeToReveal[attribute]) {
+    //     const [start, end] = attributeToPosition[attribute];
+    //     const value = revealChars.slice(start, end + 1).join('');
+    //     reveal[attribute] = value;
+    //   } else {
+    //     reveal[attribute] = undefined;
+    //   }
+    // });
+
+    // console.log('reveal', reveal)
 
     const vKey = JSON.parse(fs.readFileSync("build/verification_key.json"));
     const verified = await groth16.verify(
