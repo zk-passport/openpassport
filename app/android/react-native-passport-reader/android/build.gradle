@@ -62,5 +62,5 @@ cargo {
     // targets = ["arm", "x86"]  // failing
     targets = ["arm64", "darwin-aarch64"]  // Those work
     apiLevel = 29
-    profile = 'debug'
+    profile = 'release'
 }
