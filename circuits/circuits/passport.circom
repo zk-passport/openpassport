@@ -87,8 +87,8 @@ template PassportVerifier(n, k) {
     
     signal output reveal_packed[3] <== PackBytes(88, 3, 31)(reveal);
 
-    signal output nullifier;
-    nullifier <== (signature[0] << 64) + signature[1];
+    // signal output nullifier;
+    // nullifier <== (signature[0] << 64) + signature[1];
 
     // Calculate the Poseidon hash of public public key and outputs it
     // This can be used to verify the public key is correct in contract without requiring the actual key

@@ -21,6 +21,6 @@ Users can also selectively disclose personal info like their nationality or thei
 - ✅ Selective disclosure
 - ✅ Basic react native frontend
 - ✅ Passport verification pipeline, android
-- ✅ Passport verification pipeline, iOS
+- 🚧 Passport verification pipeline, iOS
 - 🚧 Contracts
 - 🚧 On-chain registry of CSCA pubkeys based on the official ICAO masterlist
