@@ -1,5 +1,7 @@
 # Proof of Passport
 
+![DALL·E 2023-10-25 11 57 47 - tight AF](https://github.com/zk-passport/proof-of-passport/assets/62038140/514ae671-3c02-434f-ac6a-31ce20eec24d)
+
 Monorepo for the Proof of Passport protocol.
 
 Proof of Passport lets users scan the NFC chip in their government-issued passport.
