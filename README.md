@@ -5,9 +5,10 @@
 Monorepo for the Proof of Passport protocol.
 
 Proof of Passport lets users scan the NFC chip in their government-issued passport and prove the correctness of the signature in a zk-SNARK.
-This unlocks two interesting perspective:
+This unlocks two interesting perspectives:
 - For sybil-resistance, proof of passport can provide a reliable while not universal source of unique identity.
 - For identity and privacy, proof of passport allows selective disclosure of private data. For instance, users can disclose their nationality or their date of birth without revealing any other private information.
+
 As a first application, users who can prove they indeed hold a valid passport can verify this proof on-chain to mint a Soulbound Token (SBT).
 
 
