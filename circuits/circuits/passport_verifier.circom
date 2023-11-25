@@ -3,18 +3,14 @@ pragma circom 2.1.5;
 include "./rsa/rsa.circom";
 include "./sha256Bytes.circom";
 include "../node_modules/circomlib/circuits/sha256/sha256.circom";
-include "../node_modules/circomlib/circuits/poseidon.circom";
-include "./helpers/extract.circom";
 
 template PassportVerifier(n, k) {
     signal input mrz[93]; // formatted mrz (5 + 88) chars
-    signal input reveal_bitmap[88];
     signal input dataHashes[297];
     signal input eContentBytes[104];
 
     signal input pubkey[k];
     signal input signature[k];
-    signal input address;
 
     // compute sha256 of formatted mrz
     signal mrzSha[256] <== Sha256Bytes(93)(mrz);
@@ -77,49 +73,4 @@ template PassportVerifier(n, k) {
     }
     rsa.modulus <== pubkey;
     rsa.signature <== signature;
-
-    signal reveal[88];
-
-    // reveal reveal_bitmap bits of MRZ
-    for (var i = 0; i < 88; i++) {
-        reveal[i] <== mrz[5+i] * reveal_bitmap[i];
-    }
-    
-    signal output reveal_packed[3] <== PackBytes(88, 3, 31)(reveal);
-
-    // signal output nullifier;
-    // nullifier <== (signature[0] << 64) + signature[1];
-
-    // Calculate the Poseidon hash of public public key and outputs it
-    // This can be used to verify the public key is correct in contract without requiring the actual key
-    // We are converting pub_key (modulus) in to 9 chunks of 242 bits, assuming original n, k are 121 and 17.
-    // This is because Posiedon circuit only support array of 16 elements.
-    // Otherwise we would have to output the ceil(256/31) = 9 field elements of the public key
-    var k2_chunked_size = k >> 1;
-    if(k % 2 == 1) {
-        k2_chunked_size += 1;
-    }
-    signal pubkey_hash_input[k2_chunked_size];
-    for(var i = 0; i < k2_chunked_size; i++) {
-        if(i==k2_chunked_size-1 && k2_chunked_size % 2 == 1) {
-            pubkey_hash_input[i] <== pubkey[2*i];
-        } else {
-            pubkey_hash_input[i] <== pubkey[2*i] + (1<<n) * pubkey[2*i+1];
-        }
-    }
-    signal output pubkey_hash <== Poseidon(k2_chunked_size)(pubkey_hash_input);
 }
-
-component main { public [ address ] } = PassportVerifier(64, 32);
-
-// Us:
-// 1 + 2 + 3 + 1
-// pubkey_hash + nullifier + reveal_packed + address
-// we take nullifier = signature[0, 1] which it 64 + 64 bits long, so chance of collision is 2^128
-
-// Them:
-// 1 + 3 + 1
-// pubkey_hash + reveal_twitter_packed + address
-
-// Soit on on garde la bitmap privée et on rend l'output publique => on doit sortir 8*88 bits
-// Soit on rend l'input publique et on rend seulement les output révélés publics => on doit sortir 88 bits + 8*reveal_chars bits

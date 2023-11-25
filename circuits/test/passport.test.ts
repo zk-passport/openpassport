@@ -63,8 +63,8 @@ describe('Circuit tests', function () {
 
       const { proof, publicSignals } = await groth16.fullProve(
         inputs,
-        "build/passport_js/passport.wasm",
-        "build/passport_final.zkey"
+        "build/proof_of_passport_js/proof_of_passport.wasm",
+        "build/proof_of_passport_final.zkey"
       )
 
       // console.log('proof done');
@@ -92,8 +92,8 @@ describe('Circuit tests', function () {
 
       return expect(groth16.fullProve(
         invalidInputs,
-        "build/passport_js/passport.wasm",
-        "build/passport_final.zkey"
+        "build/proof_of_passport_js/proof_of_passport.wasm",
+        "build/proof_of_passport_final.zkey"
       )).to.be.rejected;
     })
 
@@ -105,8 +105,8 @@ describe('Circuit tests', function () {
 
       return expect(groth16.fullProve(
         invalidInputs,
-        "build/passport_js/passport.wasm",
-        "build/passport_final.zkey"
+        "build/proof_of_passport_js/proof_of_passport.wasm",
+        "build/proof_of_passport_final.zkey"
       )).to.be.rejected;
     })
     
@@ -118,8 +118,8 @@ describe('Circuit tests', function () {
 
       return expect(groth16.fullProve(
         invalidInputs,
-        "build/passport_js/passport.wasm",
-        "build/passport_final.zkey"
+        "build/proof_of_passport_js/proof_of_passport.wasm",
+        "build/proof_of_passport_final.zkey"
       )).to.be.rejected;
     })
   })
@@ -154,8 +154,8 @@ describe('Circuit tests', function () {
   
         const { proof, publicSignals } = await groth16.fullProve(
           inputs,
-          "build/passport_js/passport.wasm",
-          "build/passport_final.zkey"
+          "build/proof_of_passport_js/proof_of_passport.wasm",
+          "build/proof_of_passport_final.zkey"
         )
   
         console.log('proof done');
