@@ -1,7 +1,7 @@
-import { hash } from "./computeEContent";
-import { DataHash } from "./types";
-import { assembleEContent, formatAndConcatenateDataHashes, formatMrz, hexToDecimal } from "./utils";
+import { DataHash, PassportData } from "./types";
+import { hash, assembleEContent, formatAndConcatenateDataHashes, formatMrz, hexToDecimal } from "./utils";
 import * as forge from 'node-forge';
+const fs = require('fs');
 
 const sampleMRZ = "P<FRADUPONT<<ALPHONSE<HUGUES<ALBERT<<<<<<<<<24HB818324FRA0402111M3111115<<<<<<<<<<<<<<02"
 const sampleDataHashes = [
@@ -32,7 +32,7 @@ const sampleDataHashes = [
 ]
 const sampleTimeOfSig = [49, 15, 23, 13, 49, 57, 49, 50, 49, 54, 49, 55, 50, 50, 51, 56, 90]
 
-export async function genSampleData() {
+export function genSampleData(): PassportData {
   const mrzHash = hash(formatMrz(sampleMRZ));
   sampleDataHashes.unshift([1, mrzHash]);
   const concatenatedDataHashes = formatAndConcatenateDataHashes(
@@ -52,24 +52,38 @@ export async function genSampleData() {
   md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
 
   const signature = privKey.sign(md)
-  const signatureBytes = Array.from(signature, c => c.charCodeAt(0));
+  const signatureBytes = Array.from(signature, (c: string) => c.charCodeAt(0));
   
   // Signature verification
-  const hashOfEContent = md.digest().getBytes();
-  const publicKey = rsa.setPublicKey(
-    new forge.jsbn.BigInteger(modulus, 16),
-    new forge.jsbn.BigInteger("10001", 16),
-  );
-  const valid = publicKey.verify(hashOfEContent, signature);
-  console.log('valid ?', valid)
+  // const hashOfEContent = md.digest().getBytes();
+  // const publicKey = rsa.setPublicKey(
+  //   new forge.jsbn.BigInteger(modulus, 16),
+  //   new forge.jsbn.BigInteger("10001", 16),
+  // );
+  // const valid = publicKey.verify(hashOfEContent, signature);
+  // console.log('valid ?', valid)
 
   return {
-    "mrz": sampleMRZ,
-    modulus: hexToDecimal(modulus),
-    "dataGroupHashes": sampleDataHashes,
-    "eContent": eContent,
-    "encryptedDigest": signatureBytes,
+    mrz: sampleMRZ,
+    signatureAlgorithm: 'SHA256withRSA', // sha256WithRSAEncryption
+    pubKey: {
+      modulus: hexToDecimal(modulus),
+    },
+    dataGroupHashes: sampleDataHashes as DataHash[],
+    eContent: eContent,
+    encryptedDigest: signatureBytes,
   }
 }
 
-
+export function getPassportData(): PassportData {
+  if (fs.existsSync('../../inputs/passportData.json')) {
+    return require('../../inputs/passportData.json');
+  } else {
+    const sampleData = genSampleData();
+    if (!fs.existsSync('../../inputs/')) {
+      fs.mkdirSync('../../inputs/');
+    }
+    fs.writeFileSync('../../inputs/passportData.json', JSON.stringify(sampleData));
+    return sampleData;
+  }
+}

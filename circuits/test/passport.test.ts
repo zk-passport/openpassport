@@ -1,11 +1,11 @@
 import { describe } from 'mocha'
 import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import { arraysAreEqual, bytesToBigDecimal, formatAndConcatenateDataHashes, formatMrz, splitToWords } from '../utils/utils'
+import { hash, toUnsignedByte, arraysAreEqual, bytesToBigDecimal, formatAndConcatenateDataHashes, formatMrz, splitToWords } from '../../common/src/utils/utils'
 import { groth16 } from 'snarkjs'
-import { hash, toUnsignedByte } from '../utils/computeEContent'
-import { DataHash, PassportData } from '../utils/types'
-import { genSampleData } from '../utils/sampleData'
+import { DataHash, PassportData } from '../../common/src/utils/types'
+import { getPassportData } from '../../common/src/utils/passportData'
+import { attributeToPosition } from '../../common/src/constants/constants'
 const fs = require('fs');
 
 chai.use(chaiAsPromised)
@@ -17,15 +17,7 @@ describe('Circuit tests', function () {
   let inputs: any;
 
   this.beforeAll(async () => {
-    if (fs.existsSync('inputs/passportData.json')) {
-      passportData = require('../inputs/passportData.json');
-    } else {
-      passportData = (await genSampleData()) as PassportData;
-      if (!fs.existsSync("inputs/")) {
-        fs.mkdirSync("inputs/");
-      }
-      fs.writeFileSync('inputs/passportData.json', JSON.stringify(passportData));
-    }
+    const passportData = getPassportData();
 
     const formattedMrz = formatMrz(passportData.mrz);
     const mrzHash = hash(formatMrz(passportData.mrz));
@@ -51,7 +43,7 @@ describe('Circuit tests', function () {
       dataHashes: concatenatedDataHashes.map(toUnsignedByte).map(byte => String(byte)),
       eContentBytes: passportData.eContent.map(toUnsignedByte).map(byte => String(byte)),
       pubkey: splitToWords(
-        BigInt(passportData.modulus),
+        BigInt(passportData.pubKey.modulus),
         BigInt(64),
         BigInt(32)
       ),
@@ -60,7 +52,7 @@ describe('Circuit tests', function () {
         BigInt(64),
         BigInt(32)
       ),
-      address: "0x9D392187c08fc28A86e1354aD63C70897165b982",
+      address: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
     }
     
   })
@@ -133,16 +125,6 @@ describe('Circuit tests', function () {
   })
 
   describe('Selective disclosure', function() {
-    const attributeToPosition = {
-      issuing_state: [2, 4],
-      name: [5, 43],
-      passport_number: [44, 52],
-      nationality: [54, 56],
-      date_of_birth: [57, 62],
-      gender: [64, 64],
-      expiry_date: [65, 70],
-    }
-
     const attributeCombinations = [
       ['issuing_state', 'name'],
       ['passport_number', 'nationality', 'date_of_birth'],
@@ -150,7 +132,7 @@ describe('Circuit tests', function () {
     ];
 
     attributeCombinations.forEach(combination => {
-      it.only(`Disclosing ${combination.join(", ")}`, async function () {
+      it(`Disclosing ${combination.join(", ")}`, async function () {
         const attributeToReveal = Object.keys(attributeToPosition).reduce((acc, attribute) => {
           acc[attribute] = combination.includes(attribute);
           return acc;
@@ -224,21 +206,3 @@ describe('Circuit tests', function () {
 })
 
 
-
-// [
-//   '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00', '\x00', 'F',    'R',
-//   'A',    '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
-//   '\x00', '\x00', '\x00', '\x00'
-// ]
-
-// P<FRADUPONT<<ALPHONSE<HUGUES<ALBERT<<<<<<<<<24HB818324FRA0402111M3111115<<<<<<<<<<<<<<02
