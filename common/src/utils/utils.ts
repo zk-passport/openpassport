@@ -1,19 +1,5 @@
-import {DataHash, MrzInfo, PassportData} from './types';
-
-export function toUnsigned(byte: number) {
-  return byte & 0xff;
-}
-
-export function arraysAreEqual(array1: number[], array2: number[]) {
-  return (
-    array1.length === array2.length &&
-    array1.every((value, index) => value === array2[index])
-  );
-}
-
-export function toSigned(byte: number) {
-  return byte > 127 ? byte - 256 : byte;
-}
+import { DataHash } from './types';
+import {sha256} from 'js-sha256';
 
 export function dataHashesObjToArray(dataHashes: {
   [key: string]: number[];
@@ -24,27 +10,6 @@ export function dataHashesObjToArray(dataHashes: {
       return [Number(key), dataHash];
     })
     .sort((a, b) => (a[0] as number) - (b[0] as number)) as DataHash[];
-}
-
-export function assembleMrz(mrzInfo: MrzInfo) {
-  return (
-    mrzInfo.documentCode +
-    '<' +
-    mrzInfo.issuingState +
-    mrzInfo.primaryIdentifier +
-    '<<' +
-    mrzInfo.secondaryIdentifier +
-    mrzInfo.documentNumber +
-    mrzInfo.documentNumberCheckDigit +
-    mrzInfo.nationality +
-    mrzInfo.dateOfBirth +
-    mrzInfo.dateOfBirthCheckDigit +
-    mrzInfo.gender.substring(0, 1) +
-    mrzInfo.dateOfExpiry +
-    mrzInfo.dateOfExpiryCheckDigit +
-    mrzInfo.optionalData1 +
-    mrzInfo.compositeCheckDigit
-  );
 }
 
 export function formatMrz(mrz: string) {
@@ -60,26 +25,6 @@ export function formatMrz(mrz: string) {
   // console.log('mrzCharcodes with tags:', mrzCharcodes);
 
   return mrzCharcodes;
-}
-
-// Example: [49, 15, 23, 13, 49, 57, 49, 50, 49, 54, 49, 55, 50, 50, 51, 56, 90]
-// Is "191216172238Z" - 16th December 2019, 17:22:38 UTC
-export function findTimeOfSignature(eContentDecomposed: any) {
-  const timeElement: any = eContentDecomposed.elements.find(
-    (element: any) => element.elements[0].identifier === '1.2.840.113549.1.9.5',
-  );
-
-  if (!timeElement) {
-    throw new Error('No time element found in eContentDecomposed');
-  }
-
-  const timeFound = timeElement.elements[1].elements[0].time;
-
-  // Adding the 4 bytes of the ASN.1 tag and length
-  // 49 : SET, 15 : LGT, 23 : UTCTIME, 13 : LGT
-  timeFound.unshift(...[49, 15, 23, 13]);
-
-  return timeFound;
 }
 
 export function parsePubKeyString(pubKeyString: string) {
@@ -160,6 +105,38 @@ export function assembleEContent(
   return constructedEContent;
 }
 
+export function checkInputs(
+  passportNumber: string,
+  dateOfBirth: string,
+  dateOfExpiry: string,
+): boolean {
+  if (passportNumber.length !== 9) {
+    throw new Error('Passport number must be 9 characters long');
+  }
+  if (dateOfBirth.length !== 6) {
+    throw new Error('Date of birth must be 6 characters long');
+  }
+  if (dateOfExpiry.length !== 6) {
+    throw new Error('Date of expiry must be 6 characters long');
+  }
+  return true;
+}
+
+export function toUnsigned(byte: number) {
+  return byte & 0xff;
+}
+
+export function arraysAreEqual(array1: number[], array2: number[]) {
+  return (
+    array1.length === array2.length &&
+    array1.every((value, index) => value === array2[index])
+  );
+}
+
+export function toSigned(byte: number) {
+  return byte > 127 ? byte - 256 : byte;
+}
+
 export const toBinaryString = (byte: any) => {
   const binary = (parseInt(byte, 10) & 0xFF).toString(2).padStart(8, '0');
   return binary;
@@ -196,4 +173,24 @@ export function bytesToBigDecimal(arr: number[]): string {
 
 export function hexToDecimal(hex: string): string {
   return BigInt(`0x${hex}`).toString();
+}
+
+// hash logic here because the one in utils.ts only works with node
+export function hash(bytesArray: number[]) {
+  let unsignedBytesArray = bytesArray.map(toUnsignedByte);
+  let hash = sha256(unsignedBytesArray);
+  return hexToSignedBytes(hash);
+}
+
+export function hexToSignedBytes(hexString: string): number[] {
+  let bytes = [];
+  for (let i = 0; i < hexString.length - 1; i += 2) {
+    let byte = parseInt(hexString.substr(i, 2), 16);
+    bytes.push(byte >= 128 ? byte - 256 : byte);
+  }
+  return bytes;
+}
+
+export function toUnsignedByte(signedByte: number) {
+  return signedByte < 0 ? signedByte + 256 : signedByte;
 }
