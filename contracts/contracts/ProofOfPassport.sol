@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -76,7 +76,8 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         require(verifier.verifyProof(a, b, c, inputs), "Invalid Proof");
 
         // Effects: Mint token
-        _mint(msg.sender, totalSupply());
+        uint256 newTokenId = totalSupply();
+        _mint(msg.sender, newTokenId);
         nullifiers[inputs[3]] = true;
 
 
@@ -85,7 +86,7 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         bytes memory charcodes = fieldElementsToBytes(firstThree);
         // console.logBytes1(charcodes[21]);
 
-        Attributes storage attributes = tokenAttributes[totalSupply()];
+        Attributes storage attributes = tokenAttributes[newTokenId];
 
         for (uint i = 0; i < attributePositions.length; i++) {
             AttributePosition memory attribute = attributePositions[i];
@@ -94,8 +95,8 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
                 attributeBytes[j - attribute.start] = charcodes[j];
             }
             string memory attributeValue = string(attributeBytes);
-            console.log(attribute.name, attributeValue);
             attributes.values[i] = attributeValue;
+            console.log(attribute.name, attributes.values[i]);
         }
     }
 
@@ -143,6 +144,9 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
             "ERC721Metadata: URI query for nonexistent token"
         );
         Attributes memory attributes = tokenAttributes[_tokenId];
+
+        console.log("Issuing state in tokenURI", attributes.values[0]);
+
         bytes memory baseURI = (
             abi.encodePacked(
                 '{ "attributes": [',
@@ -160,7 +164,7 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
                     attributes.values[5],
                     '"},{"trait_type": "Expiry date", "value": "',
                     attributes.values[6],
-                    '"},',
+                    '"}',
                 "],",
                 '"description": "Proof of Passport guarantees possession of a valid passport.","external_url": "https://github.com/zk-passport/proof-of-passport","image": "https://i.imgur.com/9kvetij.png","name": "Proof of Passport #',
                 _tokenId.toString(),

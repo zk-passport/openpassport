@@ -134,5 +134,24 @@ describe("ProofOfPassport", function () {
           .mint(...callData)
       ).to.be.revertedWith("Invalid proof");
     });
+
+    it.only("Should have a correct tokenURI a user to mint a SBT", async function () {
+      const { proofOfPassport, otherAccount, callData } = await loadFixture(
+        deployFixture
+      );
+
+      const tx = await proofOfPassport
+        .connect(otherAccount)
+        .mint(...callData);
+
+      const receipt = await tx.wait();
+
+      const tokenURI = await proofOfPassport.tokenURI(0);
+
+      console.log('tokenURI', tokenURI);
+
+      // expect(await proofOfPassport.balanceOf(otherAccount.address)).to.equal(1);
+    });
+
   });
 });
