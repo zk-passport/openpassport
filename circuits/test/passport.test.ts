@@ -122,6 +122,26 @@ describe('Circuit tests', function () {
         "build/proof_of_passport_final.zkey"
       )).to.be.rejected;
     })
+
+    it.only("shouldn't allow address maleability", async function () {
+      const { proof, publicSignals } = await groth16.fullProve(
+        inputs,
+        "build/proof_of_passport_js/proof_of_passport.wasm",
+        "build/proof_of_passport_final.zkey"
+      )
+
+      console.log('proof done');
+      console.log('publicSignals', publicSignals);
+
+      publicSignals[publicSignals.length - 1] = BigInt("0xC5B4F2A7Ea7F675Fca6EF724d6E06FFB40dFC93F").toString();
+
+      const vKey = JSON.parse(fs.readFileSync("build/verification_key.json"));
+      return expect(await groth16.verify(
+        vKey,
+        publicSignals,
+        proof
+      )).to.be.false;
+    })
   })
 
   describe('Selective disclosure', function() {
