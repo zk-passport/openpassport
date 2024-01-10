@@ -65,7 +65,8 @@ import axios from 'axios';
 import groth16ExportSolidityCallData from './utils/snarkjs';
 import contractAddresses from "./deployments/addresses.json"
 import proofOfPassportArtefact from "./deployments/ProofOfPassport.json";
-
+import CustomTextInput from './src/components/CustomTextInput';
+import EnterDetailsScreen from './src/screens/EnterDetailsScreen';
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
 const SKIP_SCAN = false;
@@ -117,8 +118,17 @@ function App(): JSX.Element {
   };
 
   const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    backgroundColor:  Colors.white,
+    flex:1
   };
+
+  const inputStyle = StyleSheet.create({
+    inputField: {
+      minHeight: 45, // Set a minimum height that fits the text
+      // Add other styles as needed to match your design
+    },
+    // Include any other styles you want to apply to the input component
+  });
 
   useEffect(() => {
     const logEventListener = DeviceEventEmitter.addListener('LOG_EVENT', e => {
@@ -364,62 +374,20 @@ function App(): JSX.Element {
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            backgroundColor: isDarkMode ? Colors.white : Colors.white,
           }}
         >
           <View>
             {step === 'enterDetails' ? (
-              <View style={styles.sectionContainer}>
-                <Text style={styles.header}>Welcome to Proof of Passport</Text>
-                <Text style={{textAlign: "center", fontSize: 20, marginTop: 20, marginBottom: 20}}>Enter Your Passport Details</Text>
-                <Text>Passport Number</Text>
-                <Input
-                  variant="outline"
-                  size="md"
-                  marginBottom={10}
-                  marginTop={4}
-                >
-                  <InputField
-                    value={passportNumber}
-                    onChangeText={setPassportNumber}
-                    placeholder={"Passport Number"}
-                  />
-                </Input>
-                <Text>Date of Birth</Text>
-                <Input
-                  variant="outline"
-                  size="md"
-                  marginBottom={10}
-                  marginTop={4}
-                >
-                  <InputField
-                    value={dateOfBirth}
-                    onChangeText={setDateOfBirth}
-                    placeholder={"YYMMDD"}
-                  />
-                </Input>
-                <Text>Date of Expiry</Text>
-                <Input
-                  variant="outline"
-                  size="md"
-                  marginBottom={10}
-                  marginTop={4}
-                >
-                  <InputField
-                    value={dateOfExpiry}
-                    onChangeText={setDateOfExpiry}
-                    placeholder={"YYMMDD"}
-                  />
-                </Input>
-
-                <Button
-                  onPress={scan}
-                  marginTop={10}
-                >
-                  <ButtonText>Scan Passport with NFC</ButtonText>
-                  {/* <ButtonIcon as={AddIcon} /> */}
-                </Button>
-              </View>
+                      <EnterDetailsScreen
+                      passportNumber={passportNumber}
+                      setPassportNumber={setPassportNumber}
+                      dateOfBirth={dateOfBirth}
+                      setDateOfBirth={setDateOfBirth}
+                      dateOfExpiry={dateOfExpiry}
+                      setDateOfExpiry={setDateOfExpiry}
+                      onScanPress={scan}
+                    />
             ) : null}
             {step === 'scanning' ? (
               <View style={styles.sectionContainer}>
