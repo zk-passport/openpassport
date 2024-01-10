@@ -4,36 +4,68 @@ import React, {useState} from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import CustomTextInput from '../components/CustomTextInput';
 import Button from '../components/CustomButton'; 
+import { ToggleGroup } from 'tamagui'
+import { AlignCenter, AlignLeft, AlignRight, Camera } from '@tamagui/lucide-icons'
+import { XStack, YStack } from 'tamagui'
 
-const EnterDetailsScreen = ({ passportNumber, setPassportNumber, dateOfBirth, setDateOfBirth, dateOfExpiry, setDateOfExpiry, onScanPress }) => {
+const EnterDetailsScreen = ({
+  passportNumber,
+  setPassportNumber,
+  dateOfBirth,
+  setDateOfBirth,
+  dateOfExpiry,
+  setDateOfExpiry,
+  onScanPress
+}) => {
+  const [selectedToggle, setSelectedToggle] = useState('write');
 
   return (
     <View style={styles.sectionContainer}>
       <Text style={styles.header}>Welcome to Proof of Passport</Text>
       <Text style={styles.header2}>Generate ZK proof with your passport data</Text>
+      <ToggleGroup
+        type="single"
+        value={selectedToggle}
+        onValueChange={setSelectedToggle}
+        disableDeactivation={true}
+        sizeAdjust={1}
+      >
+        <ToggleGroup.Item value="write">
+          <AlignCenter />
+        </ToggleGroup.Item>
+        <ToggleGroup.Item value="camera">
+          <Camera />
+        </ToggleGroup.Item>
+      </ToggleGroup>
 
-      <CustomTextInput
-        value={passportNumber}
-        onChangeText={setPassportNumber}
-        placeholder="Passport Number"
-        keyboardType="default"
-      />
-      <CustomTextInput
-        value={dateOfBirth}
-        onChangeText={setDateOfBirth}
-        placeholder="Date of Birth (YYMMDD)"
-        keyboardType="numeric"
-      />
-      <CustomTextInput
-        value={dateOfExpiry}
-        onChangeText={setDateOfExpiry}
-        placeholder="Date of Expiry (YYMMDD)"
-        keyboardType="numeric"
-      />
-      <Button
-        onPress={onScanPress}
-        title="Scan Passport with NFC"
-      />
+      {selectedToggle === 'write' ? (
+        <View style={styles.inputContainer}>
+          <CustomTextInput
+            value={passportNumber}
+            onChangeText={setPassportNumber}
+            placeholder="Passport number"
+            keyboardType="default"
+          />
+          <CustomTextInput
+            value={dateOfBirth}
+            onChangeText={setDateOfBirth}
+            placeholder="Date of birth (yymmdd)"
+            keyboardType="numeric"
+          />
+          <CustomTextInput
+            value={dateOfExpiry}
+            onChangeText={setDateOfExpiry}
+            placeholder="Date of expiry (yymmdd)"
+            keyboardType="numeric"
+          />
+        </View>
+      ) : (
+        <View style={styles.inputContainer}>
+        <Text style={styles.header2}>Workk in progress</Text>
+      </View>
+      )}
+
+      <Button onPress={onScanPress} title="Scan Passport with NFC" />
     </View>
   );
 };
@@ -60,7 +92,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
     color: 'gray',
-  }
+  },
+  inputContainer: {
+    width: '100%', 
+    alignSelf: 'center', 
+    flex: 1,
+  },
 });
 
 export default EnterDetailsScreen;

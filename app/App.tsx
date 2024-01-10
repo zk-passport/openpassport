@@ -369,15 +369,16 @@ function App(): JSX.Element {
       <SafeAreaView style={backgroundStyle}>
         <StatusBar
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={backgroundStyle.backgroundColor}
+          backgroundColor={Colors.red}
         />
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           style={{
-            backgroundColor: isDarkMode ? Colors.white : Colors.white,
+            backgroundColor: isDarkMode ? Colors.black : Colors.black,
           }}
+          contentContainerStyle={{ flexGrow: 1 }}
         >
-          <View>
+          <View style={styles.view}>
             {step === 'enterDetails' ? (
                       <EnterDetailsScreen
                       passportNumber={passportNumber}
@@ -510,7 +511,7 @@ function App(): JSX.Element {
               </View>
             ) : null}
           </View>
-          <View style={{...styles.sectionContainer, ...styles.testSection, marginTop: 80}}>
+          <View style={{...styles.sectionContainer, ...styles.testSection, marginTop: 20}}>
             <Text style={{...styles.sectionDescription, textAlign: "center"}}>Test functions</Text>
 
             <Button
@@ -540,6 +541,9 @@ function App(): JSX.Element {
 }
 
 const styles = StyleSheet.create({
+  view: {
+    flex: 1,
+  },
   sectionContainer: {
     marginTop: 32,
     paddingHorizontal: 24,
