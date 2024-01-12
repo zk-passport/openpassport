@@ -15,9 +15,16 @@ const EnterDetailsScreen = ({
   setDateOfBirth,
   dateOfExpiry,
   setDateOfExpiry,
-  onScanPress
+  onScanPress,
+  onStartCameraScan
 }) => {
   const [selectedToggle, setSelectedToggle] = useState('write');
+  const handleCameraPress = () => {
+    if (selectedToggle === 'write') {
+      onStartCameraScan(); // Call the function passed as prop
+      setSelectedToggle('write');
+    }
+  };
 
   return (
     <View style={styles.sectionContainer}>
@@ -33,12 +40,12 @@ const EnterDetailsScreen = ({
         <ToggleGroup.Item value="write">
           <AlignCenter />
         </ToggleGroup.Item>
-        <ToggleGroup.Item value="camera">
+        <ToggleGroup.Item value="camera" onPress={handleCameraPress}>
           <Camera />
         </ToggleGroup.Item>
       </ToggleGroup>
 
-      {selectedToggle === 'write' ? (
+      {true ? (
         <View style={styles.inputContainer}>
           <CustomTextInput
             value={passportNumber}
