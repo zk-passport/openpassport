@@ -61,8 +61,8 @@ const EnterDetailsScreen = ({
         </View>
       ) : (
         <View style={styles.inputContainer}>
-        <Text style={styles.header2}>Workk in progress</Text>
-      </View>
+        <Text style={styles.header2}>Work in progress</Text>
+        </View>
       )}
 
       <Button onPress={onScanPress} title="Scan Passport with NFC" />
