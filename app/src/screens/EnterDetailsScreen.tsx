@@ -21,7 +21,7 @@ const EnterDetailsScreen = ({
   const [selectedToggle, setSelectedToggle] = useState('write');
   const handleCameraPress = () => {
     if (selectedToggle === 'write') {
-      onStartCameraScan(); // Call the function passed as prop
+      onStartCameraScan(); 
       setSelectedToggle('write');
     }
   };

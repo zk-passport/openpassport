@@ -113,27 +113,18 @@ function App(): JSX.Element {
   const startCameraScan = () => {
     NativeModules.CameraActivityModule.startCameraActivity()
       .then((mrzInfo) => {
-        console.log('MRZ Info:', mrzInfo);
         const lines = mrzInfo.split('\n');
           if (lines.length >= 2) {
             const secondLine = lines[1];
-            console.log('Second Line:', secondLine);
-            const passportNumber = secondLine.substring(0, 9).replace(/</g, '').trim(); // Passport number (first 9 characters, remove filler characters)
-            const dateOfBirth = secondLine.substring(13, 19); // Date of birth (YYMMDD) at positions 14-19
-            const dateOfExpiry = secondLine.substring(21, 27); // Date of expiry (YYMMDD) at positions 22-27
-            console.log('passportNumber:', passportNumber);
-            console.log('dateOfBirth:', dateOfBirth);
-            console.log('dateOfExpiry:', dateOfExpiry);
-
+            const passportNumber = secondLine.substring(0, 9).replace(/</g, '').trim(); 
+            const dateOfBirth = secondLine.substring(13, 19); 
+            const dateOfExpiry = secondLine.substring(21, 27); 
             setPassportNumber(passportNumber);
             setDateOfBirth(dateOfBirth);
             setDateOfExpiry(dateOfExpiry);
-            
-
       } else {
         console.error('Invalid MRZ format');
       }
-        // Handle the MRZ Info as needed
       })
       .catch((error) => {
         console.error('Camera Activity Error:', error);
