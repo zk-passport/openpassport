@@ -88,7 +88,7 @@ function App(): JSX.Element {
   const [dateOfBirth, setDateOfBirth] = useState(DEFAULT_DOB ?? '');
   const [dateOfExpiry, setDateOfExpiry] = useState(DEFAULT_DOE ?? '');
   const [address, setAddress] = useState(DEFAULT_ADDRESS ?? '');
-  const [passportData, setPassportData] = useState(mockPassportData);
+  const [passportData, setPassportData] = useState(samplePassportData);
   const [step, setStep] = useState('enterDetails');
   const [testResult, setTestResult] = useState<any>(null);
   const [error, setError] = useState<any>(null);
@@ -417,7 +417,8 @@ function App(): JSX.Element {
                       handleDisclosureChange={handleDisclosureChange}
                       address={address}
                       setAddress={setAddress}
-                      generatingProof={generatingProof}/>
+                      generatingProof={generatingProof}
+                      handleProve={handleProve}/>
                     
             ) : null}
             {step === 'scanning' ? (

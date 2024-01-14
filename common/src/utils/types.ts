@@ -10,7 +10,7 @@ export type PassportData = {
 };
 // Mock data for PassportData
 export const mockPassportData: PassportData = {
-  mrz: 'YourMockMRZ',
+  mrz: 'YourMockMR<<ZYourMoc<<kMRZYourMockMRZYourMockMRZ',
   signatureAlgorithm: 'RSA',
   pubKey: {
     modulus: 'YourModulus',
