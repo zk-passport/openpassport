@@ -3,10 +3,10 @@
 import React, {useState} from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import CustomTextInput from '../components/CustomTextInput';
-import Button from '../components/CustomButton'; 
+import CustomButton from '../components/CustomButton'; 
 import { ToggleGroup } from 'tamagui'
 import { AlignCenter, AlignLeft, AlignRight, Camera } from '@tamagui/lucide-icons'
-import { XStack, YStack } from 'tamagui'
+import { XStack, YStack, Button } from 'tamagui'
 
 const EnterDetailsScreen = ({
   passportNumber,
@@ -18,32 +18,14 @@ const EnterDetailsScreen = ({
   onScanPress,
   onStartCameraScan
 }) => {
-  const [selectedToggle, setSelectedToggle] = useState('write');
-  const handleCameraPress = () => {
-    if (selectedToggle === 'write') {
-      onStartCameraScan(); 
-      setSelectedToggle('write');
-    }
-  };
 
   return (
     <View style={styles.sectionContainer}>
       <Text style={styles.header}>Welcome to Proof of Passport</Text>
       <Text style={styles.header2}>Generate ZK proof with your passport data</Text>
-      <ToggleGroup
-        type="single"
-        value={selectedToggle}
-        onValueChange={setSelectedToggle}
-        disableDeactivation={true}
-        sizeAdjust={1}
-      >
-        <ToggleGroup.Item value="write">
-          <AlignCenter />
-        </ToggleGroup.Item>
-        <ToggleGroup.Item value="camera" onPress={handleCameraPress}>
-          <Camera />
-        </ToggleGroup.Item>
-      </ToggleGroup>
+      <Button onPress={onStartCameraScan}>
+        <Camera/>
+      </Button>
 
       {true ? (
         <View style={styles.inputContainer}>
@@ -72,7 +54,7 @@ const EnterDetailsScreen = ({
         </View>
       )}
 
-      <Button onPress={onScanPress} title="Scan Passport with NFC" />
+      <CustomButton onPress={onScanPress} title="Scan Passport with NFC"/>
     </View>
   );
 };
@@ -84,6 +66,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
+    paddingBottom:20,
   },
   header: {
     fontSize: 22,
