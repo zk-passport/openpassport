@@ -8,7 +8,13 @@ import ProveScreen from './ProveScreen';
 
 const MainScreen = (
     {onStartCameraScan,
-    nfcScan}
+    nfcScan,
+passportData,
+disclosure,
+handleDisclosureChange,
+address,
+setAddress,
+generatingProof}
 ) => {
   // placeholder function for button press
   const [selectedTab, setSelectedTab] = useState("scan");
@@ -35,8 +41,14 @@ const MainScreen = (
                       nfcScan = {nfcScan}/>
                 </Tabs.Content>
                 <Tabs.Content value="generate">
-                    <Text>Prove Screen</Text>
-                </Tabs.Content>
+                <ProveScreen
+        passportData={passportData}
+        disclosure={disclosure}
+        handleDisclosureChange={handleDisclosureChange}
+        address={address}
+        setAddress={setAddress}
+        generatingProof={generatingProof}
+      />                </Tabs.Content>
 
                 <Tabs.List>
                     <Tabs.Tab unstyled value="scan" w="50%" backgroundColor="transparent" >

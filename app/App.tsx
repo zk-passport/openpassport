@@ -46,7 +46,7 @@ import {
   DEFAULT_DOE,
   DEFAULT_ADDRESS,
 } from '@env';
-import {DataHash, PassportData} from '../common/src/utils/types';
+import {DataHash, PassportData , mockPassportData} from '../common/src/utils/types';
 import {AWS_ENDPOINT} from '../common/src/constants/constants';
 import {
   hash,
@@ -88,7 +88,7 @@ function App(): JSX.Element {
   const [dateOfBirth, setDateOfBirth] = useState(DEFAULT_DOB ?? '');
   const [dateOfExpiry, setDateOfExpiry] = useState(DEFAULT_DOE ?? '');
   const [address, setAddress] = useState(DEFAULT_ADDRESS ?? '');
-  const [passportData, setPassportData] = useState<PassportData | null>(null);
+  const [passportData, setPassportData] = useState(mockPassportData);
   const [step, setStep] = useState('enterDetails');
   const [testResult, setTestResult] = useState<any>(null);
   const [error, setError] = useState<any>(null);
@@ -411,7 +411,13 @@ function App(): JSX.Element {
                       onStartCameraScan={startCameraScan}/> */
                       <MainScreen
                       onStartCameraScan={startCameraScan}
-                      nfcScan = {scan}/>
+                      nfcScan = {scan}
+                      passportData={passportData}
+                      disclosure={disclosure}
+                      handleDisclosureChange={handleDisclosureChange}
+                      address={address}
+                      setAddress={setAddress}
+                      generatingProof={generatingProof}/>
                     
             ) : null}
             {step === 'scanning' ? (
