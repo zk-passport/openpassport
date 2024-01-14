@@ -7,6 +7,7 @@ import Button from '../components/CustomButton';
 import { ToggleGroup } from 'tamagui'
 import { AlignCenter, AlignLeft, AlignRight, Camera } from '@tamagui/lucide-icons'
 import { XStack, YStack } from 'tamagui'
+import { SizableText, Tabs, H5 } from 'tamagui'
 
 const EnterDetailsScreen = ({
   passportNumber,
@@ -18,12 +19,9 @@ const EnterDetailsScreen = ({
   onScanPress,
   onStartCameraScan
 }) => {
-  const [selectedToggle, setSelectedToggle] = useState('write');
+  const [selectedToggle, setSelectedToggle] = useState('camera');
   const handleCameraPress = () => {
-    if (selectedToggle === 'write') {
       onStartCameraScan(); 
-      setSelectedToggle('write');
-    }
   };
 
   return (
@@ -37,9 +35,6 @@ const EnterDetailsScreen = ({
         disableDeactivation={true}
         sizeAdjust={1}
       >
-        <ToggleGroup.Item value="write">
-          <AlignCenter />
-        </ToggleGroup.Item>
         <ToggleGroup.Item value="camera" onPress={handleCameraPress}>
           <Camera />
         </ToggleGroup.Item>
@@ -73,6 +68,9 @@ const EnterDetailsScreen = ({
       )}
 
       <Button onPress={onScanPress} title="Scan Passport with NFC" />
+
+
+
     </View>
   );
 };

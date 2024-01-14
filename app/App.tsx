@@ -65,8 +65,9 @@ import axios from 'axios';
 import groth16ExportSolidityCallData from './utils/snarkjs';
 import contractAddresses from "./deployments/addresses.json"
 import proofOfPassportArtefact from "./deployments/ProofOfPassport.json";
-import CustomTextInput from './src/components/CustomTextInput';
 import EnterDetailsScreen from './src/screens/EnterDetailsScreen';
+import MainScreen from './src/screens/MainScreen';
+import { extractMRZInfo } from './src/utils/camera_utils';
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
 const SKIP_SCAN = false;
@@ -113,18 +114,14 @@ function App(): JSX.Element {
   const startCameraScan = () => {
     NativeModules.CameraActivityModule.startCameraActivity()
       .then((mrzInfo) => {
-        const lines = mrzInfo.split('\n');
-          if (lines.length >= 2) {
-            const secondLine = lines[1];
-            const passportNumber = secondLine.substring(0, 9).replace(/</g, '').trim(); 
-            const dateOfBirth = secondLine.substring(13, 19); 
-            const dateOfExpiry = secondLine.substring(21, 27); 
-            setPassportNumber(passportNumber);
-            setDateOfBirth(dateOfBirth);
-            setDateOfExpiry(dateOfExpiry);
-      } else {
-        console.error('Invalid MRZ format');
-      }
+        try {
+          const { documentNumber, birthDate, expiryDate } = extractMRZInfo(mrzInfo);
+          setPassportNumber(documentNumber);
+          setDateOfBirth(birthDate);
+          setDateOfExpiry(expiryDate);
+        } catch (error) {
+          console.error('Invalid MRZ format:', error.message);
+        }
       })
       .catch((error) => {
         console.error('Camera Activity Error:', error);
@@ -402,6 +399,7 @@ function App(): JSX.Element {
         >
           <View style={styles.view}>
             {step === 'enterDetails' ? (
+              /*
                       <EnterDetailsScreen
                       passportNumber={passportNumber}
                       setPassportNumber={setPassportNumber}
@@ -410,8 +408,11 @@ function App(): JSX.Element {
                       dateOfExpiry={dateOfExpiry}
                       setDateOfExpiry={setDateOfExpiry}
                       onScanPress={scan}
+                      onStartCameraScan={startCameraScan}/> */
+                      <MainScreen
                       onStartCameraScan={startCameraScan}
-                    />
+                      nfcScan = {scan}/>
+                    
             ) : null}
             {step === 'scanning' ? (
               <View style={styles.sectionContainer}>
@@ -533,28 +534,6 @@ function App(): JSX.Element {
                 </Text>}
               </View>
             ) : null}
-          </View>
-          <View style={{...styles.sectionContainer, ...styles.testSection, marginTop: 20}}>
-            <Text style={{...styles.sectionDescription, textAlign: "center"}}>Test functions</Text>
-
-            <Button
-              onPress={async () => {
-                NativeModules.RNPassportReader.callRustLib((err: any, res: any) => {
-                  if (err) {
-                    console.error(err);
-                    setTestResult(err);
-                  } else {
-                    console.log(res); // Should log "5"
-                    setTestResult(res);
-                  }
-                });
-              }}
-              marginTop={10}
-            >
-              <ButtonText>Call arkworks lib</ButtonText>
-            </Button>
-            {testResult && <Text>{testResult}</Text>}
-
           </View>
         </ScrollView>
       </SafeAreaView>
