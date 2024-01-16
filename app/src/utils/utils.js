@@ -17,4 +17,14 @@ export function extractMRZInfo(mrzString) {
       expiryDate
     };
   }
+
+  export const Steps = {
+    MRZ_SCAN: 1,
+    MRZ_SCAN_COMPLETED: 2,
+    NFC_SCANNING: 3,
+    NFC_SCAN_COMPLETED: 4,
+    GENERATING_PROOF: 5,
+    PROOF_GENERATED: 6
+  };
+
   

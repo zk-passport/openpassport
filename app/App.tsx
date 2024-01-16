@@ -36,7 +36,6 @@ import {
 } from "@gluestack-ui/themed"
 import { config } from "@gluestack-ui/config" // Optional if you want to use default theme
 import Toast, { BaseToast, ErrorToast, SuccessToast, ToastProps } from 'react-native-toast-message';
-
 // @ts-ignore
 import PassportReader from 'react-native-passport-reader';
 import {getFirstName, formatDuration, checkInputs } from './utils/utils';
@@ -67,7 +66,7 @@ import contractAddresses from "./deployments/addresses.json"
 import proofOfPassportArtefact from "./deployments/ProofOfPassport.json";
 import EnterDetailsScreen from './src/screens/EnterDetailsScreen';
 import MainScreen from './src/screens/MainScreen';
-import { extractMRZInfo } from './src/utils/camera_utils';
+import { extractMRZInfo , Steps} from './src/utils/utils';
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
 const SKIP_SCAN = false;
@@ -83,13 +82,15 @@ const attributeToPosition = {
 }
 
 function App(): JSX.Element {
+  
+
   const isDarkMode = useColorScheme() === 'dark';
   const [passportNumber, setPassportNumber] = useState(DEFAULT_PNUMBER ?? '');
   const [dateOfBirth, setDateOfBirth] = useState(DEFAULT_DOB ?? '');
   const [dateOfExpiry, setDateOfExpiry] = useState(DEFAULT_DOE ?? '');
   const [address, setAddress] = useState(DEFAULT_ADDRESS ?? '');
   const [passportData, setPassportData] = useState(samplePassportData);
-  const [step, setStep] = useState('enterDetails');
+  const [step, setStep] = useState(Steps.MRZ_SCAN);
   const [testResult, setTestResult] = useState<any>(null);
   const [error, setError] = useState<any>(null);
 
@@ -100,6 +101,8 @@ function App(): JSX.Element {
   const [proof, setProof] = useState<{proof: string, inputs: string} | null>(null);
   const [minting, setMinting] = useState<boolean>(false);
   const [mintText, setMintText] = useState<string | null>(null);
+
+
 
   const [disclosure, setDisclosure] = useState({
     issuing_state: false,
@@ -119,6 +122,7 @@ function App(): JSX.Element {
           setPassportNumber(documentNumber);
           setDateOfBirth(birthDate);
           setDateOfExpiry(expiryDate);
+          setStep(Steps.MRZ_SCAN_COMPLETED);
         } catch (error) {
           console.error('Invalid MRZ format:', error.message);
         }
@@ -162,10 +166,11 @@ function App(): JSX.Element {
   useEffect(() => {
     if (SKIP_SCAN && passportData === null) {
       setPassportData(samplePassportData as PassportData);
-      setStep('scanCompleted');
+      setStep(Steps.NFC_SCAN_COMPLETED);
     }
   }, []);
 
+  
   async function handleResponse(response: any) {
     const {
       mrz,
@@ -199,7 +204,7 @@ function App(): JSX.Element {
     console.log('encryptedDigest', passportData.encryptedDigest);
 
     setPassportData(passportData);
-    setStep('scanCompleted');
+    setStep(Steps.NFC_SCAN_COMPLETED);
   }
 
   async function scan() {
@@ -215,7 +220,7 @@ function App(): JSX.Element {
     // 2. press the back of your android phone against the passport
     // 3. wait for the scan(...) Promise to get resolved/rejected
     console.log('scanning...');
-    setStep('scanning');
+    setStep(Steps.NFC_SCANNING);
     try {
       const response = await PassportReader.scan({
         documentNumber: passportNumber,
@@ -235,6 +240,7 @@ function App(): JSX.Element {
   }
 
   const handleProve = async () => {
+    setStep(Steps.GENERATING_PROOF);
     if (passportData === null) {
       console.log('passport data is null');
       return;
@@ -319,8 +325,8 @@ function App(): JSX.Element {
         proof: JSON.stringify(deserializedProof),
         inputs: JSON.stringify(deserializedInputs),
       });
-      setGeneratingProof(false)
-      setStep('proofGenerated');
+      setGeneratingProof(false);
+      setStep(Steps.PROOF_GENERATED);
     });
   };
 
@@ -398,17 +404,6 @@ function App(): JSX.Element {
           contentContainerStyle={{ flexGrow: 1 }}
         >
           <View style={styles.view}>
-            {step === 'enterDetails' ? (
-              /*
-                      <EnterDetailsScreen
-                      passportNumber={passportNumber}
-                      setPassportNumber={setPassportNumber}
-                      dateOfBirth={dateOfBirth}
-                      setDateOfBirth={setDateOfBirth}
-                      dateOfExpiry={dateOfExpiry}
-                      setDateOfExpiry={setDateOfExpiry}
-                      onScanPress={scan}
-                      onStartCameraScan={startCameraScan}/> */
                       <MainScreen
                       onStartCameraScan={startCameraScan}
                       nfcScan = {scan}
@@ -418,129 +413,14 @@ function App(): JSX.Element {
                       address={address}
                       setAddress={setAddress}
                       generatingProof={generatingProof}
-                      handleProve={handleProve}/>
-                    
-            ) : null}
-            {step === 'scanning' ? (
-              <View style={styles.sectionContainer}>
-                <Text style={styles.header}>Put your phone on your passport</Text>
-                <Spinner
-                  size={60}
-                  style={{marginTop: 70}}
-                />
-              </View>
-            ) : null}
-            {step === 'scanCompleted' && passportData ? (
-              <View style={styles.sectionContainer}>
-                <Text style={styles.header}>
-                  Hi {getFirstName(passportData.mrz)}
-                </Text>
-                <View
-                  marginTop={20}
-                  marginBottom={20}
-                >
-                  <Text
-                    marginBottom={5}
-                  >
-                    Signature algorithm: {passportData.signatureAlgorithm}
-                  </Text>
-                  <Text
-                    marginBottom={10}
-                  >
-                    What do you want to disclose ?
-                  </Text>
-                  {Object.keys(disclosure).map((key) => {
-                    const keyy = key as keyof typeof disclosure;
-                    const indexes = attributeToPosition[keyy];
-                    const keyFormatted = keyy.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                    const mrzAttribute = passportData.mrz.slice(indexes[0], indexes[1])
-                    const mrzAttributeFormatted = mrzAttribute.replace(/</g, ' ')
-                    
-                    return (
-                      <View key={key} margin={2} width={"$full"} flexDirection="row" justifyContent="space-between">
-                        <View maxWidth={"$5/6"}>
-                          <Text
-                            style={{fontWeight: "bold"}}
-                          >
-                            {keyFormatted}:{" "}
-                          </Text>
-                          <Text>
-                            {mrzAttributeFormatted}
-                          </Text>
-                        </View>
-                        <Checkbox
-                          value={key}
-                          isChecked={disclosure[keyy]}
-                          onChange={() => handleDisclosureChange(keyy)}
-                          size="lg"
-                          aria-label={key}
-                        >
-                          <CheckboxIndicator mr="$2">
-                            <CheckboxIcon as={CheckIcon} />
-                          </CheckboxIndicator>
-                        </Checkbox>
-                      </View>
-                    )
-                  })}
-                </View>
-                <Text>Enter your address or ens</Text>
-                <Input
-                  variant="outline"
-                  size="md"
-                  marginBottom={10}
-                  marginTop={4}
-                >
-                  <InputField
-                    value={address}
-                    onChangeText={setAddress}
-                    placeholder="Your Address or ens name"
-                  />
-                </Input>
-
-                {generatingProof ?
-                  <Button
-                    onPress={handleProve}
-                  >
-                    <ButtonSpinner mr="$1" />
-                    <ButtonText>Generating zk proof</ButtonText>
-                  </Button>
-                  : <Button
-                      onPress={handleProve}
-                    >
-                      <ButtonText>Generate zk proof</ButtonText>
-                    </Button>
-                }
-              </View>
-            ) : null}
-            {step === 'proofGenerated' ? (
-              <View style={styles.sectionContainer}>
-                <Text style={styles.header}>Zero-knowledge proof generated</Text>
-
-                <Text style={{fontWeight: "bold"}}>
-                  Proof:
-                </Text>
-                <Text>
-                  {JSON.stringify(proof)}
-                </Text>
-
-                <Text>
-                  <Text style={{ fontWeight: 'bold' }}>Proof Duration:</Text> {formatDuration(proofTime)}
-                </Text>     
-                <Text>
-                  <Text style={{ fontWeight: 'bold' }}>Total Duration:</Text> {formatDuration(totalTime)}
-                </Text>
-
-                <Button
-                  onPress={handleMint}
-                  marginTop={10}
-                >
-                  <ButtonText>Mint Proof of Passport</ButtonText>
-                </Button>
-                {mintText && <Text>
-                  {mintText}
-                </Text>}
-              </View>
-            ) : null}
+                      handleProve={handleProve}
+                      step={step}
+                      mintText={mintText}
+                      proof={proof}
+                      proofTime={proofTime}
+                      handleMint={handleMint}
+                      totalTime={totalTime}
+                      setStep={setStep}/>
           </View>
         </ScrollView>
       </SafeAreaView>
