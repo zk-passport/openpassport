@@ -127,7 +127,7 @@ const MainScreen = (
             </XStack>
 
             <Fieldset gap="$4" mt="$2" horizontal>
-            <Label width={160} justifyContent="flex-end" htmlFor="name">
+            <Label width={160} justifyContent="flex-end" htmlFor="name" fow="bold">
               Restart to step 1
             </Label>
             <Button size="$4" m="$2" onPress={handleRestart}>
@@ -135,7 +135,7 @@ const MainScreen = (
             </Button>
           </Fieldset>
           <Fieldset gap="$4" mt="$2" horizontal>
-            <Label width={160} justifyContent="flex-end" htmlFor="name">
+            <Label width={160} justifyContent="flex-end" htmlFor="name" fow="bold">
               Broken camera
             </Label>
             <Switch size="$4" checked={brokenCamera} onCheckedChange={setBrokenCamera}>
@@ -144,7 +144,7 @@ const MainScreen = (
           </Fieldset>
           {
             brokenCamera &&
-          <YStack space >
+          <YStack space pl="$3">
           <Fieldset gap="$4" horizontal>
             <Label width={160} justifyContent="flex-end" htmlFor="name">
               Passport Number
