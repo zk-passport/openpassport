@@ -76,7 +76,7 @@ const PassportDataComponent = ({
       </Button>
     </>
   ) : (
-    <YStack>
+    <YStack m="$2">
       <Text>Zero-knowledge proof generated</Text>
 
       <Text fontWeight="bold">Proof:</Text>

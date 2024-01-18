@@ -85,7 +85,7 @@ function App(): JSX.Element {
   
 
   const isDarkMode = useColorScheme() === 'dark';
-  const [passportNumber, setPassportNumber] = useState(DEFAULT_PNUMBER ?? '');
+  const [passportNumber, setPassportNumber] = useState(DEFAULT_PNUMBER ?? "");
   const [dateOfBirth, setDateOfBirth] = useState(DEFAULT_DOB ?? '');
   const [dateOfExpiry, setDateOfExpiry] = useState(DEFAULT_DOE ?? '');
   const [address, setAddress] = useState(DEFAULT_ADDRESS ?? '');
@@ -420,7 +420,14 @@ function App(): JSX.Element {
                       proofTime={proofTime}
                       handleMint={handleMint}
                       totalTime={totalTime}
-                      setStep={setStep}/>
+                      setStep={setStep}
+                      passportNumber={passportNumber}
+                      setPassportNumber={setPassportNumber}
+                      dateOfBirth={dateOfBirth}
+                      setDateOfBirth={setDateOfBirth}
+                      dateOfExpiry={dateOfExpiry}
+                      setDateOfExpiry={setDateOfExpiry}
+                      />
           </View>
         </ScrollView>
       </SafeAreaView>
