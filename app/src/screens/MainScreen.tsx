@@ -1,14 +1,9 @@
 import React, { useState, useEffect} from 'react';
-import { YStack, XStack, Text, Button } from 'tamagui';
-import { SizableText, Tabs, H5, styled , Dialog, Adapt, Sheet, Label , Fieldset, Input, Unspaced, Switch} from 'tamagui'
-import { BadgeInfo , Scan, UserCheck , Settings , HelpCircle, XCircle , IterationCw} from '@tamagui/lucide-icons'; 
-import { ThemeableStack } from 'tamagui' // or '@tamagui/stacks'
-
+import { YStack, XStack, Text, Button, SizableText, Tabs, styled , Dialog, Adapt, Sheet, Label , Fieldset, Input, Switch ,ThemeableStack} from 'tamagui'
+import { Scan, UserCheck , HelpCircle, XCircle , IterationCw} from '@tamagui/lucide-icons'; 
 import ScanScreen from './ScanScreen';
 import ProveScreen from './ProveScreen';
 import { Steps } from '../utils/utils';
-import { Popover } from 'tamagui'
-import { CloseCircleIcon, InfoIcon } from '@gluestack-ui/themed';
 
 const MainScreen = (
     {onStartCameraScan,
@@ -35,12 +30,7 @@ const MainScreen = (
     setDateOfExpiry
     }
 ) => {
-  // placeholder function for button press
   const [selectedTab, setSelectedTab] = useState("scan");
-  const handleOpenCamera = () => {
-    console.log('Camera button pressed');
-    // your camera opening logic goes here
-  };
   const [brokenCamera,setBrokenCamera] = useState(false);
   const [open, setOpen] = useState(false)
   const MyCard = styled(ThemeableStack, {
@@ -57,12 +47,11 @@ const MainScreen = (
 
   }
   useEffect(() => {
-    // Check if passportNumber length is 9 and either dateOfBirth or dateOfExpiry length is 6
+    // Check if length of each field is correct and move to step MRZ_SCAN_COMPLETED if so
     if (passportNumber?.length === 9 && (dateOfBirth?.length === 6 && dateOfExpiry?.length === 6)) {
         setStep(Steps.MRZ_SCAN_COMPLETED);
     }
-    console.log("passportNumber");
-}, [passportNumber, dateOfBirth, dateOfExpiry]); // Dependencies array
+}, [passportNumber, dateOfBirth, dateOfExpiry]);
 
   return (
     <YStack f={1} ai="center" jc="space-between" bc="#fff">
@@ -190,8 +179,7 @@ const MainScreen = (
                     <ScanScreen
                       onStartCameraScan={onStartCameraScan}
                       nfcScan = {nfcScan}
-                      step={step}
-                      setStep = {setStep}/>
+                      step={step}/>
                 </Tabs.Content>
                 <Tabs.Content value="generate">
                 <ProveScreen

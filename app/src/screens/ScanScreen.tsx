@@ -1,8 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import { YStack, Text,Spinner , Circle, ZStack, XStack, Input, View, SizableStack, SizableText, Square } from 'tamagui'; // Ensure correct import paths based on your project setup
+import { YStack, Text,Spinner , Circle, ZStack, XStack, SizableText } from 'tamagui'; // Ensure correct import paths based on your project setup
 import { Steps } from '../utils/utils';
-import { Keyboard } from 'react-native';
-const ScanScreen = ({onStartCameraScan,nfcScan,step,setStep}) => {
+const ScanScreen = ({onStartCameraScan,nfcScan,step}) => {
 
    
 

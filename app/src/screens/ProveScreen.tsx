@@ -1,6 +1,6 @@
 import React from 'react';
 import { YStack,XStack, Text, Checkbox, Input, Button, Spinner ,SizableText} from 'tamagui';
-import { Check , Cross, Croissant} from '@tamagui/lucide-icons';
+import { Check } from '@tamagui/lucide-icons';
 import { getFirstName, formatDuration } from '../../utils/utils';
 import { attributeToPosition } from '../../../common/src/constants/constants';
 import { Steps } from '../utils/utils';
