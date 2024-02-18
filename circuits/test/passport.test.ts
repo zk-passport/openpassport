@@ -26,7 +26,7 @@ describe('Circuit tests', function () {
       mrzHash,
       passportData.dataGroupHashes as DataHash[],
     );
-    
+
     const concatenatedDataHashesHashDigest = hash(concatenatedDataHashes);
 
     assert(
@@ -53,10 +53,10 @@ describe('Circuit tests', function () {
       ),
       address: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8", // sample address
     }
-    
+
   })
-  
-  describe('Proof', function() {
+
+  describe('Proof', function () {
     it('should prove and verify with valid inputs', async function () {
       const { proof, publicSignals } = await groth16.fullProve(
         inputs,
@@ -99,7 +99,7 @@ describe('Circuit tests', function () {
         "build/proof_of_passport_final.zkey"
       )).to.be.rejected;
     })
-    
+
     it('should fail to prove with invalid signature', async function () {
       const invalidInputs = {
         ...inputs,
@@ -131,7 +131,7 @@ describe('Circuit tests', function () {
     })
   })
 
-  describe('Selective disclosure', function() {
+  describe('Selective disclosure', function () {
     const attributeCombinations = [
       ['issuing_state', 'name'],
       ['passport_number', 'nationality', 'date_of_birth'],
@@ -144,7 +144,7 @@ describe('Circuit tests', function () {
           acc[attribute] = combination.includes(attribute);
           return acc;
         }, {});
-  
+
         const bitmap = Array(88).fill('0');
 
         Object.entries(attributeToReveal).forEach(([attribute, reveal]) => {
@@ -153,51 +153,51 @@ describe('Circuit tests', function () {
             bitmap.fill('1', start, end + 1);
           }
         });
-  
+
         inputs = {
           ...inputs,
           reveal_bitmap: bitmap.map(String),
         }
-  
+
         const { proof, publicSignals } = await groth16.fullProve(
           inputs,
           "build/proof_of_passport_js/proof_of_passport.wasm",
           "build/proof_of_passport_final.zkey"
         )
-  
+
         console.log('proof done');
-  
+
         const vKey = JSON.parse(fs.readFileSync("build/verification_key.json"));
         const verified = await groth16.verify(
           vKey,
           publicSignals,
           proof
         )
-  
+
         assert(verified == true, 'Should verifiable')
-  
+
         console.log('proof verified');
-  
+
         const firstThreeElements = publicSignals.slice(0, 3);
         const bytesCount = [31, 31, 26]; // nb of bytes in each of the first three field elements
-  
+
         const bytesArray = firstThreeElements.flatMap((element: string, index: number) => {
           const bytes = bytesCount[index];
           const elementBigInt = BigInt(element);
           const byteMask = BigInt(255); // 0xFF
-        
+
           const bytesOfElement = [...Array(bytes)].map((_, byteIndex) => {
             return (elementBigInt >> (BigInt(byteIndex) * BigInt(8))) & byteMask;
           });
-        
+
           return bytesOfElement;
         });
-        
+
         const result = bytesArray.map((byte: bigint) => String.fromCharCode(Number(byte)));
-  
+
         console.log(result);
-  
-        for(let i = 0; i < result.length; i++) {
+
+        for (let i = 0; i < result.length; i++) {
           if (bitmap[i] == '1') {
             const char = String.fromCharCode(Number(inputs.mrz[i + 5]));
             assert(result[i] == char, 'Should reveal the right one');

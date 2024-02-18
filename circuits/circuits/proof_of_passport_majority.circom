@@ -3,6 +3,7 @@ pragma circom 2.1.5;
 include "circomlib/circuits/poseidon.circom";
 include "@zk-email/circuits/helpers/extract.circom";
 include "./passport_verifier.circom";
+include "./majority.circom";
 
 template ProofOfPassport(n, k) {
     signal input mrz[93]; // formatted mrz (5 + 88) chars
@@ -14,6 +15,8 @@ template ProofOfPassport(n, k) {
     signal input reveal_bitmap[88];
     signal input address;
 
+    signal input current_timestamp[4]; // current timestamp; 4 bytes
+
     // Verify passport
     component PV = PassportVerifier(n, k);
     PV.mrz <== mrz;
@@ -22,12 +25,22 @@ template ProofOfPassport(n, k) {
     PV.pubkey <== pubkey;
     PV.signature <== signature;
 
+    component isMajor = IsMajor(18,40);
+    isMajor.current_timestamp <== current_timestamp;
+    signal subMRZ[6];
+    for (var i = 0; i < 6; i++) {
+        subMRZ[i] <== mrz[62 + i];
+    }
+    isMajor.yymmdd <== subMRZ;
+
     // reveal reveal_bitmap bits of MRZ
-    signal reveal[88];
+    signal reveal[89];
     for (var i = 0; i < 88; i++) {
         reveal[i] <== mrz[5+i] * reveal_bitmap[i];
     }
-    signal output reveal_packed[3] <== PackBytes(88, 3, 31)(reveal);
+    reveal[88] <== 18 * isMajor.out;
+
+    signal output reveal_packed[3] <== PackBytes(89, 3, 31)(reveal);
 
     // if the age is revealead check that it i
 
@@ -51,7 +64,7 @@ template ProofOfPassport(n, k) {
     }
 }
 
-component main { public [ address ] } = ProofOfPassport(64, 32);
+component main { public [ address,  current_timestamp] } = ProofOfPassport(64, 32);
 
 // Us:
 // 11 + 1 + 3 + 1

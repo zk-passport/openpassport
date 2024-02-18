@@ -1,5 +1,5 @@
 import { DataHash } from './types';
-import {sha256} from 'js-sha256';
+import { sha256 } from 'js-sha256';
 
 export function dataHashesObjToArray(dataHashes: {
   [key: string]: number[];
@@ -52,19 +52,21 @@ export function formatAndConcatenateDataHashes(
   dataHashes: DataHash[],
 ) {
   // Let's replace the first array with the MRZ hash
+  // why shift to unshit right after ?
   dataHashes.shift();
   dataHashes.unshift([1, mrzHash]);
   // concatenating dataHashes :
 
   let concat: number[] = []
 
-  // Starting sequence. Should be the same for everybody, but not sure
+  // Starting sequence. Should be the same for everybody, but not sure 24 bytes
   concat.push(...[
     48, -126, 1, 37, 2, 1, 0, 48, 11, 6, 9, 96, -122, 72, 1, 101, 3, 4, 2, 1,
     48, -126, 1, 17,
   ])
 
-  for(const dataHash of dataHashes) {
+  for (const dataHash of dataHashes) {
+    // 6 element in dataHashes
     concat.push(...[48, 37, 2, 1, dataHash[0], 4, 32, ...dataHash[1]])
   }
 
@@ -195,7 +197,7 @@ function bytesToBigInt(bytes: number[]) {
 
 function splitInto(arr: number[], size: number) {
   const res = [];
-  for(let i = 0; i < arr.length; i += size) {
+  for (let i = 0; i < arr.length; i += size) {
     res.push(arr.slice(i, i + size));
   }
   return res;
