@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NativeModules } from 'react-native';
-import { YStack, XStack, Text, Checkbox, Input, Button, Spinner, Image } from 'tamagui';
+import { YStack, XStack, Text, Checkbox, Input, Button, Spinner, Image, useWindowDimensions } from 'tamagui';
 import { Check, LayoutGrid, Scan } from '@tamagui/lucide-icons';
 import { getFirstName, formatDuration } from '../../utils/utils';
 import { attributeToPosition } from '../../../common/src/constants/constants';
@@ -53,7 +53,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
   setEns
 }) => {
   const [zkeyLoaded, setZkeyLoaded] = useState(false);
-  
+
   const downloadZkey = async () => {
     // TODO: don't redownload if already in the file system at path, if downloaded from previous session
 
@@ -71,7 +71,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
       console.error(e.message);
     }
   };
-  
+
   const maskString = (input: string): string => {
     if (input.length <= 5) {
       return input.charAt(0) + '*'.repeat(input.length - 1);
@@ -131,9 +131,8 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
 
 
   // Keyboard management
-
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-
+  const { height, width } = useWindowDimensions();
   useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
       setKeyboardVisible(true);
@@ -152,21 +151,21 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
     <YStack px="$4" f={1}>
       {(step >= Steps.NFC_SCAN_COMPLETED && selectedApp != null) ?
         (step < Steps.PROOF_GENERATED ? (
-          <YStack flex={1} m="$2" gap="$2">
-            <XStack flex={1} />
-            <YStack alignSelf='center' mt="$1">
-              {hideData ? <Image
-                w="$13"
-                h="$15"
-                borderRadius="$10"
-                source={{
-                  uri: USER,
-                }}
-              /> :
+          <YStack flex={1} mx="$2" gap="$2">
+            <YStack alignSelf='center' my="$3">
+              {hideData ?
                 <Image
-                  w="$13"
-                  h="$15"
-                  borderRadius="$10"
+                  w={height > 800 ? 150 : 100}
+                  h={height > 800 ? 190 : 80}
+                  borderRadius={height > 800 ? "$11" : "$9"}
+                  source={{
+                    uri: USER,
+                  }}
+                /> :
+                <Image
+                  w={height > 800 ? 150 : 110}
+                  h={height > 800 ? 190 : 130}
+                  borderRadius={height > 800 ? "$11" : "$9"}
                   source={{
                     uri: passportData.photoBase64 ?? USER,
                   }}
@@ -174,14 +173,11 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
 
               }
             </YStack>
-            <XStack f={1} />
-
-            <Text mt="$8" fontWeight="bold">Hi {hideData ? maskString(getFirstName(passportData.mrz)) : getFirstName(passportData.mrz)},</Text>
-            <Text mt="$2">Enter your address or ens:</Text>
+            <Text fontSize="$5" fontWeight="bold">Hi {hideData ? maskString(getFirstName(passportData.mrz)) : getFirstName(passportData.mrz)} 👋</Text>
+            <Text >Enter your address or ens:</Text>
             <Input
               fontSize={13}
-              mt="$3"
-              placeholder="Your Address or ens name"
+              placeholder="anon.eth or 0x023…"
               value={inputValue}
               onChangeText={setInputValue}
               autoCorrect={false}
@@ -189,9 +185,9 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
               borderColor={address != ethers.ZeroAddress ? "#3185FC" : "unset"}
             />
 
-            {(!keyboardVisible || Platform.OS == "ios") && <YStack mt="$6" f={1}>
-              <Text h="$3">{selectedApp?.disclosurephrase}</Text>
-              <YStack mt="$1">
+            <YStack f={1} >
+              <Text h="$3" mt="$2">{selectedApp?.disclosurephrase}</Text>
+              <YStack>
                 {selectedApp && Object.keys(selectedApp.disclosure).map((key) => {
                   const key_ = key as string;
                   const indexes = attributeToPosition[key_];
@@ -200,7 +196,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
                   const mrzAttributeFormatted = mrzAttribute;
 
                   return (
-                    <XStack key={key} m="$2" gap="$4">
+                    <XStack key={key} mx="$2" my="$1.5" gap="$4">
                       <Checkbox
                         value={key}
                         checked={disclosure[key_]}
@@ -218,14 +214,11 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
                   );
                 })}
               </YStack>
-            </YStack>}
+            </YStack>
             <XStack f={1} />
-            <XStack f={1} />
-            <XStack f={1} />
-            {(!keyboardVisible || Platform.OS == "ios") && <Button disabled={address == ethers.ZeroAddress} borderRadius={100} onPress={() => {!zkeyLoaded ? downloadZkey() : handleProve(path)}} mt="$8" backgroundColor={address == ethers.ZeroAddress ? "#cecece" : "#3185FC"} alignSelf='center' >
-
+            <Button mb="$2" disabled={address == ethers.ZeroAddress} borderRadius={100} onPress={() => { !zkeyLoaded ? downloadZkey() : handleProve(path) }} backgroundColor={address == ethers.ZeroAddress ? "#cecece" : "#3185FC"} alignSelf='center' >
               {!zkeyLoaded && Platform.OS != "ios" ? (
-                  <Text color="white" fow="bold">Download zkey</Text>
+                <Text color="white" fow="bold">Download zkey</Text>
               ) : generatingProof ? (
                 <XStack ai="center">
                   <Spinner />
@@ -234,14 +227,14 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
               ) : (
                 <Text color="white" fow="bold">Generate ZK proof</Text>
               )}
+            </Button>
 
-            </Button>}
-            <Text fontSize={10} color={generatingProof ? "gray" : "white"} alignSelf='center'>This operation can take up to 2 mn</Text>
-            <Text fontSize={9} color={generatingProof ? "gray" : "white"} pb="$2" alignSelf='center'>The application may freeze during this time (hard work)</Text>
+            {(height > 1000) && <Text fontSize={10} color={generatingProof ? "gray" : "white"} alignSelf='center'>This operation can take up to 2 mn</Text>}
+            {(height > 1000) && <Text fontSize={9} color={generatingProof ? "gray" : "white"} pb="$2" alignSelf='center'>The application may freeze during this time (hard work)</Text>}
           </YStack>
 
         ) : (
-          <YStack flex={1} m="$2" justifyContent='center' alignItems='center' gap="$5">
+          <YStack flex={1} justifyContent='center' alignItems='center' gap="$5">
             <XStack flex={1} />
             <ProofGrid proof={proof} />
 
