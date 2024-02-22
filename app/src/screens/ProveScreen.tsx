@@ -148,24 +148,24 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
   }, []);
 
   return (
-    <YStack px="$4" f={1}>
+    <YStack px="$4" f={1} >
       {(step >= Steps.NFC_SCAN_COMPLETED && selectedApp != null) ?
         (step < Steps.PROOF_GENERATED ? (
           <YStack flex={1} mx="$2" gap="$2">
             <YStack alignSelf='center' my="$3">
               {hideData ?
                 <Image
-                  w={height > 800 ? 150 : 100}
-                  h={height > 800 ? 190 : 80}
+                  w={height > 750 ? 150 : 100}
+                  h={height > 750 ? 190 : 80}
                   borderRadius={height > 800 ? "$11" : "$9"}
                   source={{
                     uri: USER,
                   }}
                 /> :
                 <Image
-                  w={height > 800 ? 150 : 110}
-                  h={height > 800 ? 190 : 130}
-                  borderRadius={height > 800 ? "$11" : "$9"}
+                  w={height > 750 ? 150 : 110}
+                  h={height > 750 ? 190 : 130}
+                  borderRadius={height > 750 ? "$11" : "$9"}
                   source={{
                     uri: passportData.photoBase64 ?? USER,
                   }}
@@ -187,7 +187,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
 
             <YStack f={1} >
               <Text h="$3" mt="$2">{selectedApp?.disclosurephrase}</Text>
-              <YStack>
+              <YStack mt="$1">
                 {selectedApp && Object.keys(selectedApp.disclosure).map((key) => {
                   const key_ = key as string;
                   const indexes = attributeToPosition[key_];
@@ -196,18 +196,20 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
                   const mrzAttributeFormatted = mrzAttribute;
 
                   return (
-                    <XStack key={key} mx="$2" my="$1.5" gap="$4">
-                      <Checkbox
-                        value={key}
-                        checked={disclosure[key_]}
-                        onCheckedChange={() => handleDisclosureChange(key_)}
-                        aria-label={keyFormatted}
-                        size="$5"
-                      >
-                        <Checkbox.Indicator >
-                          <Check />
-                        </Checkbox.Indicator>
-                      </Checkbox>
+                    <XStack key={key} mx="$2" gap="$4" alignItems='center'>
+                      <XStack p="$2" onPress={() => handleDisclosureChange(key_)}>
+                        <Checkbox
+                          value={key}
+                          checked={disclosure[key_]}
+                          onCheckedChange={() => handleDisclosureChange(key_)}
+                          aria-label={keyFormatted}
+                          size="$5"
+                        >
+                          <Checkbox.Indicator >
+                            <Check />
+                          </Checkbox.Indicator>
+                        </Checkbox>
+                      </XStack>
                       <Text fontWeight="bold">{keyFormatted}: </Text>
                       <Text>{hideData ? maskString(mrzAttributeFormatted) : mrzAttributeFormatted}</Text>
                     </XStack>
@@ -228,9 +230,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
                 <Text color="white" fow="bold">Generate ZK proof</Text>
               )}
             </Button>
-
-            {(height > 1000) && <Text fontSize={10} color={generatingProof ? "gray" : "white"} alignSelf='center'>This operation can take up to 2 mn</Text>}
-            {(height > 1000) && <Text fontSize={9} color={generatingProof ? "gray" : "white"} pb="$2" alignSelf='center'>The application may freeze during this time (hard work)</Text>}
+            {(height > 750) && <Text fontSize={10} color={generatingProof ? "gray" : "white"} pb="$2" alignSelf='center'>This operation can take up to 2 mn, phone may freeze during this time</Text>}
           </YStack>
 
         ) : (
@@ -240,7 +240,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
 
             <YStack>
               <Text fontWeight="bold" fontSize="$6" mt="$6">Congrats 🎉</Text>
-              <Text fontWeight="bold" fontSize="$5">You just generated this Zero Knowledge proof !</Text>
+              <Text fontWeight="bold" fontSize="$5" mt="$1.5">You just generated this Zero Knowledge proof !</Text>
               <Text color="gray" fontSize="$5" mt="$1" fow="bold" textAlign='left'>You can now share this proof with the selected app.</Text>
 
               <Text color="gray" mt="$3">Proof generation duration: {formatDuration(proofTime)}</Text>

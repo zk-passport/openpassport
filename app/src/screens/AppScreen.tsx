@@ -41,7 +41,7 @@ const AppScreen: React.FC<AppScreenProps> = ({ selectedApp, setSelectedApp, step
     },
     {
       app: soulbound,
-      title: 'Mint SBT',
+      title: 'Mint SBT 🔥',
       description: 'And prove you\'re a human',
       colorOfTheText: 'black',
     },
