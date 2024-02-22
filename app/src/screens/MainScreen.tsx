@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { YStack, XStack, Text, Button, Tabs, styled, Dialog, Adapt, Sheet, Label, Fieldset, Input, Switch, ThemeableStack, Separator, H3, H2, Image } from 'tamagui'
+import { YStack, XStack, Text, Button, Tabs, styled, Dialog, Adapt, Sheet, Label, Fieldset, Input, Switch, ThemeableStack, Separator, H3, H2, Image, useWindowDimensions, H4 } from 'tamagui'
 import { Scan, UserCheck, HelpCircle, IterationCw, LayoutGrid, VenetianMask, Cog, CheckCircle2 } from '@tamagui/lucide-icons';
 import ScanScreen from './ScanScreen';
 import ProveScreen from './ProveScreen';
@@ -139,6 +139,11 @@ const MainScreen: React.FC<MainScreenProps> = ({
     };
   }, []);
 
+  const { height, width } = useWindowDimensions();
+
+
+
+
 
   return (
     <YStack f={1} bc="white" mt={Platform.OS === 'ios' ? "$8" : "$0"} mb={Platform.OS === 'ios' ? "$3" : "$0"}>
@@ -189,79 +194,79 @@ const MainScreen: React.FC<MainScreenProps> = ({
                     },
                   },
                 ]}
-                enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
+                enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.95 }}
                 exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
 
               >
-                <YStack f={1} gap="$2">
+                <YStack f={1} gap="$1">
                   <XStack gap="$2" >
                     <Dialog.Title>Settings</Dialog.Title>
                     <Cog mt="$1" alignSelf='center' size="$2" />
-
                   </XStack>
-
-
-
-                  <Fieldset mt="$2" horizontal>
-                    <Label width={225} justifyContent="flex-end" htmlFor="restart" fow="bold">
-                      Private mode
-                    </Label>
-                    <Switch size="$4" checked={hideData} onCheckedChange={handleHideData}>
-                      <Switch.Thumb animation="bouncy" backgroundColor="white" />
-                    </Switch>
-                  </Fieldset>
-
-                  <Fieldset mt="$1" horizontal>
+                  <Fieldset horizontal>
                     <Label width={225} justifyContent="flex-end" htmlFor="name" fow="bold">
                       Broken camera
                     </Label>
-                    <Switch size="$4" checked={brokenCamera} onCheckedChange={setBrokenCamera}>
+                    <Switch size="$3.5" checked={brokenCamera} onCheckedChange={setBrokenCamera}>
                       <Switch.Thumb animation="bouncy" backgroundColor="white" />
                     </Switch>
                   </Fieldset>
                   {
                     brokenCamera &&
-                    <YStack pl="$3" gap="$3" mt="$4">
+                    <YStack pl="$3" gap="$1">
                       <Fieldset gap="$4" horizontal>
                         <Label width={160} justifyContent="flex-end" fontSize={13}>
                           Passport Number
                         </Label>
-                        <Input borderColor={passportNumber?.length === 9 ? "green" : "unset"} flex={1} id="passport_number" onChangeText={(text) => setPassportNumber(text.toUpperCase())} value={passportNumber} keyboardType="default" />
+                        <Input h="$3.5" borderColor={passportNumber?.length === 9 ? "green" : "unset"} flex={1} id="passport_number" onChangeText={(text) => setPassportNumber(text.toUpperCase())} value={passportNumber} keyboardType="default" />
                       </Fieldset>
                       <Fieldset gap="$4" horizontal>
                         <Label width={160} justifyContent="flex-end" fontSize={13}>
                           Date of birth (yymmdd)
                         </Label>
-                        <Input borderColor={dateOfBirth?.length === 6 ? "green" : "unset"} flex={1} id="date_of_birth" onChangeText={setDateOfBirth} value={dateOfBirth} keyboardType="numeric" />
+                        <Input h="$3.5" borderColor={dateOfBirth?.length === 6 ? "green" : "unset"} flex={1} id="date_of_birth" onChangeText={setDateOfBirth} value={dateOfBirth} keyboardType="numeric" />
                       </Fieldset>
                       <Fieldset gap="$4" horizontal>
                         <Label width={160} justifyContent="flex-end" fontSize={13}>
                           Date of expiry (yymmdd)
                         </Label>
-                        <Input borderColor={dateOfExpiry?.length === 6 ? "green" : "unset"} flex={1} id="date_of_expiry" onChangeText={setDateOfExpiry} value={dateOfExpiry} keyboardType="numeric" />
+                        <Input h="$3.5" borderColor={dateOfExpiry?.length === 6 ? "green" : "unset"} flex={1} id="date_of_expiry" onChangeText={setDateOfExpiry} value={dateOfExpiry} keyboardType="numeric" />
                       </Fieldset>
                     </YStack>
                   }
-                  <Fieldset gap="$4" mt="$3" horizontal>
+
+                  <Fieldset horizontal>
+                    <Label width={225} justifyContent="flex-end" htmlFor="restart" fow="bold">
+                      Private mode
+                    </Label>
+                    <Switch size="$3.5" checked={hideData} onCheckedChange={handleHideData}>
+                      <Switch.Thumb animation="bouncy" backgroundColor="white" />
+                    </Switch>
+                  </Fieldset>
+
+
+
+                  <Fieldset gap="$4" mt="$1" horizontal>
                     <Label width={200} justifyContent="flex-end" htmlFor="restart" fow="bold">
                       Restart to step 1
                     </Label>
-                    <Button size="$4" m="$2" onPress={handleRestart}>
+                    <Button size="$3.5" ml="$2" onPress={handleRestart}>
                       <IterationCw />
                     </Button>
                   </Fieldset>
 
-                  <Fieldset gap="$4" mt="$2" horizontal>
+                  <Fieldset gap="$4" mt="$1" horizontal>
                     <Label width={200} justifyContent="flex-end" htmlFor="skip" fow="bold">
                       Use mock passport data
                     </Label>
-                    <Button size="$4" m="$2" onPress={handleSkip}>
+                    <Button size="$3.5" ml="$2" onPress={handleSkip}>
                       <VenetianMask />
                     </Button>
                   </Fieldset>
-                  <YStack flex={1}>
-                    <YStack flex={1} />
-                    <Dialog.Close mb="$6" displayWhenAdapted alignSelf='center' asChild >
+                  <YStack flex={1} />
+
+                  <YStack mb="$0">
+                    <Dialog.Close displayWhenAdapted alignSelf='center' asChild >
                       <Button>
                         <Text w="80%" textAlign='center' fow="bold">Close</Text>
                       </Button>
@@ -327,46 +332,39 @@ const MainScreen: React.FC<MainScreenProps> = ({
                 exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
                 gap="$4"
               >
-                <YStack flex={1}>
+                <YStack flex={1} jc="space-evenly">
                   <XStack gap="$2">
                     <Dialog.Title>Help</Dialog.Title>
                     <HelpCircle mt="$1" alignSelf='center' size="$2" />
                   </XStack>
-                  <H3 mt="$3">How to scan your passport ?</H3>
+
                   <YStack>
+                    <H4>How to scan your passport ?</H4>
                     <Text>1. Find the location of the NFC chip of your passport.</Text>
                     <Text>If you are struggling <Text color="#3185FC">this post</Text> will help you to find it.</Text>
                     <Text mt="$2">2. Find where is the NFC lector of your phone.</Text>
                     <Text mt="$2">3. Keep both part pressed together when this app ask for it.</Text>
                   </YStack>
-                  <H3 mt="$3">Security and User data Privacy</H3>
-                  <YStack gap="$2">
+                  <YStack gap="$1">
+                    <H4 mt="$2">Security and Privacy</H4>
+
                     <Text>This app gerates ZK proofs to ...</Text>
                   </YStack>
-                  <H3 mt="$3">What are ZK proofs ?</H3>
                   <YStack gap="$2">
+                    <H4 mt="$1">What are ZK proofs ?</H4>
+
                     <Text>Zero Knowledge proofs are .....</Text>
                   </YStack>
 
-                  <H3 mt="$3">Contacts</H3>
                   <YStack gap="$2">
+                    <H4 mt="$1">Contacts</H4>
                     <Text>telegram</Text>
                   </YStack>
-
-                  <H3 mt="$3">Credits</H3>
-                  <YStack >
-                    <Text>Ethereum Foundation</Text>
-                    <Text>turboblitz.eth</Text>
-                    <Text>???.eth</Text>
-                  </YStack>
-
-                  <YStack flex={1}></YStack>
-                  <Dialog.Close displayWhenAdapted alignSelf='center' asChild >
+                  <Dialog.Close mt="$2" displayWhenAdapted alignSelf='center' asChild >
                     <Button>
                       <Text w="80%" textAlign='center' fow="bold">Close</Text>
                     </Button>
                   </Dialog.Close>
-                  <YStack flex={1}></YStack>
 
 
                 </YStack>
@@ -445,7 +443,7 @@ const MainScreen: React.FC<MainScreenProps> = ({
         </Tabs.Content>
         <Separator />
         {(!keyboardVisible || Platform.OS == "ios") &&
-          <Tabs.List separator={<Separator vertical />} pt="$4" pb="$3">
+          <Tabs.List separator={<Separator vertical />} pt="$3" pb="$2">
             <Tabs.Tab value="scan" unstyled w="33%">
               <YStack ai="center">
                 <Scan color={selectedTab === "scan" ? '#3185FC' : 'black'} />

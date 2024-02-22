@@ -21,7 +21,7 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ onStartCameraScan, handleNFCSca
         w="$1"
         h="$1"
         alignSelf='center'>
-        <Text fontSize={12} alignSelf='center' fow="bold">1</Text>
+        <Text fontSize={12} y={-1} alignSelf='center' fow="bold">1</Text>
       </XStack>
       <Text textAlign='center' mt="$2" fow={step === Steps.MRZ_SCAN ? "bold" : "normal"} >Scan the machine readable zone on the main page of your passport</Text>
 
@@ -35,7 +35,7 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ onStartCameraScan, handleNFCSca
         w="$1"
         h="$1"
         alignSelf='center'>
-        <Text fontSize={12} alignSelf='center' fow="bold">2</Text>
+        <Text fontSize={12} y={-1} alignSelf='center' fow="bold">2</Text>
       </XStack>
       <Text textAlign='center' mt="$2" fow={(step === Steps.MRZ_SCAN_COMPLETED) || (step === Steps.NFC_SCANNING) ? "bold" : "normal"}>Hold your passport against your device to read the biometric chip</Text>
 
