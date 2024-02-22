@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { YStack, XStack, Text, Button, Tabs, styled, Dialog, Adapt, Sheet, Label, Fieldset, Input, Switch, ThemeableStack, Separator, H3, H2, Image, useWindowDimensions, H4 } from 'tamagui'
-import { Scan, UserCheck, HelpCircle, IterationCw, LayoutGrid, VenetianMask, Cog, CheckCircle2 } from '@tamagui/lucide-icons';
+import { YStack, XStack, Text, Button, Tabs, Sheet, Label, Fieldset, Input, Switch, Separator, H3, H2, Image, useWindowDimensions, H4 } from 'tamagui'
+import { Scan, UserCheck, HelpCircle, IterationCw, LayoutGrid, VenetianMask, Cog, CheckCircle2, ExternalLink } from '@tamagui/lucide-icons';
 import ScanScreen from './ScanScreen';
 import ProveScreen from './ProveScreen';
 import { Steps } from '../utils/utils';
@@ -58,19 +58,15 @@ const MainScreen: React.FC<MainScreenProps> = ({
   dateOfExpiry,
   setDateOfExpiry
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [NFCScanIsOpen, setNFCScanIsOpen] = useState(false);
+  const [SettingsIsOpen, setSettingsIsOpen] = useState(false);
+  const [HelpIsOpen, setHelpIsOpen] = useState(false);
   const [ens, setEns] = useState<string>('');
   const [selectedTab, setSelectedTab] = useState("scan");
   const [selectedApp, setSelectedApp] = useState<App | null>(null);
   const [brokenCamera, setBrokenCamera] = useState(false);
   const [hideData, setHideData] = useState(false);
-  const [open, setOpen] = useState(true)
-  const AppCard = styled(ThemeableStack, {
-    hoverTheme: true,
-    pressTheme: true,
-    focusTheme: true,
-    elevate: true
-  })
+
   const handleRestart = () => {
     setStep(Steps.MRZ_SCAN);
     setSelectedApp(null)
@@ -96,7 +92,7 @@ const MainScreen: React.FC<MainScreenProps> = ({
     }
     else {
       console.log('android :)');
-      setIsOpen(true);
+      setNFCScanIsOpen(true);
       nfcScan();
     }
   }
@@ -108,10 +104,15 @@ const MainScreen: React.FC<MainScreenProps> = ({
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
-    if (step >= Steps.NFC_SCAN_COMPLETED) {
+    if (step == Steps.MRZ_SCAN_COMPLETED) {
+      timeoutId = setTimeout(() => {
+        setNFCScanIsOpen(false);
+      }, 0);
+    }
+    else if (step >= Steps.NFC_SCAN_COMPLETED) {
       // Set the timeout and store its ID
       timeoutId = setTimeout(() => {
-        setIsOpen(false);
+        setNFCScanIsOpen(false);
       }, 700);
     }
     return () => {
@@ -149,233 +150,22 @@ const MainScreen: React.FC<MainScreenProps> = ({
     <YStack f={1} bc="white" mt={Platform.OS === 'ios' ? "$8" : "$0"} mb={Platform.OS === 'ios' ? "$3" : "$0"}>
 
       <YStack >
-        <XStack jc="space-between" ai="center" p="$2" px="$3">
-          <Dialog
-            modal
-          >
-            <Dialog.Trigger >
-              <YStack p="$2" pr="$7">
-                <Cog />
-              </YStack>
-            </Dialog.Trigger>
+        <XStack jc="space-between" ai="center" px="$3">
 
-            <Adapt when="sm" platform="touch">
-              <Sheet animation="medium" zIndex={200000} modal dismissOnSnapToBottom>
-                <Sheet.Frame padding="$4" gap="$4">
-                  <Adapt.Contents />
-                </Sheet.Frame>
-                <Sheet.Overlay
-                  animation="lazy"
-                  enterStyle={{ opacity: 0 }}
-                  exitStyle={{ opacity: 0 }}
-                />
-              </Sheet>
-            </Adapt>
-
-            <Dialog.Portal>
-              <Dialog.Overlay
-                key="overlay"
-                animation="quick"
-                opacity={0.5}
-                enterStyle={{ opacity: 0 }}
-                exitStyle={{ opacity: 0 }}
-              />
-
-              <Dialog.Content
-                bordered
-                elevate
-                key="content"
-                animateOnly={['transform', 'opacity']}
-                animation={[
-                  'quick',
-                  {
-                    opacity: {
-                      overshootClamping: true,
-                    },
-                  },
-                ]}
-                enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.95 }}
-                exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
-
-              >
-                <YStack f={1} gap="$1">
-                  <XStack gap="$2" >
-                    <Dialog.Title>Settings</Dialog.Title>
-                    <Cog mt="$1" alignSelf='center' size="$2" />
-                  </XStack>
-                  <Fieldset horizontal>
-                    <Label width={225} justifyContent="flex-end" htmlFor="name" fow="bold">
-                      Broken camera
-                    </Label>
-                    <Switch size="$3.5" checked={brokenCamera} onCheckedChange={setBrokenCamera}>
-                      <Switch.Thumb animation="bouncy" backgroundColor="white" />
-                    </Switch>
-                  </Fieldset>
-                  {
-                    brokenCamera &&
-                    <YStack pl="$3" gap="$1">
-                      <Fieldset gap="$4" horizontal>
-                        <Label width={160} justifyContent="flex-end" fontSize={13}>
-                          Passport Number
-                        </Label>
-                        <Input h="$3.5" borderColor={passportNumber?.length === 9 ? "green" : "unset"} flex={1} id="passport_number" onChangeText={(text) => setPassportNumber(text.toUpperCase())} value={passportNumber} keyboardType="default" />
-                      </Fieldset>
-                      <Fieldset gap="$4" horizontal>
-                        <Label width={160} justifyContent="flex-end" fontSize={13}>
-                          Date of birth (yymmdd)
-                        </Label>
-                        <Input h="$3.5" borderColor={dateOfBirth?.length === 6 ? "green" : "unset"} flex={1} id="date_of_birth" onChangeText={setDateOfBirth} value={dateOfBirth} keyboardType="numeric" />
-                      </Fieldset>
-                      <Fieldset gap="$4" horizontal>
-                        <Label width={160} justifyContent="flex-end" fontSize={13}>
-                          Date of expiry (yymmdd)
-                        </Label>
-                        <Input h="$3.5" borderColor={dateOfExpiry?.length === 6 ? "green" : "unset"} flex={1} id="date_of_expiry" onChangeText={setDateOfExpiry} value={dateOfExpiry} keyboardType="numeric" />
-                      </Fieldset>
-                    </YStack>
-                  }
-
-                  <Fieldset horizontal>
-                    <Label width={225} justifyContent="flex-end" htmlFor="restart" fow="bold">
-                      Private mode
-                    </Label>
-                    <Switch size="$3.5" checked={hideData} onCheckedChange={handleHideData}>
-                      <Switch.Thumb animation="bouncy" backgroundColor="white" />
-                    </Switch>
-                  </Fieldset>
+          <Button p="$2" py="$3" pr="$7" unstyled onPress={() => setSettingsIsOpen(true)}><Cog /></Button>
 
 
 
-                  <Fieldset gap="$4" mt="$1" horizontal>
-                    <Label width={200} justifyContent="flex-end" htmlFor="restart" fow="bold">
-                      Restart to step 1
-                    </Label>
-                    <Button size="$3.5" ml="$2" onPress={handleRestart}>
-                      <IterationCw />
-                    </Button>
-                  </Fieldset>
-
-                  <Fieldset gap="$4" mt="$1" horizontal>
-                    <Label width={200} justifyContent="flex-end" htmlFor="skip" fow="bold">
-                      Use mock passport data
-                    </Label>
-                    <Button size="$3.5" ml="$2" onPress={handleSkip}>
-                      <VenetianMask />
-                    </Button>
-                  </Fieldset>
-                  <YStack flex={1} />
-
-                  <YStack mb="$0">
-                    <Dialog.Close displayWhenAdapted alignSelf='center' asChild >
-                      <Button>
-                        <Text w="80%" textAlign='center' fow="bold">Close</Text>
-                      </Button>
-                    </Dialog.Close>
-                  </YStack>
-                </YStack>
-
-              </Dialog.Content>
-            </Dialog.Portal>
-          </Dialog>
-
-
-
-          <Text fow="bold">
+          <Text fontSize="$6" fow="bold">
             {selectedTab === "scan" ? "Scan" : (selectedTab === "app" ? "Apps" : "Prove")}
           </Text>
 
-          <Dialog
-            modal
-          >
-            <Dialog.Trigger>
-              <YStack p="$2" pl="$8">
-                <HelpCircle />
-              </YStack>
-            </Dialog.Trigger>
-
-            <Adapt when="sm" platform="touch">
-              <Sheet animation="medium" zIndex={200000} modal dismissOnSnapToBottom>
-                <Sheet.Frame padding="$4" gap="$4">
-                  <Adapt.Contents />
-                </Sheet.Frame>
-                <Sheet.Overlay
-                  animation="lazy"
-                  enterStyle={{ opacity: 0 }}
-                  exitStyle={{ opacity: 0 }}
-                />
-              </Sheet>
-            </Adapt>
-
-            <Dialog.Portal>
-              <Dialog.Overlay
-                key="overlay"
-                animation="quick"
-                opacity={0.5}
-                enterStyle={{ opacity: 0 }}
-                exitStyle={{ opacity: 0 }}
-              />
-
-              <Dialog.Content
-                bordered
-                elevate
-                key="content"
-                animateOnly={['transform', 'opacity']}
-                animation={[
-                  'quick',
-                  {
-                    opacity: {
-                      overshootClamping: true,
-                    },
-                  },
-                ]}
-                enterStyle={{ x: 0, y: -20, opacity: 0, scale: 0.9 }}
-                exitStyle={{ x: 0, y: 10, opacity: 0, scale: 0.95 }}
-                gap="$4"
-              >
-                <YStack flex={1} jc="space-evenly">
-                  <XStack gap="$2">
-                    <Dialog.Title>Help</Dialog.Title>
-                    <HelpCircle mt="$1" alignSelf='center' size="$2" />
-                  </XStack>
-
-                  <YStack>
-                    <H4>How to scan your passport ?</H4>
-                    <Text>1. Find the location of the NFC chip of your passport.</Text>
-                    <Text>If you are struggling <Text color="#3185FC">this post</Text> will help you to find it.</Text>
-                    <Text mt="$2">2. Find where is the NFC lector of your phone.</Text>
-                    <Text mt="$2">3. Keep both part pressed together when this app ask for it.</Text>
-                  </YStack>
-                  <YStack gap="$1">
-                    <H4 mt="$2">Security and Privacy</H4>
-
-                    <Text>This app gerates ZK proofs to ...</Text>
-                  </YStack>
-                  <YStack gap="$2">
-                    <H4 mt="$1">What are ZK proofs ?</H4>
-
-                    <Text>Zero Knowledge proofs are .....</Text>
-                  </YStack>
-
-                  <YStack gap="$2">
-                    <H4 mt="$1">Contacts</H4>
-                    <Text>telegram</Text>
-                  </YStack>
-                  <Dialog.Close mt="$2" displayWhenAdapted alignSelf='center' asChild >
-                    <Button>
-                      <Text w="80%" textAlign='center' fow="bold">Close</Text>
-                    </Button>
-                  </Dialog.Close>
+          <Button p="$2" py="$3" pl="$7" unstyled onPress={() => setHelpIsOpen(true)}><HelpCircle /></Button>
 
 
-                </YStack>
-
-              </Dialog.Content>
-            </Dialog.Portal>
-          </Dialog>
         </XStack>
-        <Sheet open={isOpen} onOpenChange={setIsOpen} modal dismissOnOverlayPress={false} disableDrag animation="medium" snapPoints={[40]}>
+        <Sheet open={NFCScanIsOpen} onOpenChange={setNFCScanIsOpen} modal dismissOnOverlayPress={false} disableDrag animation="medium" snapPoints={[35]}>
           <Sheet.Overlay />
-          <Sheet.Handle />
           <Sheet.Frame>
             <YStack gap="$5" f={1} pt="$3">
               <H2 textAlign='center' color="gray">Ready to scan</H2>
@@ -397,12 +187,133 @@ const MainScreen: React.FC<MainScreenProps> = ({
                 />
               }
               <Text textAlign='center'>Hold your device near the NFC tag.</Text>
-              <Button my="$2" w="$20" alignSelf='center' onPress={() => setIsOpen(false)}>
-                <Text textAlign='center' fow="bold"> Cancel</Text>
-              </Button>
             </YStack>
           </Sheet.Frame>
         </Sheet>
+
+        <Sheet open={SettingsIsOpen} onOpenChange={setSettingsIsOpen} modal animation="medium" snapPoints={[88]}>
+          <Sheet.Overlay />
+          <Sheet.Frame>
+            <YStack p="$3" pb="$5" f={1} gap={height > 750 ? "$3" : "$1"} mb="$1.5">
+              <XStack gap="$2" >
+                <H2>Settings</H2>
+                <Cog mt="$1" alignSelf='center' size="$2" />
+              </XStack>
+              <Fieldset horizontal>
+                <Label width={225} justifyContent="flex-end" htmlFor="name" fow="bold">
+                  Broken camera
+                </Label>
+                <Switch size="$3.5" checked={brokenCamera} onCheckedChange={setBrokenCamera}>
+                  <Switch.Thumb animation="bouncy" backgroundColor="white" />
+                </Switch>
+              </Fieldset>
+              {
+                brokenCamera &&
+                <YStack pl="$3" gap="$1">
+                  <Fieldset gap="$4" horizontal>
+                    <Label width={160} justifyContent="flex-end" fontSize={13}>
+                      Passport Number
+                    </Label>
+                    <Input h="$3.5" borderColor={passportNumber?.length === 9 ? "green" : "unset"} flex={1} id="passport_number" onChangeText={(text) => setPassportNumber(text.toUpperCase())} value={passportNumber} keyboardType="default" />
+                  </Fieldset>
+                  <Fieldset gap="$4" horizontal>
+                    <Label width={160} justifyContent="flex-end" fontSize={13}>
+                      Date of birth (yymmdd)
+                    </Label>
+                    <Input h="$3.5" borderColor={dateOfBirth?.length === 6 ? "green" : "unset"} flex={1} id="date_of_birth" onChangeText={setDateOfBirth} value={dateOfBirth} keyboardType={Platform.OS == "ios" ? "default" : "number-pad"} />
+                  </Fieldset>
+                  <Fieldset gap="$4" horizontal>
+                    <Label width={160} justifyContent="flex-end" fontSize={13}>
+                      Date of expiry (yymmdd)
+                    </Label>
+                    <Input h="$3.5" borderColor={dateOfExpiry?.length === 6 ? "green" : "unset"} flex={1} id="date_of_expiry" onChangeText={setDateOfExpiry} value={dateOfExpiry} keyboardType={Platform.OS == "ios" ? "default" : "number-pad"} />
+                  </Fieldset>
+                </YStack>
+              }
+
+              <Fieldset horizontal>
+                <Label width={225} justifyContent="flex-end" htmlFor="restart" fow="bold">
+                  Private mode
+                </Label>
+                <Switch size="$3.5" checked={hideData} onCheckedChange={handleHideData}>
+                  <Switch.Thumb animation="bouncy" backgroundColor="white" />
+                </Switch>
+              </Fieldset>
+
+
+
+              <Fieldset gap="$4" mt="$1" horizontal>
+                <Label width={200} justifyContent="flex-end" htmlFor="restart" fow="bold">
+                  Restart to step 1
+                </Label>
+                <Button size="$3.5" ml="$2" onPress={handleRestart}>
+                  <IterationCw />
+                </Button>
+              </Fieldset>
+
+              <Fieldset gap="$4" mt="$1" horizontal>
+                <Label width={200} justifyContent="flex-end" htmlFor="skip" fow="bold">
+                  Use mock passport data
+                </Label>
+                <Button size="$3.5" ml="$2" onPress={handleSkip}>
+                  <VenetianMask />
+                </Button>
+              </Fieldset>
+              <YStack flex={1} />
+
+              <YStack mb="$0">
+                <Button onPress={() => setSettingsIsOpen(false)} w="80%" alignSelf='center'>
+                  <Text textAlign='center' fow="bold">Close</Text>
+                </Button>
+              </YStack>
+            </YStack>
+          </Sheet.Frame>
+        </Sheet>
+
+        <Sheet open={HelpIsOpen} onOpenChange={setHelpIsOpen} modal animation="medium" snapPoints={[88]}>
+          <Sheet.Overlay />
+          <Sheet.Frame>
+
+            <YStack px="$3" pb="$5" flex={1} >
+              <XStack mt="$3" gap="$2">
+                <H2>Help</H2>
+                <HelpCircle mt="$1" alignSelf='center' size="$2" />
+              </XStack>
+              <YStack flex={1} jc="space-evenly">
+
+                <YStack >
+                  <H4>How to scan your passport ?</H4>
+                  <Text>1. Find the location of the NFC chip of your passport.</Text>
+                  <Text>If you are struggling <Text color="#3185FC">this post <ExternalLink color="#3185FC" size={12} /></Text> will help you to find it.</Text>
+                  <Text mt="$2">2. Find where is the NFC lector of your phone. <ExternalLink color="#3185FC" size={12} /></Text>
+                  <Text mt="$2">3. Keep both part pressed together when this app ask for it.</Text>
+                </YStack>
+                <YStack gap="$1">
+                  <H4 mt="$2">Security and Privacy</H4>
+
+                  <Text>This app gerates ZK proofs to ...</Text>
+                </YStack>
+                <YStack gap="$2">
+                  <H4 mt="$1">What are ZK proofs ?</H4>
+
+                  <Text>Zero Knowledge proofs are .....</Text>
+                </YStack>
+
+                <YStack gap="$2">
+                  <H4 mt="$1">Contacts</H4>
+                  <Text>telegram</Text>
+                </YStack>
+              </YStack>
+              <Button alignSelf='center' s w="80%" onPress={() => setHelpIsOpen(false)}>
+                <Text w="80%" textAlign='center' fow="bold">Close</Text>
+              </Button>
+
+            </YStack>
+          </Sheet.Frame>
+        </Sheet>
+
+
+
         <Separator />
       </YStack>
       <Tabs f={1} orientation="horizontal" flexDirection="column" defaultValue="scan" onValueChange={setSelectedTab}>
@@ -443,25 +354,25 @@ const MainScreen: React.FC<MainScreenProps> = ({
         </Tabs.Content>
         <Separator />
         {(!keyboardVisible || Platform.OS == "ios") &&
-          <Tabs.List separator={<Separator vertical />} pt="$3" pb="$2">
+          <Tabs.List pt="$2" pb="$2">
             <Tabs.Tab value="scan" unstyled w="33%">
               <YStack ai="center">
                 <Scan color={selectedTab === "scan" ? '#3185FC' : 'black'} />
-                <Text color={selectedTab === "scan" ? '#3185FC' : 'black'}>Scan</Text>
+                <Text fontSize="$2" color={selectedTab === "scan" ? '#3185FC' : 'black'}>Scan</Text>
               </YStack>
             </Tabs.Tab>
             {step >= Steps.NFC_SCAN_COMPLETED ?
               <Tabs.Tab value="app" unstyled w="33%">
                 <YStack ai="center">
                   <LayoutGrid color={selectedTab === "app" ? '#3185FC' : 'black'} />
-                  <Text color={selectedTab === "app" ? '#3185FC' : 'black'}>Apps</Text>
+                  <Text fontSize="$2" color={selectedTab === "app" ? '#3185FC' : 'black'}>Apps</Text>
                 </YStack>
               </Tabs.Tab>
               :
               <Tabs.Tab value="scan" unstyled w="33%">
                 <YStack ai="center">
                   <LayoutGrid color="#bcbcbc" />
-                  <Text color="#bcbcbc">Apps</Text>
+                  <Text fontSize="$2" color="#bcbcbc">Apps</Text>
                 </YStack>
               </Tabs.Tab>
 
@@ -471,14 +382,14 @@ const MainScreen: React.FC<MainScreenProps> = ({
                 <Tabs.Tab value="generate" unstyled w="33%">
                   <YStack ai="center">
                     <UserCheck color={selectedTab === "generate" ? '#3185FC' : 'black'} />
-                    <Text color={selectedTab === "generate" ? '#3185FC' : 'black'}>Prove</Text>
+                    <Text fontSize="$2" color={selectedTab === "generate" ? '#3185FC' : 'black'}>Prove</Text>
                   </YStack>
                 </Tabs.Tab>
                 :
                 <Tabs.Tab value={step >= Steps.NFC_SCAN_COMPLETED ? "app" : "scan"} unstyled w="33%">
                   <YStack ai="center">
                     <UserCheck color="#bcbcbc" />
-                    <Text color="#bcbcbc">Prove</Text>
+                    <Text fontSize="$2" color="#bcbcbc">Prove</Text>
                   </YStack>
                 </Tabs.Tab>
             }
