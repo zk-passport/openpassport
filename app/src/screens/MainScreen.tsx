@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { YStack, XStack, Text, Button, Tabs, Sheet, Label, Fieldset, Input, Switch, Separator, H3, H2, Image, useWindowDimensions, H4 } from 'tamagui'
 import { Scan, UserCheck, HelpCircle, IterationCw, LayoutGrid, VenetianMask, Cog, CheckCircle2, ExternalLink } from '@tamagui/lucide-icons';
+import X from '../images/x.png'
+import Telegram from '../images/telegram.png'
+import Github from '../images/github.png'
 import ScanScreen from './ScanScreen';
 import ProveScreen from './ProveScreen';
 import { Steps } from '../utils/utils';
 import AppScreen from './AppScreen';
 import { App } from '../utils/AppClass';
-import { Platform } from 'react-native';
+import { Linking, Platform, Pressable } from 'react-native';
 import { Keyboard } from 'react-native';
 import NFC_IMAGE from '../images/nfc.png'
 
@@ -123,7 +126,6 @@ const MainScreen: React.FC<MainScreenProps> = ({
   }, [step]);
 
   // Keyboard management
-
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
@@ -142,13 +144,8 @@ const MainScreen: React.FC<MainScreenProps> = ({
 
   const { height, width } = useWindowDimensions();
 
-
-
-
-
   return (
     <YStack f={1} bc="white" mt={Platform.OS === 'ios' ? "$8" : "$0"} mb={Platform.OS === 'ios' ? "$3" : "$0"}>
-
       <YStack >
         <XStack jc="space-between" ai="center" px="$3">
 
@@ -284,27 +281,44 @@ const MainScreen: React.FC<MainScreenProps> = ({
                 <YStack >
                   <H4>How to scan your passport ?</H4>
                   <Text>1. Find the location of the NFC chip of your passport.</Text>
-                  <Text>If you are struggling <Text color="#3185FC">this post <ExternalLink color="#3185FC" size={12} /></Text> will help you to find it.</Text>
-                  <Text mt="$2">2. Find where is the NFC lector of your phone. <ExternalLink color="#3185FC" size={12} /></Text>
-                  <Text mt="$2">3. Keep both part pressed together when this app ask for it.</Text>
+                  <Text>If you are struggling <Text color="#3185FC" onPress={() => Linking.openURL('https://zk-passport.github.io/posts/where-is-my-chip/')}>this post <ExternalLink color="#3185FC" size={12} /></Text> will help you to find it.</Text>
+                  <Text mt="$2">2. Find where is the NFC lector of your phone. <Button pl="$1" unstyled h="$1" w="$3" jc="flex-end" onPress={() => Linking.openURL('https://zk-passport.github.io/posts/locate-NFC-reader/')}>
+                    <ExternalLink color="#3185FC" size={12} />
+                  </Button></Text>
+                  <Text mt="$2">3. Keep both part pressed together while NFC popup shows up adn don't move</Text>
                 </YStack>
                 <YStack gap="$1">
                   <H4 mt="$2">Security and Privacy</H4>
-
-                  <Text>This app gerates ZK proofs to ...</Text>
+                  <Text>This app generates Zero-Knowledge proofs ...</Text>
                 </YStack>
                 <YStack gap="$2">
                   <H4 mt="$1">What are ZK proofs ?</H4>
 
-                  <Text>Zero Knowledge proofs are .....</Text>
+                  <Text>Zero Knowledge proofs are ...</Text>
                 </YStack>
 
                 <YStack gap="$2">
-                  <H4 mt="$1">Contacts</H4>
-                  <Text>telegram</Text>
+                  <H4 >Contacts</H4>
+                  <XStack mt="$2" ml="$3" gap="$5">
+                    <Pressable onPress={() => Linking.openURL('https://t.me/proofofpassport')}>
+                      <Image
+                        source={{ uri: Telegram, width: 24, height: 24 }}
+                      />
+                    </Pressable>
+                    <Pressable onPress={() => Linking.openURL('https://x.com/proofofpassport')}>
+                      <Image
+                        source={{ uri: X, width: 24, height: 24 }}
+                      />
+                    </Pressable>
+                    <Pressable onPress={() => Linking.openURL('https://github.com/zk-passport/proof-of-passport')}>
+                      <Image
+                        source={{ uri: Github, width: 24, height: 24 }}
+                      />
+                    </Pressable>
+                  </XStack>
                 </YStack>
               </YStack>
-              <Button alignSelf='center' s w="80%" onPress={() => setHelpIsOpen(false)}>
+              <Button alignSelf='center' w="80%" onPress={() => setHelpIsOpen(false)}>
                 <Text w="80%" textAlign='center' fow="bold">Close</Text>
               </Button>
 
