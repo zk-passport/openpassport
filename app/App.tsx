@@ -406,7 +406,6 @@ function App(): JSX.Element {
       const startTime = Date.now();
       console.log('running mopro init action')
       await NativeModules.Prover.runInitAction()
-
       console.log('running mopro prove action')
       const response = await NativeModules.Prover.runProveAction({
         ...inputs,
@@ -440,6 +439,7 @@ function App(): JSX.Element {
 
 
   const handleMint = async () => {
+    setStep(Steps.TX_MINTING);
     setMinting(true)
     if (!proof?.proof || !proof?.inputs) {
       console.log('proof or inputs is null');
@@ -497,6 +497,7 @@ function App(): JSX.Element {
           bottomOffset: 80,
         })
         setMintText(`Error minting SBT. Network: Sepolia. Transaction hash: ${response.data.hash}`)
+        setStep(Steps.PROOF_GENERATED);
       }
     } catch (err: any) {
       console.log('err', err);

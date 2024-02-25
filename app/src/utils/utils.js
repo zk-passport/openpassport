@@ -25,6 +25,7 @@ export const Steps = {
   NFC_SCAN_COMPLETED: 4,
   GENERATING_PROOF: 5,
   PROOF_GENERATED: 6,
-  TX_MINTED: 7
+  TX_MINTING: 7,
+  TX_MINTED: 8
 };
 
