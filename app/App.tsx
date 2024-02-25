@@ -328,7 +328,7 @@ function App(): JSX.Element {
     console.log('passportData.dataGroupHashes', passportData.dataGroupHashes);
 
     const dataGroupHashesUint8Array = new Uint8Array(passportData.dataGroupHashes);
-    
+
     console.log('dataGroupHashesUint8Array', dataGroupHashesUint8Array);
 
     const [messagePadded, messagePaddedLen] = sha256Pad(
@@ -483,13 +483,18 @@ function App(): JSX.Element {
       if (receipt?.status === 1) {
         Toast.show({
           type: 'success',
-          text1: 'Proof of passport minted',
+          text1: 'SBT minted 🎊',
+          position: 'top',
+          bottomOffset: 80,
         })
         setMintText(`SBT minted. Network: Sepolia. Transaction hash: ${response.data.hash}`)
+        setStep(Steps.TX_MINTED);
       } else {
         Toast.show({
           type: 'error',
           text1: 'Proof of passport minting failed',
+          position: 'top',
+          bottomOffset: 80,
         })
         setMintText(`Error minting SBT. Network: Sepolia. Transaction hash: ${response.data.hash}`)
       }
@@ -506,11 +511,15 @@ function App(): JSX.Element {
           Toast.show({
             type: 'error',
             text1: `Error: ${match[1]}`,
+            position: 'top',
+            bottomOffset: 80,
           })
         } else {
           Toast.show({
             type: 'error',
             text1: `Error: mint failed`,
+            position: 'top',
+            bottomOffset: 80,
           })
           console.log('Failed to parse blockchain error');
         }

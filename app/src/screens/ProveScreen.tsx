@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NativeModules } from 'react-native';
 import { YStack, XStack, Text, Checkbox, Input, Button, Spinner, Image, useWindowDimensions } from 'tamagui';
-import { Check, LayoutGrid, Scan } from '@tamagui/lucide-icons';
+import { Check, LayoutGrid, Scan, Copy } from '@tamagui/lucide-icons';
 import { getFirstName, formatDuration } from '../../utils/utils';
 import { attributeToPosition } from '../../../common/src/constants/constants';
 import { Steps } from '../utils/utils';
@@ -11,6 +11,10 @@ import { App } from '../utils/AppClass';
 import { Keyboard, Platform } from 'react-native';
 import { DEFAULT_ADDRESS } from '@env';
 const { ethers } = require('ethers');
+import Clipboard from '@react-native-community/clipboard';
+import Toast from 'react-native-toast-message';
+
+
 
 const fileName = "passport.arkzkey"
 const path = "/data/user/0/com.proofofpassport/files/" + fileName
@@ -52,11 +56,38 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
   ens,
   setEns
 }) => {
+  const [zkeyLoading, setZkeyLoading] = useState(false);
   const [zkeyLoaded, setZkeyLoaded] = useState(false);
+
+  const getTx = (input: string | null): string => {
+    if (!input) return '';
+    const transaction = input.split(' ').filter(word => word.startsWith('0x')).join(' ');
+    return transaction;
+  }
+  const shortenInput = (input: string | null): string => {
+    if (!input) return '';
+    if (input.length > 9) {
+      return input.substring(0, 25) + '\u2026';
+    } else {
+      return input;
+    }
+  }
+
+  const copyToClipboard = (input: string) => {
+    Clipboard.setString(input);
+    Toast.show({
+      type: 'success',
+      text1: 'Tx copied to clipboard',
+      position: 'top',
+      bottomOffset: 80,
+    })
+  };
 
   const downloadZkey = async () => {
     // TODO: don't redownload if already in the file system at path, if downloaded from previous session
-
+    setZkeyLoading(true);
+    // Allow the spinner to show up before app freeze on android
+    await new Promise(resolve => setTimeout(resolve, 1500));
     try {
       console.log('Downloading file...')
       const result = await NativeModules.RNPassportReader.downloadFile(
@@ -66,9 +97,16 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
       console.log("Download successful");
       console.log(result);
       setZkeyLoaded(true);
+      setZkeyLoading(false);
     } catch (e: any) {
       console.log("Download not successful");
-      console.error(e.message);
+      Toast.show({
+        type: 'error',
+        text1: `Error: ${e.message}`,
+        position: 'top',
+        bottomOffset: 80,
+      })
+      setZkeyLoading(false);
     }
   };
 
@@ -79,6 +117,8 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
       return input.charAt(0) + input.charAt(1) + '*'.repeat(input.length - 2);
     }
   }
+
+
 
   const [inputValue, setInputValue] = useState(DEFAULT_ADDRESS ?? '');
   const provider = new ethers.JsonRpcProvider(`https://eth-mainnet.g.alchemy.com/v2/lpOn3k6Fezetn1e5QF-iEsn-J0C6oGE0`);
@@ -99,11 +139,23 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
       if (inputValue != ens) {
         if (inputValue.endsWith('.eth')) {
           try {
+            Toast.show({
+              type: 'info',
+              text1: '🔭 Looking for ' + inputValue,
+              position: 'top',
+              bottomOffset: 80,
+            })
             const resolvedAddress = await provider.resolveName(inputValue);
             if (resolvedAddress) {
               console.log("new address settled:" + resolvedAddress);
               setAddress(resolvedAddress);
               setEns(inputValue);
+              Toast.show({
+                type: 'success',
+                text1: '🎊 welcome home' + inputValue,
+                position: 'top',
+                bottomOffset: 90,
+              })
               if (hideData) {
                 console.log(maskString(address));
                 //  setInputValue(maskString(address));
@@ -112,10 +164,21 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
                 // setInputValue(address);
               }
             } else {
-              console.error("Could not resolve ENS name.");
+              Toast.show({
+                type: 'error',
+                text1: '❌  ' + inputValue + ' not found ',
+                position: 'top',
+                bottomOffset: 90,
+              })
             }
           } catch (error) {
-            console.error("Error resolving ENS name:", error);
+            Toast.show({
+              type: 'error',
+              text1: 'Error resolving ENS name',
+              text2: 'Check input format or RPC provider',
+              position: 'top',
+              bottomOffset: 80,
+            })
           }
         }
         else if (inputValue.length === 42 && inputValue.startsWith('0x')) {
@@ -220,12 +283,15 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
             <XStack f={1} />
             <XStack f={1} />
             <XStack f={1} />
-            <Button disabled={address == ethers.ZeroAddress} borderRadius={100} onPress={() => { (!zkeyLoaded && Platform.OS != "ios") ? downloadZkey() : handleProve(path) }} mt="$8" backgroundColor={address == ethers.ZeroAddress ? "#cecece" : "#3185FC"} alignSelf='center' >
-
+            <Button disabled={zkeyLoading || (address == ethers.ZeroAddress)} borderRadius={100} onPress={() => { (!zkeyLoaded && Platform.OS != "ios") ? downloadZkey() : handleProve(path) }} mt="$8" backgroundColor={address == ethers.ZeroAddress ? "#cecece" : "#3185FC"} alignSelf='center' >
               {!zkeyLoaded && Platform.OS != "ios" ? (
-                <Text color="white" fow="bold">Download zkey</Text>
+
+                <XStack ai="center" gap="$2">
+                  {zkeyLoading && <Spinner />}
+                  <Text color="white" fow="bold">{zkeyLoading ? "Downloading ZK circuit" : "Download ZK circuit"}</Text>
+                </XStack>
               ) : generatingProof ? (
-                <XStack ai="center">
+                <XStack ai="center" gap="$1">
                   <Spinner />
                   <Text color="white" marginLeft="$2" fow="bold" >Generating ZK proof</Text>
                 </XStack>
@@ -236,6 +302,28 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
             {(height > 750) && <Text fontSize={10} color={generatingProof ? "gray" : "white"} pb="$2" alignSelf='center'>This operation can take up to 2 mn, phone may freeze during this time</Text>}
           </YStack>
 
+        ) : step === Steps.TX_MINTED ? (
+          <YStack flex={1} justifyContent='center' alignItems='center' gap="$5">
+            <XStack flex={1} />
+            <ProofGrid proof={proof} />
+
+            <YStack gap="$1">
+              <Text fontWeight="bold" fontSize="$6" mt="$5">Congrats 🎉x2</Text>
+              <Text fontWeight="bold" fontSize="$5" >You just have minted a Soulbond token !</Text>
+              <Text color="gray" fontSize="$4" fow="bold" textAlign='left'>You can now share this proof with the selected app.</Text>
+
+              <Text color="gray" fontSize="$4" fow="bold" mt="$5">Network: Sepolia</Text>
+              <XStack jc='space-between' h="$2" ai="center">
+                <Text fontWeight="bold" fontSize="$5">Tx: {shortenInput(getTx(mintText))}</Text>
+              </XStack>
+            </YStack>
+
+            <XStack flex={1} />
+            <Button borderRadius={100} onPress={() => copyToClipboard(getTx(mintText))} marginTop="$4" mb="$8" backgroundColor="#3185FC">
+              <Copy color="white" size="$1" /><Text color="white" fow="bold" >Copy to clipboard</Text>
+            </Button>
+
+          </YStack>
         ) : (
           <YStack flex={1} justifyContent='center' alignItems='center' gap="$5">
             <XStack flex={1} />
@@ -252,8 +340,6 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
 
             <XStack flex={1} />
 
-
-
             {mintText && <Text color="gray">{mintText}</Text>}
 
             <Button borderRadius={100} onPress={handleMint} marginTop="$4" mb="$8" backgroundColor="#3185FC">
@@ -262,6 +348,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
 
           </YStack>
         )
+
         ) :
         (
           <YStack flex={1} justifyContent='center' alignItems='center'>

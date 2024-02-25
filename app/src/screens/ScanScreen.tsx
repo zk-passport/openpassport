@@ -1,5 +1,5 @@
 import React from 'react';
-import { YStack, Text, Spinner, XStack } from 'tamagui';
+import { YStack, Text, Spinner, XStack, Button } from 'tamagui';
 import { Steps } from '../utils/utils';
 
 interface ScanScreenProps {
@@ -46,13 +46,13 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ onStartCameraScan, handleNFCSca
               step < Steps.MRZ_SCAN_COMPLETED
                 ?
                 <YStack mt="$6">
-                  <Text p="$6" fontSize="$6" onPress={onStartCameraScan} size="$4" br="$2" color="#3185FC">Open camera</Text>
+                  <Text p="$6" fontSize="$6" onPress={onStartCameraScan} color="#3185FC">Open camera</Text>
                   <Spinner mt="$4" color={step === Steps.NFC_SCANNING ? "#3185FC" : "transparent"} />
 
                 </YStack>
                 : (
                   <YStack mt="$6">
-                    <Text p="$6" fontSize="$6" size="$4" br="$2" color="#3185FC" onPress={handleNFCScan}>
+                    <Text p="$6" fontSize="$6" color="#3185FC" onPress={handleNFCScan}>
                       {step === Steps.NFC_SCANNING ? "Scanning" : "Scan passport with NFC"}
                     </Text>
                     <Spinner mt="$4" color={step === Steps.NFC_SCANNING ? "#3185FC" : "transparent"} />
