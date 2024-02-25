@@ -330,13 +330,9 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
               <Text fontWeight="bold" fontSize="$6" mt="$6">Congrats 🎉</Text>
               <Text fontWeight="bold" fontSize="$5" mt="$1.5">You just generated this Zero Knowledge proof !</Text>
               <Text color="gray" fontSize="$5" mt="$1" fow="bold" textAlign='left'>You can now share this proof with the selected app.</Text>
-
               <Text color="gray" mt="$3">Proof generation duration: {formatDuration(proofTime)}</Text>
-
             </YStack>
-
             <XStack flex={1} />
-
             <Button disabled={step === Steps.TX_MINTING} borderRadius={100} onPress={handleMint} marginTop="$4" mb="$8" backgroundColor="#3185FC">
               {step === Steps.TX_MINTING ?
                 <XStack gap="$2">
