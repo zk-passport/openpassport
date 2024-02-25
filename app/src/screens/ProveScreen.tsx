@@ -13,9 +13,6 @@ import { DEFAULT_ADDRESS } from '@env';
 const { ethers } = require('ethers');
 import Clipboard from '@react-native-community/clipboard';
 import Toast from 'react-native-toast-message';
-
-
-
 const fileName = "passport.arkzkey"
 const path = "/data/user/0/com.proofofpassport/files/" + fileName
 
@@ -77,7 +74,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
     Clipboard.setString(input);
     Toast.show({
       type: 'success',
-      text1: 'Tx copied to clipboard',
+      text1: '🖨️ Tx copied to clipboard',
       position: 'top',
       bottomOffset: 80,
     })
@@ -340,10 +337,13 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
 
             <XStack flex={1} />
 
-            {mintText && <Text color="gray">{mintText}</Text>}
-
-            <Button borderRadius={100} onPress={handleMint} marginTop="$4" mb="$8" backgroundColor="#3185FC">
-              <Text color="white" fow="bold" >{selectedApp?.mintphrase}</Text>
+            <Button disabled={step === Steps.TX_MINTING} borderRadius={100} onPress={handleMint} marginTop="$4" mb="$8" backgroundColor="#3185FC">
+              {step === Steps.TX_MINTING ?
+                <XStack gap="$2">
+                  <Spinner />
+                  <Text color="white" fow="bold" > Minting </Text>
+                </XStack>
+                : <Text color="white" fow="bold" >{selectedApp?.mintphrase}</Text>}
             </Button>
 
           </YStack>

@@ -13,7 +13,6 @@ import { Linking, Platform, Pressable } from 'react-native';
 import { Keyboard } from 'react-native';
 import NFC_IMAGE from '../images/nfc.png'
 
-
 interface MainScreenProps {
   onStartCameraScan: () => void;
   nfcScan: () => void;
