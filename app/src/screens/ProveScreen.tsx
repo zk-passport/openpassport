@@ -149,7 +149,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
               setEns(inputValue);
               Toast.show({
                 type: 'success',
-                text1: '🎊 welcome home' + inputValue,
+                text1: '🎊 welcome ' + inputValue,
                 position: 'top',
                 bottomOffset: 90,
               })
