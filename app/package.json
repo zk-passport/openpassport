@@ -16,7 +16,6 @@
     "@tamagui/config": "^1.90.1",
     "@tamagui/core": "^1.90.1",
     "@tamagui/lucide-icons": "^1.90.1",
-    "@tamagui/toast": "^1.90.1",
     "@tamagui/types": "^1.90.1",
     "axios": "^1.6.3",
     "body-parser": "^1.20.2",
