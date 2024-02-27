@@ -1,6 +1,14 @@
+//
+//  MRZScannerModule.swift
+//  ProofOfPassport
+//
+//  Created by Rémi Colin on 27/02/2024.
+//
+
+
 import SwiftUI
 import UIKit
-import AVFoundation // Import AVFoundation for camera access check
+import AVFoundation
 import QKMRZScanner
 
 struct QKMRZScannerViewRepresentable: UIViewRepresentable {
