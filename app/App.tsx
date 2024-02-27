@@ -38,8 +38,10 @@ import MainScreen from './src/screens/MainScreen';
 import { extractMRZInfo, Steps } from './src/utils/utils';
 import forge from 'node-forge';
 import { Buffer } from 'buffer';
-import { YStack } from 'tamagui';
+import { Button, ButtonText, YStack } from 'tamagui';
 global.Buffer = Buffer;
+
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
@@ -76,6 +78,28 @@ function App(): JSX.Element {
     gender: false,
     expiry_date: false,
   });
+
+  const { MRZScannerModule } = NativeModules;
+
+  const startScanning = async () => {
+    let cameraPermissionStatus = await check(PERMISSIONS.IOS.CAMERA);
+
+    if (cameraPermissionStatus === RESULTS.DENIED) {
+      const newStatus = await request(PERMISSIONS.IOS.CAMERA);
+      cameraPermissionStatus = newStatus;
+    }
+
+    if (cameraPermissionStatus === RESULTS.GRANTED) {
+      try {
+        const result = await MRZScannerModule.startScanning();
+        console.log(result);
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      console.log('Camera permission denied');
+    }
+  };
 
   const startCameraScan = () => {
     if (Platform.OS !== 'android') {
@@ -532,6 +556,7 @@ function App(): JSX.Element {
   return (
     <YStack f={1} bg="white" h="100%" w="100%">
       <YStack h="100%" w="100%">
+        <ButtonText mt="$8" onPress={startScanning}>Are you the goat ?</ButtonText>
         <MainScreen
           onStartCameraScan={startCameraScan}
           nfcScan={scan}
