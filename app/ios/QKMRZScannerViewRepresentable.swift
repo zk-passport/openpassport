@@ -4,6 +4,9 @@ import AVFoundation // Import AVFoundation for camera access check
 import QKMRZScanner
 
 struct QKMRZScannerViewRepresentable: UIViewRepresentable {
+    // Add a closure property to handle scan results
+    var onScanResult: ((QKMRZScanResult) -> Void)?
+
     class Coordinator: NSObject, QKMRZScannerViewDelegate {
         var parent: QKMRZScannerViewRepresentable
 
@@ -12,34 +15,14 @@ struct QKMRZScannerViewRepresentable: UIViewRepresentable {
         }
 
         func mrzScannerView(_ mrzScannerView: QKMRZScannerView, didFind scanResult: QKMRZScanResult) {
-            // Example of accessing and using the scan result data
-            let documentType = scanResult.documentType
-            let countryCode = scanResult.countryCode
-            let surnames = scanResult.surnames
-            let givenNames = scanResult.givenNames
-            let documentNumber = scanResult.documentNumber
-            let expiryDate = scanResult.expiryDate
-            let birthdate = scanResult.birthdate
-            // Add more fields as needed
-
-            // Log the results to the console or handle them as needed
-            print("Scanned MRZ:")
-            print("Document Type: \(documentType)")
-            print("Country Code: \(countryCode)")
-            print("Surnames: \(surnames)")
-            print("Given Names: \(givenNames)")
-            print("Document Number: \(documentNumber)")
-            print("Expiry Date: \(expiryDate)")
-            print("Birth Date: \(birthdate)")
-            // Handle additional fields as needed
-
-            // Example: Stop scanning after a successful scan
+          
+            // Call the closure with the scan result
+            parent.onScanResult?(scanResult)
+            
             DispatchQueue.main.async {
                 mrzScannerView.stopScanning()
+            
             }
-
-            // Note: Depending on your app's architecture, you might want to notify other parts of your app about the scan result,
-            // possibly using NotificationCenter, a custom delegate pattern, or a state management solution.
         }
     }
 

@@ -9,7 +9,6 @@ import Foundation
 import React
 import SwiftUI
 
-
 @objc(MRZScannerModule)
 class MRZScannerModule: NSObject, RCTBridgeModule {
   static func moduleName() -> String! {
@@ -19,35 +18,34 @@ class MRZScannerModule: NSObject, RCTBridgeModule {
   static func requiresMainQueueSetup() -> Bool {
     return true
   }
-
+  
   @objc func startScanning(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-      DispatchQueue.main.async { // Ensure UI updates are on the main thread
-          // Create local copies of the resolve and reject closures
-          let localResolve = resolve
-          let localReject = reject
-
+      DispatchQueue.main.async {
           guard let rootViewController = UIApplication.shared.keyWindow?.rootViewController else {
-              localReject("error", "Unable to find root view controller", nil)
+              reject("error", "Unable to find root view controller", nil)
               return
           }
           
-          // Create the SwiftUI view
-          let scannerView = QKMRZScannerViewRepresentable()
-          // Wrap the SwiftUI view in a UIHostingController
-          let hostingController = UIHostingController(rootView: scannerView)
-          
-          // Present the view controller
-          rootViewController.present(hostingController, animated: true, completion: {
-              localResolve("Scanning started")
-          })
+          var hostingController: UIHostingController<QKMRZScannerViewRepresentable>? = nil // Declare hostingController here
+        var scannerView = QKMRZScannerViewRepresentable()
+          scannerView.onScanResult = { scanResult in
+              let resultDict: [String: Any] = [
+                  "documentNumber": scanResult.documentNumber,
+                  "expiryDate": scanResult.expiryDate?.description ?? "",
+                  "birthDate": scanResult.birthdate?.description ?? ""
+              ]
+              resolve(resultDict)
+              
+              // Dismiss the hosting controller after scanning
+              hostingController?.dismiss(animated: true, completion: nil) // Use hostingController with optional chaining
+          }
+          hostingController = UIHostingController(rootView: scannerView) // Assign hostingController here
+        rootViewController.present(hostingController!, animated: true, completion: nil)
       }
   }
-
-
 
   @objc func stopScanning(_ resolve: RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) {
     // Logic to stop scanning
     resolve("Scanning stopped")
   }
 }
-

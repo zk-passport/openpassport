@@ -35,7 +35,7 @@ import groth16ExportSolidityCallData from './utils/snarkjs';
 import contractAddresses from "./deployments/addresses.json"
 import proofOfPassportArtefact from "./deployments/ProofOfPassport.json";
 import MainScreen from './src/screens/MainScreen';
-import { extractMRZInfo, Steps } from './src/utils/utils';
+import { extractMRZInfo, formatDateToYYMMDD, Steps } from './src/utils/utils';
 import forge from 'node-forge';
 import { Buffer } from 'buffer';
 import { Button, ButtonText, YStack } from 'tamagui';
@@ -81,49 +81,55 @@ function App(): JSX.Element {
 
   const { MRZScannerModule } = NativeModules;
 
-  const startScanning = async () => {
-    let cameraPermissionStatus = await check(PERMISSIONS.IOS.CAMERA);
 
-    if (cameraPermissionStatus === RESULTS.DENIED) {
-      const newStatus = await request(PERMISSIONS.IOS.CAMERA);
-      cameraPermissionStatus = newStatus;
-    }
-
-    if (cameraPermissionStatus === RESULTS.GRANTED) {
-      try {
-        const result = await MRZScannerModule.startScanning();
-        console.log(result);
-      } catch (e) {
-        console.error(e);
-      }
-    } else {
-      console.log('Camera permission denied');
-    }
-  };
-
-  const startCameraScan = () => {
+  const startCameraScan = async () => {
     if (Platform.OS !== 'android') {
-      Toast.show({
-        type: 'info',
-        text1: "Camera scan supported soon on iOS",
-      })
-      return
-    }
-    NativeModules.CameraActivityModule.startCameraActivity()
-      .then((mrzInfo: string) => {
+
+      let cameraPermissionStatus = await check(PERMISSIONS.IOS.CAMERA);
+
+      if (cameraPermissionStatus === RESULTS.DENIED) {
+        const newStatus = await request(PERMISSIONS.IOS.CAMERA);
+        cameraPermissionStatus = newStatus;
+      }
+
+      if (cameraPermissionStatus === RESULTS.GRANTED) {
         try {
-          const { documentNumber, birthDate, expiryDate } = extractMRZInfo(mrzInfo);
-          setPassportNumber(documentNumber);
-          setDateOfBirth(birthDate);
-          setDateOfExpiry(expiryDate);
-          setStep(Steps.MRZ_SCAN_COMPLETED);
-        } catch (error: any) {
-          console.error('Invalid MRZ format:', error.message);
+          const result = await MRZScannerModule.startScanning();
+          console.log("Scan result:", result);
+          // Example: Print the document number, expiry date, and birth date
+          console.log(`Document Number: ${result.documentNumber}, Expiry Date: ${result.expiryDate}, Birth Date: ${result.birthDate}`);
+          setPassportNumber(result.documentNumber);
+          setDateOfBirth(formatDateToYYMMDD(result.birthDate));
+          setDateOfExpiry(formatDateToYYMMDD(result.expiryDate));
+
+
+
+        } catch (e) {
+          console.error(e);
         }
-      })
-      .catch((error: any) => {
-        console.error('Camera Activity Error:', error);
-      });
+      } else {
+        console.log('Camera permission denied');
+      }
+
+
+    }
+    else {
+      NativeModules.CameraActivityModule.startCameraActivity()
+        .then((mrzInfo: string) => {
+          try {
+            const { documentNumber, birthDate, expiryDate } = extractMRZInfo(mrzInfo);
+            setPassportNumber(documentNumber);
+            setDateOfBirth(birthDate);
+            setDateOfExpiry(expiryDate);
+            setStep(Steps.MRZ_SCAN_COMPLETED);
+          } catch (error: any) {
+            console.error('Invalid MRZ format:', error.message);
+          }
+        })
+        .catch((error: any) => {
+          console.error('Camera Activity Error:', error);
+        });
+    }
   };
 
 
@@ -556,7 +562,6 @@ function App(): JSX.Element {
   return (
     <YStack f={1} bg="white" h="100%" w="100%">
       <YStack h="100%" w="100%">
-        <ButtonText mt="$8" onPress={startScanning}>Are you the goat ?</ButtonText>
         <MainScreen
           onStartCameraScan={startCameraScan}
           nfcScan={scan}
