@@ -35,31 +35,40 @@ fi
 
 # generate ark-zkey
 cd ../circuits/build
-arkzkey-util proof_of_passport_final.zkey
-echo "arkzkey file generation done, arkzkey file is in $(pwd)/proof_of_passport_final.arkzkey"
+# arkzkey-util proof_of_passport_final.zkey
+# echo "arkzkey file generation done, arkzkey file is in $(pwd)/proof_of_passport_final.arkzkey"
 
 cd ../../app/mopro-core
-cargo build --release
+cargo build --release --features dylib
 
 cd ../mopro-ffi
 echo "Building mopro-ffi static library..."
-cargo build --release --target ${ARCHITECTURE}
+cargo build --release --target ${ARCHITECTURE} --features dylib
+echo "Copying:"
 cp target/${ARCHITECTURE}/${LIB_DIR}/libmopro_ffi.a ../ios/MoproKit/Libs/
-echo "copied libmopro_ffi.a to ios/Moprokit/Libs/"
+cp ${PROJECT_DIR}/mopro-core/target/${ARCHITECTURE}/${LIB_DIR}/proof_of_passport.dylib ../ios/MoproKit/Libs/
 
+# cp target/${ARCHITECTURE}/${LIB_DIR}/libmopro_ffi.dylib ../ios/MoproKit/Libs/
+echo "copied libmopro_ffi.a to ios/Moprokit/Libs/"
+# echo "copied libmopro_ffi.dylib to ios/Moprokit/Libs/"
 
 # TODO: if functions signatures change, we have to rebuild the bindings by adapting theses lines:
-# cd ..
+cd ..
 # Install uniffi-bindgen binary in mopro-ffi
-# echo "[ffi] Installing uniffi-bindgen..."
-# if ! command -v uniffi-bindgen &> /dev/null
-# then
-#     cargo install --bin uniffi-bindgen --path .
-# else
-#     echo "uniffi-bindgen already installed, skipping."
-# fi
-# echo "Updating mopro-ffi bindings and library..."
-# uniffi-bindgen generate mopro-ffi/src/mopro.udl --language swift --out-dir ${TARGET_DIR}/SwiftBindings
-# cp ${TARGET_DIR}/SwiftBindings/moproFFI.h ${MOPROKIT_DIR}/Include/
-# cp ${TARGET_DIR}/SwiftBindings/mopro.swift ${MOPROKIT_DIR}/Bindings/
-# cp ${TARGET_DIR}/SwiftBindings/moproFFI.modulemap ${MOPROKIT_DIR}/Resources/
+echo "[ffi] Installing uniffi-bindgen..."
+if ! command -v uniffi-bindgen &> /dev/null
+then
+    cargo install --bin uniffi-bindgen --path .
+else
+    echo "uniffi-bindgen already installed, skipping."
+fi
+echo "Updating mopro-ffi bindings and library..."
+uniffi-bindgen generate mopro-ffi/src/mopro.udl --language swift --out-dir SwiftBindings
+cp SwiftBindings/moproFFI.h ios/MoproKit/Include/
+cp SwiftBindings/mopro.swift ios/MoproKit/Bindings/
+cp SwiftBindings/moproFFI.modulemap ios/MoproKit/Resources/
+
+# Fix dynamic lib install paths
+# NOTE: Xcode might already do this for us
+install_name_tool -id @rpath/proof_of_passport.dylib ${PROJECT_DIR}/ios/MoproKit/Libs/proof_of_passport.dylib
+codesign -f -s "${APPLE_SIGNING_IDENTITY}" ${PROJECT_DIR}/ios/MoproKit/Libs/proof_of_passport.dylib

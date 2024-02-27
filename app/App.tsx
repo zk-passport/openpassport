@@ -123,7 +123,7 @@ function App(): JSX.Element {
 
   useEffect(() => {
     if (Platform.OS !== 'android') {
-      NativeModules.Prover.runInitAction() // for mopro, ios only rn
+      // NativeModules.Prover.runInitAction() // for mopro, ios only rn
     }
   }, []);
 
@@ -405,6 +405,7 @@ function App(): JSX.Element {
       const startTime = Date.now();
       console.log('running mopro init action')
       await NativeModules.Prover.runInitAction()
+
 
       console.log('running mopro prove action')
       const response = await NativeModules.Prover.runProveAction({

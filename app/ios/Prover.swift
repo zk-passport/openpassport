@@ -27,20 +27,26 @@ class Prover: NSObject {
       // Record start time
       let start = CFAbsoluteTimeGetCurrent()
 
-      do {
-        try initializeMopro()
+      print("Private Frameworks Path: \(Bundle.main.privateFrameworksPath ?? "Not Found")")
+      
+      if let frameworksPath = Bundle.main.privateFrameworksPath {
+        let dylibPath = frameworksPath + "/proof_of_passport.dylib"
 
-        // Record end time and compute duration
-        let end = CFAbsoluteTimeGetCurrent()
-        let timeTaken = end - start
+        do {
+          try initializeMoproDylib(dylibPath: dylibPath)
 
-        // Log the time taken for initialization
-        print("Initializing arkzkey took \(timeTaken) seconds.")
-        resolve("Done")
-      } catch {
-        // Log any errors that occurred during initialization
-        print("An error occurred during initialization: \(error)")
-        reject("PROVER", "An error occurred during initialization", error)
+          // Record end time and compute duration
+          let end = CFAbsoluteTimeGetCurrent()
+          let timeTaken = end - start
+
+          // Log the time taken for initialization
+          print("Initializing arkzkey took \(timeTaken) seconds.")
+          resolve("Done")
+        } catch {
+          // Log any errors that occurred during initialization
+          print("An error occurred during initialization: \(error)")
+          reject("PROVER", "An error occurred during initialization", error)
+        }
       }
     }
   }
