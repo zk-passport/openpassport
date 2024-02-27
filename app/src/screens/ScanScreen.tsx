@@ -1,5 +1,5 @@
 import React from 'react';
-import { YStack, Text, Spinner, XStack, Button } from 'tamagui';
+import { YStack, Text, Spinner, XStack } from 'tamagui';
 import { Steps } from '../utils/utils';
 
 interface ScanScreenProps {
