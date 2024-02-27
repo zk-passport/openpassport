@@ -266,6 +266,7 @@ function App(): JSX.Element {
       handleResponseAndroid(response);
     } catch (e: any) {
       console.log('error during scan :', e);
+      setStep(Steps.MRZ_SCAN_COMPLETED);
       Toast.show({
         type: 'error',
         text1: e.message,
@@ -285,6 +286,7 @@ function App(): JSX.Element {
       handleResponseIOS(response);
     } catch (e: any) {
       console.log('error during scan :', e);
+      setStep(Steps.MRZ_SCAN_COMPLETED);
       Toast.show({
         type: 'error',
         text1: e.message,
@@ -327,7 +329,7 @@ function App(): JSX.Element {
     console.log('passportData.dataGroupHashes', passportData.dataGroupHashes);
 
     const dataGroupHashesUint8Array = new Uint8Array(passportData.dataGroupHashes);
-    
+
     console.log('dataGroupHashesUint8Array', dataGroupHashesUint8Array);
 
     const [messagePadded, messagePaddedLen] = sha256Pad(
@@ -405,7 +407,6 @@ function App(): JSX.Element {
       const startTime = Date.now();
       console.log('running mopro init action')
       await NativeModules.Prover.runInitAction()
-
       console.log('running mopro prove action')
       const response = await NativeModules.Prover.runProveAction({
         ...inputs,
@@ -439,6 +440,7 @@ function App(): JSX.Element {
 
 
   const handleMint = async () => {
+    setStep(Steps.TX_MINTING);
     setMinting(true)
     if (!proof?.proof || !proof?.inputs) {
       console.log('proof or inputs is null');
@@ -482,15 +484,21 @@ function App(): JSX.Element {
       if (receipt?.status === 1) {
         Toast.show({
           type: 'success',
-          text1: 'Proof of passport minted',
+          text1: 'SBT minted 🎊',
+          position: 'top',
+          bottomOffset: 80,
         })
         setMintText(`SBT minted. Network: Sepolia. Transaction hash: ${response.data.hash}`)
+        setStep(Steps.TX_MINTED);
       } else {
         Toast.show({
           type: 'error',
           text1: 'Proof of passport minting failed',
+          position: 'top',
+          bottomOffset: 80,
         })
         setMintText(`Error minting SBT. Network: Sepolia. Transaction hash: ${response.data.hash}`)
+        setStep(Steps.PROOF_GENERATED);
       }
     } catch (err: any) {
       console.log('err', err);
@@ -505,11 +513,15 @@ function App(): JSX.Element {
           Toast.show({
             type: 'error',
             text1: `Error: ${match[1]}`,
+            position: 'top',
+            bottomOffset: 80,
           })
         } else {
           Toast.show({
             type: 'error',
             text1: `Error: mint failed`,
+            position: 'top',
+            bottomOffset: 80,
           })
           console.log('Failed to parse blockchain error');
         }
