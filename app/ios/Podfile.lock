@@ -391,6 +391,8 @@ PODS:
     - React-jsi (= 0.72.3)
     - React-logger (= 0.72.3)
     - React-perflogger (= 0.72.3)
+  - RNCClipboard (1.5.1):
+    - React-Core
   - RNSVG (13.4.0):
     - React-Core
   - SocketRocket (0.6.1)
@@ -437,6 +439,7 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "RNCClipboard (from `../node_modules/@react-native-community/clipboard`)"
   - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -526,6 +529,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/utils"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNCClipboard:
+    :path: "../node_modules/@react-native-community/clipboard"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   Yoga:
@@ -578,10 +583,11 @@ SPEC CHECKSUMS:
   React-runtimescheduler: 116fb55732ddfd96298350528cf13ceaf94759c8
   React-utils: a8681f0d721ff080373ae9e4afb1f380707b55f9
   ReactCommon: df6a7f5665621529ee01b89fb0c3c93eb014f276
+  RNCClipboard: 41d8d918092ae8e676f18adada19104fa3e68495
   RNSVG: 07dbd870b0dcdecc99b3a202fa37c8ca163caec2
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: 8796b55dba14d7004f980b54bcc9833ee45b28ce
 
 PODFILE CHECKSUM: 7568291077da8ee6387464cd1a7e01559a46ab1f
 
-COCOAPODS: 1.15.0
+COCOAPODS: 1.15.2
