@@ -316,6 +316,7 @@ function App(): JSX.Element {
       handleResponseIOS(response);
     } catch (e: any) {
       console.log('error during scan :', e);
+      setStep(Steps.MRZ_SCAN_COMPLETED);
       Toast.show({
         type: 'error',
         text1: e.message,
