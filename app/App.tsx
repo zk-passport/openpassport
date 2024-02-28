@@ -419,9 +419,9 @@ function App(): JSX.Element {
       const endTime = Date.now();
       setProofTime(endTime - startTime);
 
-      // console.log('running mopro verify action')
-      // const res = await NativeModules.Prover.runVerifyAction()
-      // console.log('verify response:', res)
+      console.log('running mopro verify action')
+      const res = await NativeModules.Prover.runVerifyAction()
+      console.log('verify response:', res)
 
       setProof({
         proof: JSON.stringify(formatProofIOS(parsedResponse.proof)),

@@ -27,6 +27,13 @@ class Prover: NSObject {
       // Record start time
       let start = CFAbsoluteTimeGetCurrent()
 
+      do {
+        let paths = try FileManager.default.contentsOfDirectory(atPath: Bundle.main.bundlePath)
+        print("content of main app directory:", paths)
+      } catch {
+        print(error)
+      }
+
       print("Private Frameworks Path: \(Bundle.main.privateFrameworksPath ?? "Not Found")")
       
       if let frameworksPath = Bundle.main.privateFrameworksPath {

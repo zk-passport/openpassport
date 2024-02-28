@@ -51,22 +51,22 @@ cp ${PROJECT_DIR}/mopro-core/target/${ARCHITECTURE}/${LIB_DIR}/proof_of_passport
 # cp target/${ARCHITECTURE}/${LIB_DIR}/libmopro_ffi.dylib ../ios/MoproKit/Libs/
 echo "copied libmopro_ffi.a to ios/Moprokit/Libs/"
 # echo "copied libmopro_ffi.dylib to ios/Moprokit/Libs/"
+cd ..
 
 # TODO: if functions signatures change, we have to rebuild the bindings by adapting theses lines:
-cd ..
 # Install uniffi-bindgen binary in mopro-ffi
-echo "[ffi] Installing uniffi-bindgen..."
-if ! command -v uniffi-bindgen &> /dev/null
-then
-    cargo install --bin uniffi-bindgen --path .
-else
-    echo "uniffi-bindgen already installed, skipping."
-fi
-echo "Updating mopro-ffi bindings and library..."
-uniffi-bindgen generate mopro-ffi/src/mopro.udl --language swift --out-dir SwiftBindings
-cp SwiftBindings/moproFFI.h ios/MoproKit/Include/
-cp SwiftBindings/mopro.swift ios/MoproKit/Bindings/
-cp SwiftBindings/moproFFI.modulemap ios/MoproKit/Resources/
+# echo "[ffi] Installing uniffi-bindgen..."
+# if ! command -v uniffi-bindgen &> /dev/null
+# then
+#     cargo install --bin uniffi-bindgen --path .
+# else
+#     echo "uniffi-bindgen already installed, skipping."
+# fi
+# echo "Updating mopro-ffi bindings and library..."
+# uniffi-bindgen generate mopro-ffi/src/mopro.udl --language swift --out-dir SwiftBindings
+# cp SwiftBindings/moproFFI.h ios/MoproKit/Include/
+# cp SwiftBindings/mopro.swift ios/MoproKit/Bindings/
+# cp SwiftBindings/moproFFI.modulemap ios/MoproKit/Resources/
 
 # Fix dynamic lib install paths
 # NOTE: Xcode might already do this for us
