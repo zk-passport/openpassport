@@ -66,6 +66,7 @@ function App(): JSX.Element {
   const [proof, setProof] = useState<{ proof: string, inputs: string } | null>(null);
   const [minting, setMinting] = useState<boolean>(false);
   const [mintText, setMintText] = useState<string>("");
+  const [initCompleted, setInitCompleted] = useState(false);
 
   const [disclosure, setDisclosure] = useState({
     issuing_state: false,
@@ -123,9 +124,19 @@ function App(): JSX.Element {
 
   useEffect(() => {
     if (Platform.OS !== 'android') {
-      // NativeModules.Prover.runInitAction() // for mopro, ios only rn
+      initMopro()
     }
   }, []);
+
+  const initMopro = async () => {
+    try {
+      await NativeModules.Prover.runInitAction();
+      setInitCompleted(true);
+      console.log('Mopro initialization completed');
+    } catch (error) {
+      console.error('Mopro initialization failed:', error);
+    }
+  };
 
   async function handleResponseIOS(response: any) {
     const parsed = JSON.parse(response);
@@ -401,12 +412,27 @@ function App(): JSX.Element {
   }
 
   async function proveIOS(inputs: any) {
+    // Wait for initialization to complete with a 1 minute timeout
+    const waitForInit = async (timeoutMs = 60000) => {
+      const startTime = Date.now();
+      while (!initCompleted && Date.now() - startTime < timeoutMs) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before checking again
+      }
+      return initCompleted;
+    };
+
+    const initSuccess = await waitForInit();
+    if (!initSuccess) {
+      console.log('Initialization did not complete within the timeout. Please check if Mopro is initializing properly.');
+      Toast.show({
+        type: 'error',
+        text1: 'Initialization failed to complete before timeout',
+      })
+      return;
+    }
+    
     try {
       const startTime = Date.now();
-      console.log('running mopro init action')
-      await NativeModules.Prover.runInitAction()
-
-
       console.log('running mopro prove action')
       const response = await NativeModules.Prover.runProveAction({
         ...inputs,
@@ -544,6 +570,7 @@ function App(): JSX.Element {
           setDateOfBirth={setDateOfBirth}
           dateOfExpiry={dateOfExpiry}
           setDateOfExpiry={setDateOfExpiry}
+          initCompleted={initCompleted}
         />
       </YStack>
       <Toast config={toastConfig} />

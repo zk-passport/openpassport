@@ -32,6 +32,7 @@ interface ProveScreenProps {
   hideData: boolean;
   ens: string;
   setEns: (ens: string) => void;
+  initCompleted: boolean;
 }
 
 const ProveScreen: React.FC<ProveScreenProps> = ({
@@ -50,7 +51,8 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
   handleMint,
   hideData,
   ens,
-  setEns
+  setEns,
+  initCompleted
 }) => {
   const [zkeyLoaded, setZkeyLoaded] = useState(false);
   
@@ -222,20 +224,39 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
             <XStack f={1} />
             <XStack f={1} />
             <XStack f={1} />
-            {(!keyboardVisible || Platform.OS == "ios") && <Button disabled={address == ethers.ZeroAddress} borderRadius={100} onPress={() => {(!zkeyLoaded && Platform.OS != "ios") ? downloadZkey() : handleProve(path)}} mt="$8" backgroundColor={address == ethers.ZeroAddress ? "#cecece" : "#3185FC"} alignSelf='center' >
+            {
+              (!keyboardVisible || Platform.OS == "ios") && (
+              <Button
+                disabled={address == ethers.ZeroAddress || (!initCompleted && Platform.OS == "ios")}
+                borderRadius={100}
+                onPress={
+                  () => {
+                    (!zkeyLoaded && Platform.OS != "ios")
+                      ? downloadZkey()
+                      : handleProve(path)
+                  }
+                }
+                mt="$8"
+                backgroundColor={address == ethers.ZeroAddress ? "#cecece" : "#3185FC"}
+                alignSelf='center'
+              >
 
-              {!zkeyLoaded && Platform.OS != "ios" ? (
+                {!zkeyLoaded && Platform.OS != "ios" ? (
                   <Text color="white" fow="bold">Download zkey</Text>
-              ) : generatingProof ? (
-                <XStack ai="center">
-                  <Spinner />
-                  <Text color="white" marginLeft="$2" fow="bold" >Generating ZK proof</Text>
-                </XStack>
-              ) : (
-                <Text color="white" fow="bold">Generate ZK proof</Text>
-              )}
+                ) : !initCompleted && Platform.OS == "ios" ? (
+                  <Text color="white" fow="bold">Initializing...</Text>
+                ) : generatingProof ? (
+                  <XStack ai="center">
+                    <Spinner />
+                    <Text color="white" marginLeft="$2" fow="bold" >Generating ZK proof</Text>
+                  </XStack>
+                ) : (
+                  <Text color="white" fow="bold">Generate ZK proof</Text>
+                )}
 
-            </Button>}
+              </Button>
+              )
+            }
             <Text fontSize={10} color={generatingProof ? "gray" : "white"} alignSelf='center'>This operation can take up to 2 mn</Text>
             <Text fontSize={9} color={generatingProof ? "gray" : "white"} pb="$2" alignSelf='center'>The application may freeze during this time (hard work)</Text>
           </YStack>

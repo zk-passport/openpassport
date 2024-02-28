@@ -33,6 +33,7 @@ interface MainScreenProps {
   setDateOfBirth: (date: string) => void;
   dateOfExpiry: string;
   setDateOfExpiry: (date: string) => void;
+  initCompleted: boolean;
 }
 
 const MainScreen: React.FC<MainScreenProps> = ({
@@ -56,7 +57,8 @@ const MainScreen: React.FC<MainScreenProps> = ({
   dateOfBirth,
   setDateOfBirth,
   dateOfExpiry,
-  setDateOfExpiry
+  setDateOfExpiry,
+  initCompleted
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [ens, setEns] = useState<string>('');
@@ -441,7 +443,9 @@ const MainScreen: React.FC<MainScreenProps> = ({
             handleMint={handleMint}
             hideData={hideData}
             ens={ens}
-            setEns={setEns} />
+            setEns={setEns}
+            initCompleted={initCompleted}
+          />
         </Tabs.Content>
         <Separator />
         {(!keyboardVisible || Platform.OS == "ios") &&
