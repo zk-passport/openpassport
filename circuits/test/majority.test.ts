@@ -63,8 +63,8 @@ describe("Checks Test", function () {
 
         it("generate proof", async function () {
             expect(w).to.not.be.undefined;
-            const ouputs = await circuit.getDecoratedOutput(w);
-            console.log("outputs: " + ouputs);
+            const outputs = await circuit.getOutput(w, ["out"]);
+            console.log("outputs: " + outputs.out);
         });
 
         it("check contraints", async function () {
@@ -89,8 +89,8 @@ describe("Checks Test", function () {
                     console.log("current_time: " + current_time);
                     */
                     const w = await circuit.calculateWitness(inputs);
-                    const output = w[1];
-                    assert.strictEqual(output, BigInt(1), "Output should be equal to 1n");
+                    const output = await circuit.getOutput(w, ["out"]);
+                    assert.strictEqual(output.out, '1', "Output should be equal to 1n");
                 });
             });
         });
@@ -113,8 +113,8 @@ describe("Checks Test", function () {
                     console.log("current_time: " + current_time);
                     */
                     const w = await circuit.calculateWitness(inputs);
-                    const output = w[1];
-                    assert.strictEqual(output, BigInt(0), "Output should be equal to 0n");
+                    const output = await circuit.getOutput(w, ["out"]);
+                    assert.strictEqual(output.out, '0', "Output should be equal to 0n");
                 });
             });
         });
