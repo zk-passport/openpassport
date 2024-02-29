@@ -14,14 +14,12 @@ import {
   DEFAULT_DOE
 } from '@env';
 import { PassportData } from '../common/src/utils/types';
-import { AWS_ENDPOINT, MAX_DATAHASHES_LEN } from '../common/src/constants/constants';
+import { RELAYER_URL, MAX_DATAHASHES_LEN } from '../common/src/constants/constants';
 import {
-  hash,
   toUnsignedByte,
   bytesToBigDecimal,
   formatMrz,
   splitToWords,
-  hexStringToSignedIntArray,
   formatProofIOS,
   formatInputsIOS
 } from '../common/src/utils/utils';
@@ -29,7 +27,7 @@ import { samplePassportData } from '../common/src/utils/passportDataStatic';
 import { sha256Pad } from '../common/src/utils/sha256Pad';
 
 import "@ethersproject/shims"
-import { ethers, ZeroAddress } from "ethers";
+import { ethers } from "ethers";
 import axios from 'axios';
 import groth16ExportSolidityCallData from './utils/snarkjs';
 import contractAddresses from "./deployments/addresses.json"
@@ -394,7 +392,6 @@ function App(): JSX.Element {
       console.log("res", res);
       const parsedResponse = JSON.parse(res);
       console.log('parsedResponse', parsedResponse);
-      console.log('parsedResponse.duration', parsedResponse.duration);
 
       const deserializedProof = JSON.parse(parsedResponse.serialized_proof);
       console.log('deserializedProof', deserializedProof);
@@ -497,7 +494,7 @@ function App(): JSX.Element {
         .mint.populateTransaction(...callData);
       console.log('transactionRequest', transactionRequest);
 
-      const response = await axios.post(AWS_ENDPOINT, {
+      const response = await axios.post(RELAYER_URL, {
         chain: "sepolia",
         tx_data: transactionRequest
       });

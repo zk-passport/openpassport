@@ -14,17 +14,6 @@ check_target_support() {
     rustup target list | grep installed | grep -q "$1"
 }
 
-# Install arkzkey-util binary in ark-zkey
-cd ark-zkey
-echo "[ark-zkey] Installing arkzkey-util..."
-if ! command -v arkzkey-util &> /dev/null
-then
-    cargo install --bin arkzkey-util --path .
-else
-    echo "arkzkey-util already installed, skipping."
-fi
-cd ..
-
 # check target is installed
 if ! check_target_support $ARCHITECTURE; then
     rustup target add $ARCHITECTURE
@@ -33,13 +22,8 @@ else
 fi
 
 
-# generate ark-zkey
-cd ../circuits/build
-# arkzkey-util proof_of_passport_final.zkey
-# echo "arkzkey file generation done, arkzkey file is in $(pwd)/proof_of_passport_final.arkzkey"
-
-cd ../../app/mopro-core
-cargo build --release --features dylib
+cd mopro-core
+cargo build --release --features dylib # this will include circuits/build/proof_of_passport_final.arkzkey in the lib
 
 cd ../mopro-ffi
 echo "Building mopro-ffi static library..."
@@ -71,3 +55,7 @@ cd ..
 install_name_tool -id @rpath/proof_of_passport.dylib ${PROJECT_DIR}/ios/MoproKit/Libs/proof_of_passport.dylib
 # this line doesn't seem required right now
 # codesign -f -s "${APPLE_SIGNING_IDENTITY}" ${PROJECT_DIR}/ios/MoproKit/Libs/proof_of_passport.dylib
+
+cd ios
+pod install
+./post_install.sh

@@ -6,13 +6,14 @@ import { getFirstName, formatDuration } from '../../utils/utils';
 import { attributeToPosition } from '../../../common/src/constants/constants';
 import { Steps } from '../utils/utils';
 import USER from '../images/user.png'
+import arkzkeyUrl from '../../deployments/arkzkeyUrl.json'
 import ProofGrid from '../components/ProofGrid';
 import { App } from '../utils/AppClass';
 import { Keyboard, Platform } from 'react-native';
 import { DEFAULT_ADDRESS } from '@env';
 const { ethers } = require('ethers');
 
-const fileName = "passport.arkzkey"
+const fileName = "proof_of_passport_final.arkzkey"
 const path = "/data/user/0/com.proofofpassport/files/" + fileName
 
 interface ProveScreenProps {
@@ -62,7 +63,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
     try {
       console.log('Downloading file...')
       const result = await NativeModules.RNPassportReader.downloadFile(
-        'https://current-pop-zkey.s3.eu-north-1.amazonaws.com/proof_of_passport_final_dynamic_dg_support.arkzkey',
+        arkzkeyUrl.arkzkeyUrl,
         fileName
       );
       console.log("Download successful");
