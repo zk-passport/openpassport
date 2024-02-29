@@ -5,7 +5,8 @@ include "./majority.circom";
 
 /*** Only here to perform tests***/
 
-template IsMajor_test(majority,n) {
+template IsMajor_test(n) {
+    signal input majority;
     // starts at position 62 of mrz
     signal input yymmdd[6];
     // current timestamp sliced in 4 bytes
@@ -13,11 +14,12 @@ template IsMajor_test(majority,n) {
     // output 0 or 1
     signal output out;
 
-    component isMajor = IsMajor(majority,n);
+    component isMajor = IsMajor(n);
+    isMajor.majority <== majority;
     isMajor.yymmdd <== yymmdd;
     isMajor.current_timestamp <== current_timestamp;
 
     out <== isMajor.out;
     
 }
-component main {public [ current_timestamp ] } = IsMajor_test(18,40);
+component main {public [ current_timestamp ] } = IsMajor_test(40);

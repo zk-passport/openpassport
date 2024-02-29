@@ -17,6 +17,9 @@ template ProofOfPassport(n, k) {
 
     signal input current_timestamp[4]; // current timestamp; 4 bytes
 
+    signal majority; // currently hardcoded in the circuit, should be passed as input
+    majority <== 18;
+
     // Verify passport
     component PV = PassportVerifier(n, k);
     PV.mrz <== mrz;
@@ -25,7 +28,8 @@ template ProofOfPassport(n, k) {
     PV.pubkey <== pubkey;
     PV.signature <== signature;
 
-    component isMajor = IsMajor(18,40);
+    component isMajor = IsMajor(40);
+    isMajor.majority <== majority;
     isMajor.current_timestamp <== current_timestamp;
     signal subMRZ[6];
     for (var i = 0; i < 6; i++) {
@@ -34,13 +38,13 @@ template ProofOfPassport(n, k) {
     isMajor.yymmdd <== subMRZ;
 
     // reveal reveal_bitmap bits of MRZ
-    signal reveal[88];
+    signal reveal[89];
     for (var i = 0; i < 88; i++) {
         reveal[i] <== mrz[5+i] * reveal_bitmap[i];
     }
-    //reveal[88] <== 18 * isMajor.out;
+    reveal[88] <== majority * isMajor.out;
 
-    signal output reveal_packed[3] <== PackBytes(88, 3, 31)(reveal);
+    signal output reveal_packed[3] <== PackBytes(89, 3, 31)(reveal);
 
     // if the age is revealead check that it i
 

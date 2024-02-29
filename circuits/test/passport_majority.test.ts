@@ -16,9 +16,7 @@ describe("Circuit Test", function () {
     let current_time: any;
 
     before(async () => {
-        // Assuming buildBn128 is needed for groth16 setup in your environment
 
-        // Load and compile the circuit
         circuit = await wasm_tester(path.join(__dirname, "../circuits/proof_of_passport_majority.circom"),
             { include: ["node_modules"] },
         );
@@ -60,7 +58,7 @@ describe("Circuit Test", function () {
             current_timestamp: current_time
 
         }
-        //console.log("current_time: " + current_time);
+        console.log("current_time: " + current_time);
         //console.log("mrz:" + inputs.mrz);
         w = await circuit.calculateWitness(inputs);
 
@@ -92,14 +90,20 @@ describe("Circuit Test", function () {
         const charUnpacked = convertBytesToCharacters(unpackedReveals);
         const charExpected = convertBytesToCharacters(expectedReveals);
 
+        /*
+        console.log(unpackedReveals);
+        console.log(expectedReveals);
         console.log("Output: " + charUnpacked);
-        assert.strictEqual(charUnpacked, charExpected, "god please no");
+        console.log("Expected: " + charExpected);
+        */
+
+        expect(unpackedReveals).to.deep.equal(expectedReveals, "Circuit output does not match expected output");
     });
 });
 
 function unpackRevealPacked(packed) {
     let unpacked = [];
-    const bytesCount = [31, 31, 26]; // Based on the Solidity contract logic
+    const bytesCount = [31, 31, 27];
 
     Object.keys(packed).forEach((key, index) => {
         let element = BigInt(packed[key]);
@@ -118,13 +122,10 @@ function convertBytesToCharacters(bytes) {
 }
 
 function generateExpectedReveals(inputs) {
-    // Implement the logic to generate the expected reveal signals based on your inputs
-    // This will depend on how you've constructed the reveal signals in your circuit
     let expectedReveals = [];
-    // Example: for each bit in reveal_bitmap, if it's '1', push the corresponding mrz character, else push 0
     for (let i = 0; i < inputs.reveal_bitmap.length; i++) {
         expectedReveals.push(inputs.reveal_bitmap[i] === '1' ? parseInt(inputs.mrz[i + 5]) : 0); // Adjust indexing based on your logic
     }
-    // Add the age reveal logic if applicable
+    expectedReveals.push(18);
     return expectedReveals;
 }

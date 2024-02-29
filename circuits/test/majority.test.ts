@@ -7,6 +7,13 @@ import { getAdjustedTimestampBytes, getTimestampBytesFromYearFraction, yearFract
 import { DataHash } from "../../common/src/utils/types";
 const wasm_tester = require("circom_tester").wasm;
 
+/*** 
+ * 
+ * Modify 'n' parameter to adjust precision/duration of the test
+ * 
+ *  ***/
+
+
 describe("Checks Test", function () {
     this.timeout(0);
     let circuit: any;
@@ -16,8 +23,9 @@ describe("Checks Test", function () {
     let current_time: any;
     let yymmdd: any;
 
+    // Modify:
     // n: number of timestamps to test
-    let n: number = 10;
+    let n: number = 50;
     // yearStart: the first year to test
     let yearStart: number = 2000;
     // yearEnd: the last year to test
@@ -49,6 +57,7 @@ describe("Checks Test", function () {
         yymmdd = yymmddToByteArray("010101");
         current_time = getAdjustedTimestampBytes();
         inputs = {
+            "majority": 18,
             "yymmdd": yymmdd,
             "current_timestamp": current_time
         }
@@ -78,6 +87,7 @@ describe("Checks Test", function () {
                     const byteArray = yymmddToByteArray(yymmdd);
                     current_time = getTimestampBytesFromYearFraction(timestamps[index]);
                     const inputs = {
+                        "majority": 18,
                         "yymmdd": byteArray,
                         "current_timestamp": current_time
                     }
@@ -102,6 +112,7 @@ describe("Checks Test", function () {
                     const byteArray = yymmddToByteArray(yymmdd);
                     current_time = getTimestampBytesFromYearFraction(timestamps[index]);
                     const inputs = {
+                        "majority": 18,
                         "yymmdd": byteArray,
                         "current_timestamp": current_time
                     }
