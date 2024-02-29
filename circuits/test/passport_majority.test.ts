@@ -60,8 +60,8 @@ describe("Circuit Test", function () {
             current_timestamp: current_time
 
         }
-        console.log("current_time: " + current_time);
-        console.log("mrz:" + inputs.mrz);
+        //console.log("current_time: " + current_time);
+        //console.log("mrz:" + inputs.mrz);
         w = await circuit.calculateWitness(inputs);
 
     });
@@ -71,31 +71,60 @@ describe("Circuit Test", function () {
         expect(circuit).to.not.be.undefined;
     });
 
+    /*
     it("generate proof", async function () {
         expect(w).to.not.be.undefined;
-        const w1String = w[1].toString();
-        //const slicedBytes = w1String.slice(0, 89).split('').map((byte: string) => String.fromCharCode(parseInt(byte, 10))).join('');
 
-        const outputs = await circuit.getDecoratedOutput(w);
-        // Split the outputs into an array of lines
-        const lines = outputs.split('\n');
+        const outputs =
+            console.log(outputs);
 
-        // Processing lines to reveal characters
-        lines.forEach(line => {
-            // Extract BigInt value from the line
-            const bigIntValue = BigInt(line.split("--> ")[1]);
-            console.log(bigIntValue);
-        });
-
-
-
-    });
+    }); */
 
     it("check contraints", async function () {
         await circuit.checkConstraints(w);
     });
 
+    it("verify reveal_packed outputs", async function () {
+        // Example outputs from your test
+        const outputs = await circuit.getOutput(w, ["reveal_packed[3]"]);
+        const unpackedReveals = unpackRevealPacked(outputs);
+        const expectedReveals = generateExpectedReveals(inputs);
+        const charUnpacked = convertBytesToCharacters(unpackedReveals);
+        const charExpected = convertBytesToCharacters(expectedReveals);
 
-
-
+        console.log("Output: " + charUnpacked);
+        assert.strictEqual(charUnpacked, charExpected, "god please no");
+    });
 });
+
+function unpackRevealPacked(packed) {
+    let unpacked = [];
+    const bytesCount = [31, 31, 26]; // Based on the Solidity contract logic
+
+    Object.keys(packed).forEach((key, index) => {
+        let element = BigInt(packed[key]);
+        for (let j = 0; j < bytesCount[index]; j++) {
+            const byte = Number(element & BigInt(0xFF));
+            unpacked.push(byte);
+            element = element >> BigInt(8);
+        }
+    });
+
+    return unpacked;
+}
+
+function convertBytesToCharacters(bytes) {
+    return bytes.map(byte => String.fromCharCode(byte)).join('');
+}
+
+function generateExpectedReveals(inputs) {
+    // Implement the logic to generate the expected reveal signals based on your inputs
+    // This will depend on how you've constructed the reveal signals in your circuit
+    let expectedReveals = [];
+    // Example: for each bit in reveal_bitmap, if it's '1', push the corresponding mrz character, else push 0
+    for (let i = 0; i < inputs.reveal_bitmap.length; i++) {
+        expectedReveals.push(inputs.reveal_bitmap[i] === '1' ? parseInt(inputs.mrz[i + 5]) : 0); // Adjust indexing based on your logic
+    }
+    // Add the age reveal logic if applicable
+    return expectedReveals;
+}
