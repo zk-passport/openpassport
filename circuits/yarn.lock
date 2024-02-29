@@ -448,7 +448,7 @@
   dependencies:
     undici-types "~5.26.4"
 
-"@zk-email/circuits@^3.2.0":
+"@zk-email/circuits@^3.2.2":
   version "3.2.3"
   resolved "https://registry.yarnpkg.com/@zk-email/circuits/-/circuits-3.2.3.tgz#24e16706bc1f46eab5b6e51185faf8d8afe28175"
   integrity sha512-dAOaEul2iq86f69FFaXK/u3ec+Lk6B3vpbapyJ9oKGgWeINilWJQaEP1WSJyeVV52zPRVE5uDkIVhIguU7jk2g==
@@ -765,10 +765,9 @@ circom_runtime@0.1.24:
   dependencies:
     ffjavascript "0.2.60"
 
-circom_tester@^0.0.20:
+"circom_tester@github:Atomic-Buy/circom_tester#main":
   version "0.0.20"
-  resolved "https://registry.yarnpkg.com/circom_tester/-/circom_tester-0.0.20.tgz#066227923594c722169646c685e72ba6e1b85939"
-  integrity sha512-hhtqh3z1+/4RqhbAQxQTzekDvANFNd0M0+D8OdpxM1Ud4yQXoM+1n06AhJ7sULfCUD+LQrmnSjK5GD783KRSxg==
+  resolved "https://codeload.github.com/Atomic-Buy/circom_tester/tar.gz/cf7d7a60bddcffc2388f0acaf44f38bb00d6f2f6"
   dependencies:
     chai "^4.3.6"
     ffjavascript "^0.2.60"
