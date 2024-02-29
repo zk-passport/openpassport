@@ -7,7 +7,9 @@ include "circomlib/circuits/bitify.circom";
 /*** This circuit works only with an actual timestamp between 2000 (because of unix timestamp)  and 2100 (gapped by the max of 4 bytes) ***/
 
 // TODO: remove n parameter and determine it inside the code
-template IsMajor(majority,n) {
+template IsMajor(n) {
+
+    signal input majority;
     // starts at position 62 of mrz
     signal input yymmdd[6];
     // current timestamp sliced in 4 bytes shoud be m
