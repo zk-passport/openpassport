@@ -62,8 +62,6 @@ describe("Circuit Test", function () {
         }
         console.log("current_time: " + current_time);
         console.log("mrz:" + inputs.mrz);
-
-
         w = await circuit.calculateWitness(inputs);
 
     });

@@ -6,14 +6,17 @@ include "circomlib/circuits/bitify.circom";
 /*** Note taht the cehck is %100 so user will have to wait between it's 100 and 100 + majority ***/
 /*** This circuit works only with an actual timestamp between 2000 (because of unix timestamp)  and 2100 (gapped by the max of 4 bytes) ***/
 
+// TODO: remove n parameter and determine it inside the code
 template IsMajor(majority,n) {
     // starts at position 62 of mrz
     signal input yymmdd[6];
-    // current timestamp sliced in 4 bytes
+    // current timestamp sliced in 4 bytes shoud be m
     signal input current_timestamp[4];
     // output 0 or 1
     signal output out;
 
+
+    //TODO: deprecate this with using bitstonum template in loop of length  m
     signal Y1 <== yymmdd[0] - 48;
     signal Y2 <== yymmdd[1] - 48;
     signal M1 <== yymmdd[2] - 48;
@@ -30,7 +33,8 @@ template IsMajor(majority,n) {
     // Add 100 years to the guy
     signal age_from_1900 <== 100*secInYear + (Y1*10 + Y2)*secInYear + (M1*10 +M2)*secInMonth + (D1*10 +D2)*secInDay;
 
-    // current timestamp since unix creation
+    // current timestamp since unix creation 
+    // TODO: should implement BitstoNums template with a loop
     signal current_time_num <== current_timestamp[0] * 2**24 + current_timestamp[1] * 2**16 + current_timestamp[2] * 2**8 + current_timestamp[3];
     // current timestamp since 1900
     signal current_time_1900 <== current_time_num + 70 * secInYear;
