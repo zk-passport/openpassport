@@ -6,34 +6,36 @@ include "./sha256Bytes.circom";
 
 // optimizations: cut data hashes to the only part required
 // put the convertion to array of bytes inside the shaBytes.circom
-
+// pb stands for padding bytes
 template PassportVerifier(n, k) {
-    // mrz: machine readable zone from passport formatted into array of bytes (5 + 88) chars | why + 5 chars ?
+
+    // mrz: machine readable zone from passport formatted into array of bytes | 5 pb + 88 char
     signal input mrz[93];
 
-    // dataHashes but how ? :  list of 297 bytes
+    // dg_identifier : 1 byte
+    // dg_hash : 32 bytes
+    // dataHashes: contains the hashes of 7 DG of the passport | 24 pb + ( 4 pb + dg_identifier + 2 pb + dg_hash ) * 7
     signal input dataHashes[297];
 
-    // wtf is that ?
+    // dataHashes_hash : 32 bytes
+    // eContentBytes: contains the hash of the dataHashes and other things | ?? + dataHashes_hash
     signal input eContentBytes[104];
 
-    // probably the pubkey that signed the passport
+    // pubkey that signed the passport
     signal input pubkey[k];
 
-    // probably the signature of the passport
+    // signature of the passport
     signal input signature[k];
 
-    /* Compute the sha256 of the formatted mrz and convert it to an array of 32 bytes (char)  */
+    /*  sha256 formatted mrz and convert it to an array of 32 bytes  */
 
-    // compute sha256 of formatted mrz
+    // mrzSha: sha256 formatted mrz | 256 bits
     signal mrzSha[256] <== Sha256Bytes(93)(mrz);
 
-    // mrzSha_bytes: list of 32 component Bits2Num which converts 8 bits into a Num
+    // mrzSha_bytes: list of 32 Bits2Num
     component mrzSha_bytes[32];
 
-
-    // This loop will cast the 256 bits from mrzSha into a list of 32 bytes
-    //` get output of sha256 into bytes to check against dataHashes
+    // cast the 256 bits from mrzSha into a list of 32 bytes
     for (var i = 0; i < 32; i++) {
         mrzSha_bytes[i] = Bits2Num(8);
 
@@ -42,15 +44,14 @@ template PassportVerifier(n, k) {
         }
     }
 
-    // check that it is in the right position in dataHashes
-    // passport stores a hash of the MRZ from bytes 32 to 64 of their dataHashes
+    // assert mrz_hash equals the one extracted from dataHashes input (bytes 32 to 64)
     for(var i = 0; i < 32; i++) {
         dataHashes[31 + i] === mrzSha_bytes[i].out;
     }
 
     /* Hash data hashes and check there are in econtentBytes in range bytes 72 to 104 */
 
-    // hash dataHashes
+    // dataHashesSha: sha256 of dataHashes | 256 bits
     signal dataHashesSha[256] <== Sha256Bytes(297)(dataHashes);
 
 
@@ -63,24 +64,20 @@ template PassportVerifier(n, k) {
         }
     }
 
-    // check that it is in the right position in eContent
+    // assert dataHashesSha is in eContentBytes in range bytes 72 to 104
     for(var i = 0; i < 32; i++) {
         eContentBytes[72 + i] === dataHashesSha_bytes[i].out;
     }
 
-    // hash eContentBytes
+    /*  sha256 eContentBytes, type it and verify its hash and the pubkey correspond to the signature */
+
+    // eContentSha: eContentBytes hash | 256 bits
     signal eContentSha[256] <== Sha256Bytes(104)(eContentBytes);
 
     // get output of eContentBytes sha256 into k chunks of n bits each
-    // get output of eContentBytes sha256 into k chunks of n bits each
-
-
-    // msg_len = (256 // n) + 1
     var msg_len = (256 + n) \ n;
 
-    // hash of econtet
-    // create a list of length 256/n +1 of components of n bits
-
+    //eContentHash:  list of length 256/n +1 of components of n bits 
     component eContentHash[msg_len];
     for (var i = 0; i < msg_len; i++) {
         //instantiate each component of the list of Bits2Num of size n
@@ -96,12 +93,15 @@ template PassportVerifier(n, k) {
     
     // verify eContentHash signature
     component rsa = RSAVerify65537(64, 32);
+
     for (var i = 0; i < msg_len; i++) {
         rsa.base_message[i] <== eContentHash[i].out;
     }
+
     for (var i = msg_len; i < k; i++) {
         rsa.base_message[i] <== 0;
     }
+
     rsa.modulus <== pubkey;
     rsa.signature <== signature;
 }
