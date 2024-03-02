@@ -94,6 +94,8 @@ Build the iOS native module:
 
 ## Export a new release
 
+Don't forget to comment out the presets in .env when doing a release.
+
 ### Android
 Because of the size of the arkzkey, it has to be downloaded dynamically on android.
 
