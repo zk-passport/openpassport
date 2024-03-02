@@ -18,6 +18,17 @@ export function extractMRZInfo(mrzString) {
   };
 }
 
+// Function to format date from 'YYYY-MM-DD 00:00:00 +0000' to 'YYMMDD'
+export function formatDateToYYMMDD(inputDate) {
+  // Extract the date components directly from the input string
+  const year = inputDate.substring(2, 4); // Get YY part
+  const month = inputDate.substring(5, 7); // Get MM part
+  const day = inputDate.substring(8, 10); // Get DD part
+
+  // Concatenate components into YYMMDD format
+  return year + month + day;
+}
+
 export const Steps = {
   MRZ_SCAN: 1,
   MRZ_SCAN_COMPLETED: 2,
