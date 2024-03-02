@@ -33,11 +33,13 @@ import groth16ExportSolidityCallData from './utils/snarkjs';
 import contractAddresses from "./deployments/addresses.json"
 import proofOfPassportArtefact from "./deployments/ProofOfPassport.json";
 import MainScreen from './src/screens/MainScreen';
-import { extractMRZInfo, Steps } from './src/utils/utils';
+import { extractMRZInfo, formatDateToYYMMDD, Steps } from './src/utils/utils';
 import forge from 'node-forge';
 import { Buffer } from 'buffer';
-import { YStack } from 'tamagui';
+import { Button, ButtonText, YStack } from 'tamagui';
 global.Buffer = Buffer;
+
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
@@ -76,29 +78,57 @@ function App(): JSX.Element {
     expiry_date: false,
   });
 
-  const startCameraScan = () => {
+  const { MRZScannerModule } = NativeModules;
+
+
+  const startCameraScan = async () => {
     if (Platform.OS !== 'android') {
-      Toast.show({
-        type: 'info',
-        text1: "Camera scan supported soon on iOS",
-      })
-      return
-    }
-    NativeModules.CameraActivityModule.startCameraActivity()
-      .then((mrzInfo: string) => {
+
+      let cameraPermissionStatus = await check(PERMISSIONS.IOS.CAMERA);
+
+      if (cameraPermissionStatus === RESULTS.DENIED) {
+        const newStatus = await request(PERMISSIONS.IOS.CAMERA);
+        cameraPermissionStatus = newStatus;
+      }
+
+      if (cameraPermissionStatus === RESULTS.GRANTED) {
         try {
-          const { documentNumber, birthDate, expiryDate } = extractMRZInfo(mrzInfo);
-          setPassportNumber(documentNumber);
-          setDateOfBirth(birthDate);
-          setDateOfExpiry(expiryDate);
-          setStep(Steps.MRZ_SCAN_COMPLETED);
-        } catch (error: any) {
-          console.error('Invalid MRZ format:', error.message);
+          const result = await MRZScannerModule.startScanning();
+          console.log("Scan result:", result);
+          // Example: Print the document number, expiry date, and birth date
+          console.log(`Document Number: ${result.documentNumber}, Expiry Date: ${result.expiryDate}, Birth Date: ${result.birthDate}`);
+          setPassportNumber(result.documentNumber);
+          setDateOfBirth(formatDateToYYMMDD(result.birthDate));
+          setDateOfExpiry(formatDateToYYMMDD(result.expiryDate));
+
+
+
+        } catch (e) {
+          console.error(e);
         }
-      })
-      .catch((error: any) => {
-        console.error('Camera Activity Error:', error);
-      });
+      } else {
+        console.log('Camera permission denied');
+      }
+
+
+    }
+    else {
+      NativeModules.CameraActivityModule.startCameraActivity()
+        .then((mrzInfo: string) => {
+          try {
+            const { documentNumber, birthDate, expiryDate } = extractMRZInfo(mrzInfo);
+            setPassportNumber(documentNumber);
+            setDateOfBirth(birthDate);
+            setDateOfExpiry(expiryDate);
+            setStep(Steps.MRZ_SCAN_COMPLETED);
+          } catch (error: any) {
+            console.error('Invalid MRZ format:', error.message);
+          }
+        })
+        .catch((error: any) => {
+          console.error('Camera Activity Error:', error);
+        });
+    }
   };
 
 
@@ -275,6 +305,7 @@ function App(): JSX.Element {
       handleResponseAndroid(response);
     } catch (e: any) {
       console.log('error during scan :', e);
+      setStep(Steps.MRZ_SCAN_COMPLETED);
       Toast.show({
         type: 'error',
         text1: e.message,
@@ -294,6 +325,7 @@ function App(): JSX.Element {
       handleResponseIOS(response);
     } catch (e: any) {
       console.log('error during scan :', e);
+      setStep(Steps.MRZ_SCAN_COMPLETED);
       Toast.show({
         type: 'error',
         text1: e.message,
@@ -336,7 +368,7 @@ function App(): JSX.Element {
     console.log('passportData.dataGroupHashes', passportData.dataGroupHashes);
 
     const dataGroupHashesUint8Array = new Uint8Array(passportData.dataGroupHashes);
-    
+
     console.log('dataGroupHashesUint8Array', dataGroupHashesUint8Array);
 
     const [messagePadded, messagePaddedLen] = sha256Pad(
@@ -463,6 +495,7 @@ function App(): JSX.Element {
 
 
   const handleMint = async () => {
+    setStep(Steps.TX_MINTING);
     setMinting(true)
     if (!proof?.proof || !proof?.inputs) {
       console.log('proof or inputs is null');
@@ -506,15 +539,21 @@ function App(): JSX.Element {
       if (receipt?.status === 1) {
         Toast.show({
           type: 'success',
-          text1: 'Proof of passport minted',
+          text1: 'SBT minted 🎊',
+          position: 'top',
+          bottomOffset: 80,
         })
         setMintText(`SBT minted. Network: Sepolia. Transaction hash: ${response.data.hash}`)
+        setStep(Steps.TX_MINTED);
       } else {
         Toast.show({
           type: 'error',
           text1: 'Proof of passport minting failed',
+          position: 'top',
+          bottomOffset: 80,
         })
         setMintText(`Error minting SBT. Network: Sepolia. Transaction hash: ${response.data.hash}`)
+        setStep(Steps.PROOF_GENERATED);
       }
     } catch (err: any) {
       console.log('err', err);
@@ -529,11 +568,15 @@ function App(): JSX.Element {
           Toast.show({
             type: 'error',
             text1: `Error: ${match[1]}`,
+            position: 'top',
+            bottomOffset: 80,
           })
         } else {
           Toast.show({
             type: 'error',
             text1: `Error: mint failed`,
+            position: 'top',
+            bottomOffset: 80,
           })
           console.log('Failed to parse blockchain error');
         }

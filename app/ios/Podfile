@@ -7,8 +7,21 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
+def node_require(script)
+  # Resolve script with node to allow for hoisting
+  require Pod::Executable.execute_command('node', ['-p',
+    "require.resolve(
+      '#{script}',
+      {paths: [process.argv[1]]},
+    )", __dir__]).strip
+end
+node_require('react-native/scripts/react_native_pods.rb')
+node_require('react-native-permissions/scripts/setup.rb')
+
+
 platform :ios, '13.0'
 prepare_react_native_project!
+
 
 # If you are using a `react-native-flipper` your iOS build will fail when `NO_FLIPPER=1` is set.
 # because `react-native-flipper` depends on (FlipperKit,...) that will be excluded
@@ -29,6 +42,7 @@ end
 
 target 'ProofOfPassport' do
   config = use_native_modules!
+  setup_permissions(['Camera'])
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -36,6 +50,7 @@ target 'ProofOfPassport' do
   use_frameworks!
   pod 'NFCPassportReader', git: 'https://github.com/0xturboblitz/NFCPassportReader.git', commit: '310ecb519655d9ed8b1afc5eb490b2f51a4d3595'
   pod 'MoproKit', :path => './MoproKit'
+  pod 'QKMRZScanner'
 
   use_react_native!(
     :path => config[:reactNativePath],
