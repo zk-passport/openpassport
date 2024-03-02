@@ -20,8 +20,7 @@ template ProofOfPassport(n, k) {
     signal input address;
 
     signal input current_date[6]; // current date: YYMMDD
-
-    signal majority <== 18;
+    signal input majority;
 
     // Verify passport
     component PV = PassportVerifier(n, k);
