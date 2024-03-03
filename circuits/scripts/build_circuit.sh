@@ -59,9 +59,3 @@ echo "Size of proof_of_passport.arkzkey: $(wc -c <build/proof_of_passport_final.
 END_TIME=$(date +%s)
 ELAPSED_TIME=$(($END_TIME - $START_TIME))
 echo "Build completed in $ELAPSED_TIME seconds"
-
-
-
-# Here, add .arkzkey generation
-# also add a script that uploads to s3
-
