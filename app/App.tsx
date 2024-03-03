@@ -38,10 +38,9 @@ import MainScreen from './src/screens/MainScreen';
 import { extractMRZInfo, formatDateToYYMMDD, Steps } from './src/utils/utils';
 import forge from 'node-forge';
 import { Buffer } from 'buffer';
-import { Button, ButtonText, YStack } from 'tamagui';
+import { YStack } from 'tamagui';
 global.Buffer = Buffer;
 
-import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
@@ -81,37 +80,18 @@ function App(): JSX.Element {
 
   const { MRZScannerModule } = NativeModules;
 
-
   const startCameraScan = async () => {
-    if (Platform.OS !== 'android') {
-
-      let cameraPermissionStatus = await check(PERMISSIONS.IOS.CAMERA);
-
-      if (cameraPermissionStatus === RESULTS.DENIED) {
-        const newStatus = await request(PERMISSIONS.IOS.CAMERA);
-        cameraPermissionStatus = newStatus;
+    if (Platform.OS === 'ios') {
+      try {
+        const result = await MRZScannerModule.startScanning();
+        console.log("Scan result:", result);
+        console.log(`Document Number: ${result.documentNumber}, Expiry Date: ${result.expiryDate}, Birth Date: ${result.birthDate}`);
+        setPassportNumber(result.documentNumber);
+        setDateOfBirth(formatDateToYYMMDD(result.birthDate));
+        setDateOfExpiry(formatDateToYYMMDD(result.expiryDate));
+      } catch (e) {
+        console.error(e);
       }
-
-      if (cameraPermissionStatus === RESULTS.GRANTED) {
-        try {
-          const result = await MRZScannerModule.startScanning();
-          console.log("Scan result:", result);
-          // Example: Print the document number, expiry date, and birth date
-          console.log(`Document Number: ${result.documentNumber}, Expiry Date: ${result.expiryDate}, Birth Date: ${result.birthDate}`);
-          setPassportNumber(result.documentNumber);
-          setDateOfBirth(formatDateToYYMMDD(result.birthDate));
-          setDateOfExpiry(formatDateToYYMMDD(result.expiryDate));
-
-
-
-        } catch (e) {
-          console.error(e);
-        }
-      } else {
-        console.log('Camera permission denied');
-      }
-
-
     }
     else {
       NativeModules.CameraActivityModule.startCameraActivity()

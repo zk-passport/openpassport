@@ -59,9 +59,10 @@ struct ScannerWithInstructions: View {
     var body: some View {
         VStack {
             scannerView
-            Text("Make sure to put your passport flat")
-                .font(.title2) 
+            Text("Avoid glare or reflections during scanning.")
+                .font(.title3)
                 .padding()
+                .multilineTextAlignment(.center)
         }
     }
 }
