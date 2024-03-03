@@ -26,8 +26,8 @@ class MRZScannerModule: NSObject, RCTBridgeModule {
               return
           }
           
-          var hostingController: UIHostingController<QKMRZScannerViewRepresentable>? = nil // Declare hostingController here
-        var scannerView = QKMRZScannerViewRepresentable()
+          var hostingController: UIHostingController<ScannerWithInstructions>? = nil
+          var scannerView = QKMRZScannerViewRepresentable()
           scannerView.onScanResult = { scanResult in
               let resultDict: [String: Any] = [
                   "documentNumber": scanResult.documentNumber,
@@ -37,10 +37,13 @@ class MRZScannerModule: NSObject, RCTBridgeModule {
               resolve(resultDict)
               
               // Dismiss the hosting controller after scanning
-              hostingController?.dismiss(animated: true, completion: nil) // Use hostingController with optional chaining
+              hostingController?.dismiss(animated: true, completion: nil) 
           }
-          hostingController = UIHostingController(rootView: scannerView) // Assign hostingController here
-        rootViewController.present(hostingController!, animated: true, completion: nil)
+          
+          // Wrap the scanner view and instruction text in a new SwiftUI view
+          let scannerWithInstructions = ScannerWithInstructions(scannerView: scannerView)
+          hostingController = UIHostingController(rootView: scannerWithInstructions)
+          rootViewController.present(hostingController!, animated: true, completion: nil)
       }
   }
 
@@ -48,4 +51,18 @@ class MRZScannerModule: NSObject, RCTBridgeModule {
     // Logic to stop scanning
     resolve("Scanning stopped")
   }
+}
+// Define a new SwiftUI view that includes the scanner and instruction text
+struct ScannerWithInstructions: View {
+    var scannerView: QKMRZScannerViewRepresentable
+    
+    var body: some View {
+        VStack {
+            scannerView
+            Text("Avoid glare or reflections during scanning.")
+                .font(.title3)
+                .padding()
+                .multilineTextAlignment(.center)
+        }
+    }
 }
