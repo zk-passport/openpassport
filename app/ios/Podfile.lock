@@ -397,8 +397,6 @@ PODS:
     - React-perflogger (= 0.72.3)
   - RNCClipboard (1.5.1):
     - React-Core
-  - RNPermissions (4.1.4):
-    - React-Core
   - RNSVG (13.4.0):
     - React-Core
   - SocketRocket (0.6.1)
@@ -448,7 +446,6 @@ DEPENDENCIES:
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCClipboard (from `../node_modules/@react-native-community/clipboard`)"
-  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -543,8 +540,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCClipboard:
     :path: "../node_modules/@react-native-community/clipboard"
-  RNPermissions:
-    :path: "../node_modules/react-native-permissions"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   Yoga:
@@ -600,12 +595,11 @@ SPEC CHECKSUMS:
   React-utils: a8681f0d721ff080373ae9e4afb1f380707b55f9
   ReactCommon: df6a7f5665621529ee01b89fb0c3c93eb014f276
   RNCClipboard: 41d8d918092ae8e676f18adada19104fa3e68495
-  RNPermissions: ae1dee3a89314e848f07ca021e1a3d5c4cb5d0a9
   RNSVG: 07dbd870b0dcdecc99b3a202fa37c8ca163caec2
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SwiftyTesseract: 1f3d96668ae92dc2208d9842c8a59bea9fad2cbb
   Yoga: 8796b55dba14d7004f980b54bcc9833ee45b28ce
 
-PODFILE CHECKSUM: ba5489b2458ddb58834d40be2981695d0e2a3f51
+PODFILE CHECKSUM: bfa6f6f947d05938da674ddbd61afd65fc7ece34
 
 COCOAPODS: 1.15.2
