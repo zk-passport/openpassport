@@ -9,3 +9,4 @@ typechain-types
 cache
 artifacts
 
+contracts/Verifier.sol
