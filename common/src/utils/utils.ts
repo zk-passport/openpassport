@@ -1,4 +1,7 @@
 import {sha256} from 'js-sha256';
+import { LDSSecurityObject, DataGroupHash, LDSSecurityObjectVersion, DataGroupNumber } from './asn1';
+import { AsnSerializer } from "@peculiar/asn1-schema";
+import { DigestAlgorithmIdentifier } from "@peculiar/asn1-cms";
 
 export function formatMrz(mrz: string) {
   const mrzCharcodes = [...mrz].map(char => char.charCodeAt(0));
@@ -42,27 +45,22 @@ export function formatAndConcatenateDataHashes(
   // Let's replace the first array with the MRZ hash
   dataHashes.shift();
   dataHashes.unshift([1, mrzHash]);
-  // concatenating dataHashes :
 
-  let concat: number[] = []
-
-  const startingSequence = [
-    48, -126, 1, 37, 2, 1, 0, 48, 11, 6, 9, 96, -122, 72, 1, 101, 3, 4, 2, 1,
-    48, -126, 1, 17,
-  ]
-
-  // console.log(`startingSequence`, startingSequence.map(byte => (byte < 0 ? byte + 256 : byte).toString(16).padStart(2, '0')).join(''));
-
-  // Starting sequence. Should be the same for everybody, but not sure
-  concat.push(...startingSequence)
+  const ldsSecurityObject = new LDSSecurityObject();
+  ldsSecurityObject.version = LDSSecurityObjectVersion.v0;
+  ldsSecurityObject.hashAlgorithm = new DigestAlgorithmIdentifier({
+    algorithm: "1.2.840.113549.1.1.11"
+  })
 
   for(const dataHash of dataHashes) {
-    // console.log(`dataHash ${dataHash[0]}`, dataHash[1].map(byte => (byte < 0 ? byte + 256 : byte).toString(16).padStart(2, '0')).join(''));
-
-    concat.push(...[48, 37, 2, 1, dataHash[0], 4, 32, ...dataHash[1]])
+    const d = new DataGroupHash();
+    d.dataGroupNumber = dataHash[0];
+    d.dataGroupHashValue = new Uint8Array(dataHash[1]).buffer;
+    ldsSecurityObject.dataGroupHashValues.push(d);
   }
 
-  return concat;
+  const s = Buffer.from(AsnSerializer.serialize(ldsSecurityObject)).toString("hex");
+  return hexToSignedBytes(s);
 }
 
 export function assembleEContent(
