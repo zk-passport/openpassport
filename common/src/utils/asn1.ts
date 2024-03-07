@@ -1,5 +1,41 @@
-import { AsnProp, AsnPropTypes } from "@peculiar/asn1-schema";
-import { DigestAlgorithmIdentifier } from "@peculiar/asn1-cms";
+import { AsnProp, AsnPropTypes, AsnType, AsnTypeTypes, AsnArray } from "@peculiar/asn1-schema";
+import { DigestAlgorithmIdentifier, Attribute, SignedAttributes } from "@peculiar/asn1-cms";
+
+export const id_ldsSecurityObject = '2.23.136.1.1.1';
+
+/**
+ * ```asn
+ * AttributeSet ::= SET OF Attribute
+ * ```
+ */
+@AsnType({type: AsnTypeTypes.Set, itemType: Attribute})
+export class AttributeSet extends AsnArray<Attribute> {
+
+  constructor(items?: Attribute[]) {
+    super(items);
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, AttributeSet.prototype);
+  }
+
+}
+
+@AsnType({type: AsnTypeTypes.Choice})
+export class LdsSecurityObjectIdentifier {
+  @AsnProp({ type: AsnPropTypes.ObjectIdentifier })
+  public value: string = '';
+
+  constructor(value?: string) {
+    if (value) {
+      if (typeof value === "string") {
+        this.value = value;
+      } else {
+        Object.assign(this, value);
+      }
+    }
+  }
+}
+
 /**
  * DataGroupHash ::= SEQUENCE {
  *  dataGroupNumber DataGroupNumber,
