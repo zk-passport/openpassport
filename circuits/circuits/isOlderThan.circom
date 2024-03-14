@@ -4,7 +4,7 @@ include "../node_modules/circomlib/circuits/comparators.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "./dateIsLess.circom";
 
-template IsMajor() {
+template IsOlderThan() {
 
     signal input majority;
     signal input currDate[6];
@@ -31,15 +31,15 @@ template IsMajor() {
 
     signal currDateYearNormalized <== currDateYear + isPrevCentury.out * CENTURY;
 
-    component is_major = DateIsLess();
+    component is_older_than = DateIsLess();
 
-    is_major.firstYear  <== birthYear + majority;
-    is_major.firstMonth <== birthdateNum[2] * TEN + birthdateNum[3];
-    is_major.firstDay   <== birthdateNum[4] * TEN + birthdateNum[5];
+    is_older_than.firstYear  <== birthYear + majority;
+    is_older_than.firstMonth <== birthdateNum[2] * TEN + birthdateNum[3];
+    is_older_than.firstDay   <== birthdateNum[4] * TEN + birthdateNum[5];
 
-    is_major.secondYear <== currDateYearNormalized;
-    is_major.secondMonth <== currDate[2] * TEN + currDate[3];
-    is_major.secondDay <== currDate[4] * TEN + currDate[5];
+    is_older_than.secondYear <== currDateYearNormalized;
+    is_older_than.secondMonth <== currDate[2] * TEN + currDate[3];
+    is_older_than.secondDay <== currDate[4] * TEN + currDate[5];
 
-    signal output out <== is_major.out;
+    signal output out <== is_older_than.out;
 }

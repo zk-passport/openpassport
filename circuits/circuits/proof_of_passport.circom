@@ -3,6 +3,11 @@ pragma circom 2.1.5;
 include "circomlib/circuits/poseidon.circom";
 include "@zk-email/circuits/helpers/extract.circom";
 include "./passport_verifier.circom";
+include "./isOlderThan.circom";
+
+// Proof of passport with majority check
+// This circuit is used to prove that a passport is valid and that the user is major
+// Majority is currently hardcoded in this circuit
 
 template ProofOfPassport(n, k) {
     signal input mrz[93]; // formatted mrz (5 + 88) chars
@@ -11,8 +16,11 @@ template ProofOfPassport(n, k) {
     signal input pubkey[k];
     signal input signature[k];
 
-    signal input reveal_bitmap[88];
+    signal input reveal_bitmap[89];
     signal input address;
+
+    signal input current_date[6]; // current date: YYMMDD
+    signal input majority;
 
     // Verify passport
     component PV = PassportVerifier(n, k);
@@ -22,18 +30,26 @@ template ProofOfPassport(n, k) {
     PV.pubkey <== pubkey;
     PV.signature <== signature;
 
+    // Majority check
+    component isOlderThan = IsOlderThan();
+    isOlderThan.majority <== majority;
+
+    for (var i = 0; i < 6; i++) {
+        isOlderThan.currDate[i] <== current_date[i];
+        isOlderThan.birthDateASCII[i] <== mrz[62 + i];
+    }
+    signal user_majority <== majority * isOlderThan.out;
+
     // reveal reveal_bitmap bits of MRZ
-    signal reveal[88];
+    signal reveal[89];
     for (var i = 0; i < 88; i++) {
         reveal[i] <== mrz[5+i] * reveal_bitmap[i];
     }
-    signal output reveal_packed[3] <== PackBytes(88, 3, 31)(reveal);
 
-    // if the age is revealead check that it i
+    // Add the majority as last bytes
+    reveal[88] <== user_majority * reveal_bitmap[88];
 
-
-
-
+    signal output reveal_packed[3] <== PackBytes(89, 3, 31)(reveal);
 
     // make nullifier public;
     // we take nullifier = signature[0, 1] which it 64 + 64 bits long, so chance of collision is 2^128
@@ -51,7 +67,7 @@ template ProofOfPassport(n, k) {
     }
 }
 
-component main { public [ address ] } = ProofOfPassport(64, 32);
+component main { public [ address,  current_date] } = ProofOfPassport(64, 32);
 
 // Us:
 // 11 + 1 + 3 + 1

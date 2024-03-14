@@ -17,7 +17,7 @@ describe("start testing of proof_of_passport_majority.circom", function () {
 
     before(async () => {
 
-        circuit = await wasm_tester(path.join(__dirname, "../circuits/proof_of_passport_majority.circom"),
+        circuit = await wasm_tester(path.join(__dirname, "../circuits/proof_of_passport.circom"),
             { include: ["node_modules"] },
         );
 
@@ -57,7 +57,6 @@ describe("start testing of proof_of_passport_majority.circom", function () {
             address: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8", // sample address
             current_date: current_date,
             majority: majority
-
         }
         w = await circuit.calculateWitness(inputs);
 
