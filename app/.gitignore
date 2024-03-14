@@ -68,3 +68,5 @@ yarn-error.log
 .env
 
 .expo/
+
+./android/react-native-passport-reader/android/src/main/jniLibs/arm64/*
