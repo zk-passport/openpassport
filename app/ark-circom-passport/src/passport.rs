@@ -536,14 +536,16 @@ mod tests {
         println!("proof {:?}", proof);
         println!("public_inputs {:?}", public_inputs);
 
-        // Ok((SerializableProof(proof), SerializableInputs(public_inputs)))
-        now = Instant::now();
-        
+
+        let (params, matrices) = arkzkey();
+        let num_inputs = matrices.num_instance_variables;
         let pvk = Groth16::<Bn254>::process_vk(&params.vk).unwrap();
-        let verified = Groth16::<Bn254>::verify_with_processed_vk(&pvk, &inputs, &proof).unwrap();
-        println!("Proof verified. Took: {:?}", now.elapsed());
+        let inputs = &full_assignment[1..num_inputs];
+        let verified = Groth16::<Bn254>::verify_with_processed_vk(&pvk, inputs, &proof).unwrap();
+        println!("verified: {:?}", verified);
+
+        assert!(verified);
         Ok(())
-    
         // assert!(verified);
     
         // // launch the network & compile the verifier
