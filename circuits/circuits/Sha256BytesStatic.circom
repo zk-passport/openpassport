@@ -3,19 +3,9 @@ pragma circom 2.1.5;
 include "circomlib/circuits/bitify.circom";
 include "circomlib/circuits/sha256/sha256.circom";
 
-/***
-*
-*  This template takes as input a list of bytes and as parameters the size of this list
-*  The template output the sha256 of all bits concatened of the bytes list
-*
-***/
-
-
-template Sha256Bytes(max_num_bytes) {
-    // in_padded: input signal of bytes of length "max_num_bytes"
+// Static length sha256 bytes, adapted from zk-email
+template Sha256BytesStatic(max_num_bytes) {
     signal input in_padded[max_num_bytes];
-
-    // out: output hash of the circuit
     signal output out[256];
 
     // num_bits: num of bits in max_num_bytes

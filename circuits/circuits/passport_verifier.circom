@@ -2,23 +2,13 @@ pragma circom 2.1.5;
 
 include "@zk-email/circuits/helpers/rsa.circom";
 include "@zk-email/circuits/helpers/extract.circom";
-include "./sha256Bytes.circom";
+include "@zk-email/circuits/helpers/sha.circom";
+include "./Sha256BytesStatic.circom";
 
-// optimizations: cut data hashes to the only part required
-// put the convertion to array of bytes inside the shaBytes.circom
-// pb stands for padding bytes
-template PassportVerifier(n, k) {
-
-    // mrz: machine readable zone from passport formatted into array of bytes | 5 pb + 88 char
-    signal input mrz[93];
-
-    // dg_identifier : 1 byte
-    // dg_hash : 32 bytes
-    // dataHashes: contains the hashes of 7 DG of the passport | 24 pb + ( 4 pb + dg_identifier + 2 pb + dg_hash ) * 7
-    signal input dataHashes[297];
-
-    // dataHashes_hash : 32 bytes
-    // eContentBytes: contains the hash of the dataHashes and other things | ?? + dataHashes_hash
+template PassportVerifier(n, k, max_datahashes_bytes) {
+    signal input mrz[93]; // formatted mrz (5 + 88) chars
+    signal input dataHashes[max_datahashes_bytes];
+    signal input datahashes_padded_length;
     signal input eContentBytes[104];
 
     // pubkey that signed the passport
@@ -27,10 +17,8 @@ template PassportVerifier(n, k) {
     // signature of the passport
     signal input signature[k];
 
-    /*  sha256 formatted mrz and convert it to an array of 32 bytes  */
-
-    // mrzSha: sha256 formatted mrz | 256 bits
-    signal mrzSha[256] <== Sha256Bytes(93)(mrz);
+    // compute sha256 of formatted mrz
+    signal mrzSha[256] <== Sha256BytesStatic(93)(mrz);
 
     // mrzSha_bytes: list of 32 Bits2Num
     component mrzSha_bytes[32];
@@ -49,10 +37,8 @@ template PassportVerifier(n, k) {
         dataHashes[31 + i] === mrzSha_bytes[i].out;
     }
 
-    /* Hash data hashes and check there are in econtentBytes in range bytes 72 to 104 */
-
-    // dataHashesSha: sha256 of dataHashes | 256 bits
-    signal dataHashesSha[256] <== Sha256Bytes(297)(dataHashes);
+    // hash dataHashes dynamically
+    signal dataHashesSha[256] <== Sha256Bytes(max_datahashes_bytes)(dataHashes, datahashes_padded_length);
 
 
     // get output of dataHashes sha256 into bytes to check against eContent
@@ -69,10 +55,8 @@ template PassportVerifier(n, k) {
         eContentBytes[72 + i] === dataHashesSha_bytes[i].out;
     }
 
-    /*  sha256 eContentBytes, type it and verify its hash and the pubkey correspond to the signature */
-
-    // eContentSha: eContentBytes hash | 256 bits
-    signal eContentSha[256] <== Sha256Bytes(104)(eContentBytes);
+    // hash eContentBytes
+    signal eContentSha[256] <== Sha256BytesStatic(104)(eContentBytes);
 
     // get output of eContentBytes sha256 into k chunks of n bits each
     var msg_len = (256 + n) \ n;

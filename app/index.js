@@ -15,12 +15,13 @@ const tamaguiConfig = createTamagui(config)
 
 LogBox.ignoreLogs([
   /bad setState/,
-]) 
+])
 
 const Root = () => (
-  <TamaguiProvider config={myAppConfig}>
+  <TamaguiProvider config={tamaguiConfig}>
     <App />
   </TamaguiProvider>
+
 );
 
 AppRegistry.registerComponent(appName, () => Root);

@@ -32,6 +32,7 @@ import android.text.TextWatcher
 import android.util.Base64
 import android.util.Log
 import android.widget.EditText
+import android.content.Context
 
 import androidx.appcompat.app.AppCompatActivity
 import io.tradle.nfc.ImageUtil.decodeImage
@@ -44,6 +45,9 @@ import org.bouncycastle.asn1.cms.SignedData
 import org.bouncycastle.asn1.ASN1Primitive
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.ASN1Set
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.icao.DataGroupHash;
+import org.bouncycastle.asn1.icao.LDSSecurityObject;
 import org.bouncycastle.asn1.x509.Certificate
 import org.bouncycastle.jce.spec.ECNamedCurveSpec
 import org.bouncycastle.jce.interfaces.ECPublicKey
@@ -68,7 +72,9 @@ import java.io.ByteArrayInputStream
 import java.io.DataInputStream
 import java.io.InputStream
 import java.io.IOException
+import java.io.FileOutputStream
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.Signature
@@ -82,6 +88,8 @@ import java.text.ParseException
 import java.security.interfaces.RSAPublicKey
 import java.text.SimpleDateFormat
 import java.util.*
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.security.PublicKey
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
@@ -513,8 +521,8 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
 
             val gson = Gson()
 
-            val signedDataField = SODFile::class.java.getDeclaredField("signedData")
-            signedDataField.isAccessible = true
+            // val signedDataField = SODFile::class.java.getDeclaredField("signedData")
+            // signedDataField.isAccessible = true
             
           //   val signedData = signedDataField.get(sodFile) as SignedData
             
@@ -543,15 +551,38 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
               //     passport.putString("curveName", ecParams.getName())
               // }
   
-              // Old one, probably wrong:
-              //   passport.putString("curveName", (publicKey.parameters as ECNamedCurveSpec).name)
-              //   passport.putString("curveName", (publicKey.parameters.algorithm)) or maybe this
+            //   Old one, probably wrong:
+            //     passport.putString("curveName", (publicKey.parameters as ECNamedCurveSpec).name)
+            //     passport.putString("curveName", (publicKey.parameters.algorithm)) or maybe this
                 passport.putString("publicKeyQ", publicKey.q.toString())
             }
 
             passport.putString("dataGroupHashes", gson.toJson(sodFile.dataGroupHashes))
             passport.putString("eContent", gson.toJson(sodFile.eContent))
             passport.putString("encryptedDigest", gson.toJson(sodFile.encryptedDigest))
+
+            // passport.putString("encapContentInfo", gson.toJson(sodFile.encapContentInfo))
+            // passport.putString("contentInfo", gson.toJson(sodFile.contentInfo))
+            passport.putString("digestAlgorithm", gson.toJson(sodFile.digestAlgorithm))
+            passport.putString("signerInfoDigestAlgorithm", gson.toJson(sodFile.signerInfoDigestAlgorithm))
+            passport.putString("digestEncryptionAlgorithm", gson.toJson(sodFile.digestEncryptionAlgorithm))
+            passport.putString("LDSVersion", gson.toJson(sodFile.getLDSVersion()))
+            passport.putString("unicodeVersion", gson.toJson(sodFile.unicodeVersion))
+
+
+            // Get EncapContent (data group hashes) using reflection in Kotlin
+            val getENC: Method = SODFile::class.java.getDeclaredMethod("getLDSSecurityObject", SignedData::class.java)
+            getENC.isAccessible = true
+            val signedDataField: Field = sodFile::class.java.getDeclaredField("signedData")
+            signedDataField.isAccessible = true
+            val signedData: SignedData = signedDataField.get(sodFile) as SignedData
+            val ldsso: LDSSecurityObject = getENC.invoke(sodFile, signedData) as LDSSecurityObject
+
+            passport.putString("encapContent", gson.toJson(ldsso.encoded))
+
+            // passport.putString("getDocSigningCertificate", gson.toJson(sodFile.getDocSigningCertificate))
+            // passport.putString("getIssuerX500Principal", gson.toJson(sodFile.getIssuerX500Principal))
+            // passport.putString("getSerialNumber", gson.toJson(sodFile.getSerialNumber))
   
   
             // Another way to get signing time is to get into signedData.signerInfos, then search for the ICO identifier 1.2.840.113549.1.9.5 
@@ -605,31 +636,74 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         mrz: List<String>,
         reveal_bitmap: List<String>,
         dataHashes: List<String>,
+        datahashes_padded_length: String,
         eContentBytes: List<String>,
         signature: List<String>,
         pubkey: List<String>,
-        address: String
+        address: String,
+        zkeypath: String
     ): String
 
     @ReactMethod
-    fun provePassport(inputs: ReadableMap, callback: Callback) {
-        Log.d(TAG, "inputsaaa: " + inputs.toString())
+    fun provePassport(inputs: ReadableMap, zkeypath: String, callback: Callback) {
+        Log.d(TAG, "inputs in provePassport kotlin: " + inputs.toString())
         
         val mrz = inputs.getArray("mrz")?.toArrayList()?.map { it as String } ?: listOf()
         val reveal_bitmap = inputs.getArray("reveal_bitmap")?.toArrayList()?.map { it as String } ?: listOf()
         val data_hashes = inputs.getArray("dataHashes")?.toArrayList()?.map { it as String } ?: listOf()
+        val datahashes_padded_length = inputs.getString("datahashes_padded_length") ?: ""
         val e_content_bytes = inputs.getArray("eContentBytes")?.toArrayList()?.map { it as String } ?: listOf()
         val signature = inputs.getArray("signature")?.toArrayList()?.map { it as String } ?: listOf()
         val pubkey = inputs.getArray("pubkey")?.toArrayList()?.map { it as String } ?: listOf()
         val address = inputs.getString("address") ?: ""
         
-        val resultFromProof = provePassport(mrz, reveal_bitmap, data_hashes, e_content_bytes, signature, pubkey, address)
+        val resultFromProof = provePassport(
+            mrz,
+            reveal_bitmap,
+            data_hashes,
+            datahashes_padded_length,
+            e_content_bytes,
+            signature,
+            pubkey,
+            address,
+            zkeypath
+        )
 
         Log.d(TAG, "resultFromProof: " + resultFromProof.toString())
 
         // Return the result to JavaScript through the callback
         callback.invoke(null, resultFromProof)
     }
+
+    @ReactMethod
+    fun downloadFile(url: String, fileName: String, promise: Promise) {
+        val client = OkHttpClient()
+        val request = Request.Builder().url(url).build()
+    
+        try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw IOException("Failed to download file: $response")
+    
+                // Use the app's internal files directory
+                val fileOutputStream = reactContext.openFileOutput(fileName, Context.MODE_PRIVATE)
+    
+                val inputStream = response.body?.byteStream()
+                inputStream.use { input ->
+                    fileOutputStream.use { output ->
+                        input?.copyTo(output)
+                    }
+                }
+    
+                // Resolve the promise with the file path
+                val file = File(reactContext.filesDir, fileName)
+                promise.resolve(file.absolutePath)
+            }
+        } catch (e: Exception) {
+            // Reject the promise if an exception occurs
+            promise.reject(e)
+        }
+    }
+
 
     companion object {
         private val TAG = RNPassportReaderModule::class.java.simpleName

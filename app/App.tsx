@@ -11,17 +11,14 @@ import { checkInputs } from './utils/utils';
 import {
   DEFAULT_PNUMBER,
   DEFAULT_DOB,
-  DEFAULT_DOE,
-  DEFAULT_ADDRESS,
+  DEFAULT_DOE
 } from '@env';
-import { DataHash, PassportData } from '../common/src/utils/types';
-import { AWS_ENDPOINT } from '../common/src/constants/constants';
+import { PassportData } from '../common/src/utils/types';
+import { AWS_ENDPOINT, MAX_DATAHASHES_LEN } from '../common/src/constants/constants';
 import {
   hash,
   toUnsignedByte,
   bytesToBigDecimal,
-  dataHashesObjToArray,
-  formatAndConcatenateDataHashes,
   formatMrz,
   splitToWords,
   hexStringToSignedIntArray,
@@ -29,6 +26,7 @@ import {
   formatInputsIOS
 } from '../common/src/utils/utils';
 import { samplePassportData } from '../common/src/utils/passportDataStatic';
+import { sha256Pad } from '../common/src/utils/sha256Pad';
 
 import "@ethersproject/shims"
 import { ethers, ZeroAddress } from "ethers";
@@ -37,11 +35,12 @@ import groth16ExportSolidityCallData from './utils/snarkjs';
 import contractAddresses from "./deployments/addresses.json"
 import proofOfPassportArtefact from "./deployments/ProofOfPassport.json";
 import MainScreen from './src/screens/MainScreen';
-import { extractMRZInfo, Steps } from './src/utils/utils';
+import { extractMRZInfo, formatDateToYYMMDD, Steps } from './src/utils/utils';
 import forge from 'node-forge';
 import { Buffer } from 'buffer';
 import { YStack } from 'tamagui';
 global.Buffer = Buffer;
+
 
 console.log('DEFAULT_PNUMBER', DEFAULT_PNUMBER);
 
@@ -79,37 +78,46 @@ function App(): JSX.Element {
     expiry_date: false,
   });
 
-  const startCameraScan = () => {
-    if (Platform.OS !== 'android') {
-      Toast.show({
-        type: 'info',
-        text1: "Camera scan supported soon on iOS",
-      })
-      return
+  const { MRZScannerModule } = NativeModules;
+
+  const startCameraScan = async () => {
+    if (Platform.OS === 'ios') {
+      try {
+        const result = await MRZScannerModule.startScanning();
+        console.log("Scan result:", result);
+        console.log(`Document Number: ${result.documentNumber}, Expiry Date: ${result.expiryDate}, Birth Date: ${result.birthDate}`);
+        setPassportNumber(result.documentNumber);
+        setDateOfBirth(formatDateToYYMMDD(result.birthDate));
+        setDateOfExpiry(formatDateToYYMMDD(result.expiryDate));
+      } catch (e) {
+        console.error(e);
+      }
     }
-    NativeModules.CameraActivityModule.startCameraActivity()
-      .then((mrzInfo: string) => {
-        try {
-          const { documentNumber, birthDate, expiryDate } = extractMRZInfo(mrzInfo);
-          setPassportNumber(documentNumber);
-          setDateOfBirth(birthDate);
-          setDateOfExpiry(expiryDate);
-          setStep(Steps.MRZ_SCAN_COMPLETED);
-        } catch (error: any) {
-          console.error('Invalid MRZ format:', error.message);
-        }
-      })
-      .catch((error: any) => {
-        console.error('Camera Activity Error:', error);
-      });
+    else {
+      NativeModules.CameraActivityModule.startCameraActivity()
+        .then((mrzInfo: string) => {
+          try {
+            const { documentNumber, birthDate, expiryDate } = extractMRZInfo(mrzInfo);
+            setPassportNumber(documentNumber);
+            setDateOfBirth(birthDate);
+            setDateOfExpiry(expiryDate);
+            setStep(Steps.MRZ_SCAN_COMPLETED);
+          } catch (error: any) {
+            console.error('Invalid MRZ format:', error.message);
+          }
+        })
+        .catch((error: any) => {
+          console.error('Camera Activity Error:', error);
+        });
+    }
   };
 
 
-  const handleDisclosureChange = (field: keyof typeof disclosure) => {
+  const handleDisclosureChange = (field: string) => {
     setDisclosure(
       {
         ...disclosure,
-        [field]: !disclosure[field]
+        [field]: !disclosure[field as keyof typeof disclosure]
       });
   };
 
@@ -144,7 +152,6 @@ function App(): JSX.Element {
     console.log('isChipAuthenticationSupported', parsed.isChipAuthenticationSupported)
     console.log('residenceAddress', parsed.residenceAddress)
     console.log('passportPhoto', parsed.passportPhoto.substring(0, 100) + '...')
-
     console.log('parsed.documentSigningCertificate', parsed.documentSigningCertificate)
     const pem = JSON.parse(parsed.documentSigningCertificate).PEM.replace(/\\\\n/g, '\n')
     console.log('pem', pem)
@@ -181,6 +188,7 @@ function App(): JSX.Element {
     console.log('dataGroupHashes', passportData.dataGroupHashes);
     console.log('eContent', passportData.eContent);
     console.log('encryptedDigest', passportData.encryptedDigest);
+    console.log("photoBase64", passportData.photoBase64.substring(0, 100) + '...')
 
     setPassportData(passportData);
     setStep(Steps.NFC_SCAN_COMPLETED);
@@ -193,10 +201,15 @@ function App(): JSX.Element {
       modulus,
       curveName,
       publicKeyQ,
-      dataGroupHashes,
       eContent,
       encryptedDigest,
-      photo
+      photo,
+      digestAlgorithm,
+      signerInfoDigestAlgorithm,
+      digestEncryptionAlgorithm,
+      LDSVersion,
+      unicodeVersion,
+      encapContent
     } = response;
 
     const passportData: PassportData = {
@@ -207,7 +220,7 @@ function App(): JSX.Element {
         curveName: curveName,
         publicKeyQ: publicKeyQ,
       },
-      dataGroupHashes: dataHashesObjToArray(JSON.parse(dataGroupHashes)),
+      dataGroupHashes: JSON.parse(encapContent),
       eContent: JSON.parse(eContent),
       encryptedDigest: JSON.parse(encryptedDigest),
       photoBase64: photo.base64,
@@ -220,6 +233,12 @@ function App(): JSX.Element {
     console.log('eContent', passportData.eContent);
     console.log('encryptedDigest', passportData.encryptedDigest);
     console.log("photoBase64", passportData.photoBase64.substring(0, 100) + '...')
+    console.log("digestAlgorithm", digestAlgorithm)
+    console.log("signerInfoDigestAlgorithm", signerInfoDigestAlgorithm)
+    console.log("digestEncryptionAlgorithm", digestEncryptionAlgorithm)
+    console.log("LDSVersion", LDSVersion)
+    console.log("unicodeVersion", unicodeVersion)
+    console.log("encapContent", encapContent)
 
     setPassportData(passportData);
     setStep(Steps.NFC_SCAN_COMPLETED);
@@ -257,6 +276,7 @@ function App(): JSX.Element {
       handleResponseAndroid(response);
     } catch (e: any) {
       console.log('error during scan :', e);
+      setStep(Steps.MRZ_SCAN_COMPLETED);
       Toast.show({
         type: 'error',
         text1: e.message,
@@ -276,6 +296,7 @@ function App(): JSX.Element {
       handleResponseIOS(response);
     } catch (e: any) {
       console.log('error during scan :', e);
+      setStep(Steps.MRZ_SCAN_COMPLETED);
       Toast.show({
         type: 'error',
         text1: e.message,
@@ -283,7 +304,7 @@ function App(): JSX.Element {
     }
   }
 
-  const handleProve = async () => {
+  const handleProve = async (path: string) => {
     setStep(Steps.GENERATING_PROOF);
     if (passportData === null) {
       console.log('passport data is null');
@@ -297,16 +318,6 @@ function App(): JSX.Element {
 
     // 2. Format all the data as inputs for the circuit
     const formattedMrz = formatMrz(passportData.mrz);
-    const mrzHash = hash(formatMrz(passportData.mrz));
-
-    const concatenatedDataHashes =
-      Array.isArray(passportData.dataGroupHashes[0])
-        ? formatAndConcatenateDataHashes(
-          mrzHash,
-          passportData.dataGroupHashes as DataHash[],
-        )
-        : passportData.dataGroupHashes
-
 
     const reveal_bitmap = Array.from({ length: 88 }, (_) => '0');
 
@@ -319,16 +330,29 @@ function App(): JSX.Element {
       }
     }
 
-    if (!["SHA256withRSA", "sha256WithRSAEncryption"].includes(passportData.signatureAlgorithm)) {
-      console.log(`${passportData.signatureAlgorithm} not supported for proof right now.`);
-      setError(`${passportData.signatureAlgorithm} not supported for proof right now.`);
-      return;
-    }
+    // if (!["SHA256withRSA", "sha256WithRSAEncryption"].includes(passportData.signatureAlgorithm)) {
+    //   console.log(`${passportData.signatureAlgorithm} not supported for proof right now.`);
+    //   setError(`${passportData.signatureAlgorithm} not supported for proof right now.`);
+    //   return;
+    // }
+
+    console.log('passportData.dataGroupHashes', passportData.dataGroupHashes);
+
+    const dataGroupHashesUint8Array = new Uint8Array(passportData.dataGroupHashes);
+
+    console.log('dataGroupHashesUint8Array', dataGroupHashesUint8Array);
+
+    const [messagePadded, messagePaddedLen] = sha256Pad(
+      dataGroupHashesUint8Array,
+      MAX_DATAHASHES_LEN
+    );
+    console.log('messagePadded', messagePadded);
 
     const inputs = {
       mrz: Array.from(formattedMrz).map(byte => String(byte)),
       reveal_bitmap: reveal_bitmap.map(byte => String(byte)),
-      dataHashes: Array.from((concatenatedDataHashes as number[]).map(toUnsignedByte)).map(byte => String(byte)),
+      dataHashes: Array.from(messagePadded).map((x) => (x as number).toString()),
+      datahashes_padded_length: messagePaddedLen.toString(),
       eContentBytes: Array.from(passportData.eContent.map(toUnsignedByte)).map(byte => String(byte)),
       signature: splitToWords(
         BigInt(bytesToBigDecimal(passportData.encryptedDigest)),
@@ -347,7 +371,7 @@ function App(): JSX.Element {
 
     const start = Date.now();
     if (Platform.OS === 'android') {
-      await proveAndroid(inputs);
+      await proveAndroid(inputs, path);
     } else {
       await proveIOS(inputs);
     }
@@ -355,8 +379,12 @@ function App(): JSX.Element {
     console.log('Total proof time from frontend:', end - start);
   };
 
-  async function proveAndroid(inputs: any) {
-    NativeModules.RNPassportReader.provePassport(inputs, (err: any, res: any) => {
+  async function proveAndroid(inputs: any, path: string) {
+    const startTime = Date.now();
+    NativeModules.RNPassportReader.provePassport(inputs, path, (err: any, res: any) => {
+      const endTime = Date.now();
+      setProofTime(endTime - startTime);
+
       if (err) {
         console.error(err);
         setError(
@@ -375,8 +403,6 @@ function App(): JSX.Element {
       const deserializedInputs = JSON.parse(parsedResponse.serialized_inputs);
       console.log('deserializedInputs', deserializedInputs);
 
-      setProofTime(parsedResponse.duration);
-
       setProof({
         proof: JSON.stringify(deserializedProof),
         inputs: JSON.stringify(deserializedInputs),
@@ -388,27 +414,30 @@ function App(): JSX.Element {
 
   async function proveIOS(inputs: any) {
     try {
+      const startTime = Date.now();
       console.log('running mopro init action')
       await NativeModules.Prover.runInitAction()
-
       console.log('running mopro prove action')
       const response = await NativeModules.Prover.runProveAction({
         ...inputs,
+        datahashes_padded_length: [inputs.datahashes_padded_length.toString()], // wrap everything in arrays for bindings 
         address: [BigInt(address).toString()]
       })
       console.log('proof response:', response)
       const parsedResponse = JSON.parse(response)
 
-      console.log('running mopro verify action')
-      const res = await NativeModules.Prover.runVerifyAction()
-      console.log('verify response:', res)
+      const endTime = Date.now();
+      setProofTime(endTime - startTime);
+
+      // console.log('running mopro verify action')
+      // const res = await NativeModules.Prover.runVerifyAction()
+      // console.log('verify response:', res)
 
       setProof({
         proof: JSON.stringify(formatProofIOS(parsedResponse.proof)),
         inputs: JSON.stringify(formatInputsIOS(parsedResponse.inputs)),
       });
 
-      // setProofTime(response.duration);
       setGeneratingProof(false)
       setStep(Steps.PROOF_GENERATED);
     } catch (err: any) {
@@ -421,6 +450,7 @@ function App(): JSX.Element {
 
 
   const handleMint = async () => {
+    setStep(Steps.TX_MINTING);
     setMinting(true)
     if (!proof?.proof || !proof?.inputs) {
       console.log('proof or inputs is null');
@@ -464,15 +494,21 @@ function App(): JSX.Element {
       if (receipt?.status === 1) {
         Toast.show({
           type: 'success',
-          text1: 'Proof of passport minted',
+          text1: 'SBT minted 🎊',
+          position: 'top',
+          bottomOffset: 80,
         })
         setMintText(`SBT minted. Network: Sepolia. Transaction hash: ${response.data.hash}`)
+        setStep(Steps.TX_MINTED);
       } else {
         Toast.show({
           type: 'error',
           text1: 'Proof of passport minting failed',
+          position: 'top',
+          bottomOffset: 80,
         })
         setMintText(`Error minting SBT. Network: Sepolia. Transaction hash: ${response.data.hash}`)
+        setStep(Steps.PROOF_GENERATED);
       }
     } catch (err: any) {
       console.log('err', err);
@@ -487,11 +523,15 @@ function App(): JSX.Element {
           Toast.show({
             type: 'error',
             text1: `Error: ${match[1]}`,
+            position: 'top',
+            bottomOffset: 80,
           })
         } else {
           Toast.show({
             type: 'error',
             text1: `Error: mint failed`,
+            position: 'top',
+            bottomOffset: 80,
           })
           console.log('Failed to parse blockchain error');
         }
