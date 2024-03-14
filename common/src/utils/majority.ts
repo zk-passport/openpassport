@@ -89,3 +89,4 @@ export function yymmddToByteArray(yymmdd: string): number[] {
     const byteArray = Array.from(yymmdd).map(char => char.charCodeAt(0));
     return byteArray;
 }
+

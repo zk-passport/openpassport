@@ -223,3 +223,17 @@ export function formatInputsIOS(inputs: number[]) {
   const splitted = splitInto(inputs.slice(8), 32);
   return splitted.map(bytesToBigInt);
 }
+
+export function getCurrentDateYYMMDD(): number[] {
+  const date = new Date();
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  const YY = (`0${year % 100}`).slice(-2);
+  const MM = (`0${month}`).slice(-2);
+  const DD = (`0${day}`).slice(-2);
+
+  const yymmdd = `${YY}${MM}${DD}`;
+  return Array.from(yymmdd).map(char => parseInt(char));
+}
+

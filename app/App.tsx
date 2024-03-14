@@ -23,7 +23,8 @@ import {
   splitToWords,
   hexStringToSignedIntArray,
   formatProofIOS,
-  formatInputsIOS
+  formatInputsIOS,
+  getCurrentDateYYMMDD
 } from '../common/src/utils/utils';
 import { samplePassportData } from '../common/src/utils/passportDataStatic';
 import { sha256Pad } from '../common/src/utils/sha256Pad';
@@ -51,7 +52,8 @@ const attributeToPosition = {
   nationality: [54, 57],
   date_of_birth: [57, 63],
   gender: [64, 65],
-  expiry_date: [65, 71],
+  expiry_date: [65, 69],
+  majority: [89, 89]
 }
 
 function App(): JSX.Element {
@@ -319,7 +321,7 @@ function App(): JSX.Element {
     // 2. Format all the data as inputs for the circuit
     const formattedMrz = formatMrz(passportData.mrz);
 
-    const reveal_bitmap = Array.from({ length: 88 }, (_) => '0');
+    const reveal_bitmap = Array.from({ length: 89 }, (_) => '0');
 
     for (const attribute in disclosure) {
       if (disclosure[attribute as keyof typeof disclosure]) {
@@ -364,6 +366,8 @@ function App(): JSX.Element {
         BigInt(64),
         BigInt(32)
       ),
+      current_date: Array.from(getCurrentDateYYMMDD()).map(datePart => BigInt(datePart)),
+      majority: BigInt(18),
       address,
     }
 
