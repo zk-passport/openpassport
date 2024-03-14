@@ -2,9 +2,10 @@
 import chai, { assert, expect } from 'chai'
 import path from "path";
 import { getPassportData } from "../../common/src/utils/passportData";
-import { hash, toUnsignedByte, arraysAreEqual, bytesToBigDecimal, formatAndConcatenateDataHashes, formatMrz, splitToWords } from '../../common/src/utils/utils'
-import { DataHash } from "../../common/src/utils/types";
-import { getCurrentDateYYMMDD } from '../../common/src/utils/majority';
+import { hash, toUnsignedByte, arraysAreEqual, bytesToBigDecimal, formatMrz, splitToWords } from '../../common/src/utils/utils'
+import { MAX_DATAHASHES_LEN, attributeToPosition } from '../../common/src/constants/constants'
+import { getCurrentDateYYMMDD } from '../../common/src/utils/utils';
+import { sha256Pad } from '@zk-email/helpers'; // Ensure this import is added
 const wasm_tester = require("circom_tester").wasm;
 
 describe("start testing of proof_of_passport_majority.circom", function () {
@@ -20,29 +21,31 @@ describe("start testing of proof_of_passport_majority.circom", function () {
         circuit = await wasm_tester(path.join(__dirname, "../circuits/proof_of_passport.circom"),
             { include: ["node_modules"] },
         );
-
         const passportData = getPassportData();
 
         const formattedMrz = formatMrz(passportData.mrz);
-        const mrzHash = hash(formatMrz(passportData.mrz));
-        const concatenatedDataHashes = formatAndConcatenateDataHashes(
-            mrzHash,
-            passportData.dataGroupHashes as DataHash[],
-        );
 
-        const concatenatedDataHashesHashDigest = hash(concatenatedDataHashes);
+        const concatenatedDataHashesHashDigest = hash(passportData.dataGroupHashes);
+        console.log('concatenatedDataHashesHashDigest', concatenatedDataHashesHashDigest);
 
+        console.log('passportData.econtent.slice', passportData.eContent.slice(72, 72 + 32));
         assert(
             arraysAreEqual(passportData.eContent.slice(72, 72 + 32), concatenatedDataHashesHashDigest),
             'concatenatedDataHashesHashDigest is at the right place in passportData.eContent'
         )
 
         const reveal_bitmap = Array(89).fill('1');
+        const [messagePadded, messagePaddedLen] = sha256Pad(
+            new Uint8Array(passportData.dataGroupHashes),
+            MAX_DATAHASHES_LEN
+        );
+
         current_date = getCurrentDateYYMMDD();
         inputs = {
             mrz: formattedMrz.map(byte => String(byte)),
             reveal_bitmap: reveal_bitmap.map(byte => String(byte)),
-            dataHashes: concatenatedDataHashes.map(toUnsignedByte).map(byte => String(byte)),
+            dataHashes: Array.from(messagePadded).map((x) => x.toString()), // Use the padded data hashes
+            datahashes_padded_length: messagePaddedLen.toString(), // Include the padded length if needed
             eContentBytes: passportData.eContent.map(toUnsignedByte).map(byte => String(byte)),
             pubkey: splitToWords(
                 BigInt(passportData.pubKey.modulus),
