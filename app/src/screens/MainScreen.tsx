@@ -35,6 +35,8 @@ interface MainScreenProps {
   setDateOfBirth: (date: string) => void;
   dateOfExpiry: string;
   setDateOfExpiry: (date: string) => void;
+  majority: number;
+  setMajority: (age: number) => void;
 }
 
 const MainScreen: React.FC<MainScreenProps> = ({
@@ -58,7 +60,9 @@ const MainScreen: React.FC<MainScreenProps> = ({
   dateOfBirth,
   setDateOfBirth,
   dateOfExpiry,
-  setDateOfExpiry
+  setDateOfExpiry,
+  majority,
+  setMajority
 }) => {
   const [NFCScanIsOpen, setNFCScanIsOpen] = useState(false);
   const [SettingsIsOpen, setSettingsIsOpen] = useState(false);
@@ -363,7 +367,9 @@ const MainScreen: React.FC<MainScreenProps> = ({
             handleMint={handleMint}
             hideData={hideData}
             ens={ens}
-            setEns={setEns} />
+            setEns={setEns}
+            majority={majority}
+            setMajority={setMajority} />
         </Tabs.Content>
         <Separator />
         {(!keyboardVisible || Platform.OS == "ios") &&

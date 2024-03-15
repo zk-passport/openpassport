@@ -641,6 +641,8 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         signature: List<String>,
         pubkey: List<String>,
         address: String,
+        current_date: List<String>,
+        majority: String,
         zkeypath: String
     ): String
 
@@ -656,6 +658,8 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         val signature = inputs.getArray("signature")?.toArrayList()?.map { it as String } ?: listOf()
         val pubkey = inputs.getArray("pubkey")?.toArrayList()?.map { it as String } ?: listOf()
         val address = inputs.getString("address") ?: ""
+        val current_date =  inputs.getArray("current_date")?.toArrayList()?.map { it as String } ?: listOf()
+        val majority = inputs.getString("majority") ?: ""
         
         val resultFromProof = provePassport(
             mrz,
@@ -666,6 +670,8 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
             signature,
             pubkey,
             address,
+            current_date,
+            majority,
             zkeypath
         )
 

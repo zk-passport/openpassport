@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, YStack, XStack, Card, H3, Image } from 'tamagui';
 import { ChevronRight } from '@tamagui/lucide-icons';
 import { Platform } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 
 interface AppCardProps {
@@ -12,6 +13,7 @@ interface AppCardProps {
     id: string | number;
     onTouchStart?: () => void;
     selected?: boolean;
+    selectable?: boolean;
 }
 
 const AppCard: React.FC<AppCardProps> = ({
@@ -21,8 +23,16 @@ const AppCard: React.FC<AppCardProps> = ({
     background,
     id,
     onTouchStart,
-    selected
+    selected,
+    selectable
 }) => {
+    const showtoast = () => {
+        Toast.show({
+            type: 'info',
+            text1: '🚧 App not available yet '
+        })
+    }
+
     return (
         <XStack
             overflow="hidden"
@@ -35,7 +45,7 @@ const AppCard: React.FC<AppCardProps> = ({
             <Card
                 key={id}
                 elevation={0}
-                onTouchStart={onTouchStart}
+                onTouchStart={selectable ? onTouchStart : showtoast}
             >
                 <XStack w="100%"
                 >

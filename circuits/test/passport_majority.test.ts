@@ -26,9 +26,6 @@ describe("start testing of proof_of_passport_majority.circom", function () {
         const formattedMrz = formatMrz(passportData.mrz);
 
         const concatenatedDataHashesHashDigest = hash(passportData.dataGroupHashes);
-        console.log('concatenatedDataHashesHashDigest', concatenatedDataHashesHashDigest);
-
-        console.log('passportData.econtent.slice', passportData.eContent.slice(72, 72 + 32));
         assert(
             arraysAreEqual(passportData.eContent.slice(72, 72 + 32), concatenatedDataHashesHashDigest),
             'concatenatedDataHashesHashDigest is at the right place in passportData.eContent'

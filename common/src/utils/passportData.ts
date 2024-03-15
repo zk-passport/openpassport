@@ -100,7 +100,8 @@ function replaceYYMMDDinMRZ(mrz: string, YYMMDD: string): string {
 export function getPassportData(): PassportData {
   const passportDataPath = path.join(__dirname, '../../inputs/passportData.json');
 
-  if (fs.existsSync(passportDataPath)) {
+  if (false) {
+    // if ( fs.existsSync(passportDataPath)) {
     return require(passportDataPath);
   } else {
     const sampleData = genSampleData();

@@ -53,7 +53,7 @@ const attributeToPosition = {
   date_of_birth: [57, 63],
   gender: [64, 65],
   expiry_date: [65, 69],
-  majority: [89, 89]
+  older_than: [89, 89]
 }
 
 function App(): JSX.Element {
@@ -69,6 +69,7 @@ function App(): JSX.Element {
   const [proof, setProof] = useState<{ proof: string, inputs: string } | null>(null);
   const [minting, setMinting] = useState<boolean>(false);
   const [mintText, setMintText] = useState<string>("");
+  const [majority, setMajority] = useState<number>(18);
 
   const [disclosure, setDisclosure] = useState({
     issuing_state: false,
@@ -78,6 +79,7 @@ function App(): JSX.Element {
     date_of_birth: false,
     gender: false,
     expiry_date: false,
+    older_than: false,
   });
 
   const { MRZScannerModule } = NativeModules;
@@ -367,8 +369,8 @@ function App(): JSX.Element {
         BigInt(32)
       ),
       current_date: Array.from(getCurrentDateYYMMDD()).map(datePart => BigInt(datePart)),
-      majority: BigInt(18),
-      address,
+      majority: BigInt(majority),
+      address: address,
     }
 
     console.log('inputs', inputs)
@@ -418,6 +420,7 @@ function App(): JSX.Element {
 
   async function proveIOS(inputs: any) {
     try {
+      console.log(inputs);
       const startTime = Date.now();
       console.log('running mopro init action')
       await NativeModules.Prover.runInitAction()
@@ -425,7 +428,9 @@ function App(): JSX.Element {
       const response = await NativeModules.Prover.runProveAction({
         ...inputs,
         datahashes_padded_length: [inputs.datahashes_padded_length.toString()], // wrap everything in arrays for bindings 
-        address: [BigInt(address).toString()]
+        address: [BigInt(address).toString()],
+        current_date: getCurrentDateYYMMDD().map(datePart => BigInt(datePart).toString()),
+        majority: [BigInt(majority).toString()],
       })
       console.log('proof response:', response)
       const parsedResponse = JSON.parse(response)
@@ -569,6 +574,8 @@ function App(): JSX.Element {
           setDateOfBirth={setDateOfBirth}
           dateOfExpiry={dateOfExpiry}
           setDateOfExpiry={setDateOfExpiry}
+          majority={majority}
+          setMajority={setMajority}
         />
       </YStack>
       <Toast config={toastConfig} />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NativeModules } from 'react-native';
-import { YStack, XStack, Text, Checkbox, Input, Button, Spinner, Image, useWindowDimensions } from 'tamagui';
-import { Check, LayoutGrid, Scan, Copy } from '@tamagui/lucide-icons';
+import { YStack, XStack, Text, Checkbox, Input, Button, Spinner, Image, useWindowDimensions, ButtonText, } from 'tamagui';
+import { Check, LayoutGrid, Scan, Copy, Plus, Minus } from '@tamagui/lucide-icons';
 import { getFirstName, formatDuration } from '../../utils/utils';
 import { attributeToPosition } from '../../../common/src/constants/constants';
 import { Steps } from '../utils/utils';
@@ -33,6 +33,8 @@ interface ProveScreenProps {
   hideData: boolean;
   ens: string;
   setEns: (ens: string) => void;
+  majority: number;
+  setMajority: (age: number) => void;
 }
 
 const ProveScreen: React.FC<ProveScreenProps> = ({
@@ -51,10 +53,16 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
   handleMint,
   hideData,
   ens,
-  setEns
+  setEns,
+  majority,
+  setMajority
 }) => {
   const [zkeyLoading, setZkeyLoading] = useState(false);
   const [zkeyLoaded, setZkeyLoaded] = useState(false);
+  const [age, setAge] = useState(18);
+
+  const incrementAge = () => setAge(prevAge => prevAge + 1);
+  const decrementAge = () => setAge(prevAge => prevAge > 0 ? prevAge - 1 : 0);
 
   const getTx = (input: string | null): string => {
     if (!input) return '';
@@ -79,6 +87,13 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
       bottomOffset: 80,
     })
   };
+  const printHelloWorld = (key: string) => {
+    console.log(key);
+    console.log("Hello World");
+  };
+
+
+
 
   const downloadZkey = async () => {
     // TODO: don't redownload if already in the file system at path, if downloaded from previous session
@@ -247,7 +262,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
 
             <YStack f={1} >
               <Text h="$3" mt="$2">{selectedApp?.disclosurephrase}</Text>
-              <YStack mt="$1">
+              <YStack mt="$2">
                 {selectedApp && Object.keys(selectedApp.disclosure).map((key) => {
                   const key_ = key as string;
                   const indexes = attributeToPosition[key_];
@@ -263,7 +278,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
                           checked={disclosure[key_]}
                           onCheckedChange={() => handleDisclosureChange(key_)}
                           aria-label={keyFormatted}
-                          size="$5"
+                          size="$6"
                         >
                           <Checkbox.Indicator >
                             <Check />
@@ -271,15 +286,22 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
                         </Checkbox>
                       </XStack>
                       <Text fontWeight="bold">{keyFormatted}: </Text>
-                      <Text>{hideData ? maskString(mrzAttributeFormatted) : mrzAttributeFormatted}</Text>
+                      {key_ === 'older_than' ? (
+                        <XStack gap="$2" jc='center' ai='center'>
+                          <Text w="$2" fontSize={16}>{majority}</Text>
+                          <Button h="$2" w="$3" onPress={() => setMajority(majority - 1)}><Minus size={18} /></Button>
+                          <Button h="$2" w="$3" onPress={() => setMajority(majority + 1)}><Plus size={18} /></Button>
+
+                        </XStack>
+                      ) : (
+                        <Text>{hideData ? maskString(mrzAttributeFormatted) : mrzAttributeFormatted}</Text>
+                      )}
+
                     </XStack>
                   );
                 })}
               </YStack>
             </YStack>
-            <XStack f={1} />
-            <XStack f={1} />
-            <XStack f={1} />
             <Button disabled={zkeyLoading || (address == ethers.ZeroAddress)} borderRadius={100} onPress={() => { (!zkeyLoaded && Platform.OS != "ios") ? downloadZkey() : handleProve(path) }} mt="$8" backgroundColor={address == ethers.ZeroAddress ? "#cecece" : "#3185FC"} alignSelf='center' >
               {!zkeyLoaded && Platform.OS != "ios" ? (
 
