@@ -27,7 +27,7 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
     }
 
     struct Attributes {
-        string[7] values;
+        string[8] values;
     }
 
     AttributePosition[] public attributePositions;
@@ -112,8 +112,8 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
     function fieldElementsToBytes(
         uint256[3] memory publicSignals
     ) public pure returns (bytes memory) {
-        uint8[3] memory bytesCount = [31, 31, 26];
-        bytes memory bytesArray = new bytes(88); // 31 + 31 + 26
+        uint8[3] memory bytesCount = [31, 31, 27];
+        bytes memory bytesArray = new bytes(89); // 31 + 31 + 26
 
         uint256 index = 0;
         for (uint256 i = 0; i < 3; i++) {
@@ -189,6 +189,8 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
                 formatter.formatDate(attributes.values[6]),
                 '"},{"trait_type": "Expired", "value": "',
                 isExpired(_tokenId) ? "Yes" : "No",
+                '"},{"trait_type": "Older Than", "value": "',
+                formatter.formatDate(attributes.values[7]),
                 '"}',
                 "],",
                 '"description": "Proof of Passport guarantees possession of a valid passport.","external_url": "https://github.com/zk-passport/proof-of-passport","image": "https://i.imgur.com/9kvetij.png","name": "Proof of Passport #',
@@ -213,5 +215,49 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         );
 
         return block.timestamp > expiryDate;
+    }
+
+    function getIssuingStateOf(
+        uint256 _tokenId
+    ) public view returns (string memory) {
+        return tokenAttributes[_tokenId].values[0];
+    }
+
+    function getNameOf(uint256 _tokenId) public view returns (string memory) {
+        return tokenAttributes[_tokenId].values[1];
+    }
+
+    function getPassportNumberOf(
+        uint256 _tokenId
+    ) public view returns (string memory) {
+        return tokenAttributes[_tokenId].values[2];
+    }
+
+    function getNationalityOf(
+        uint256 _tokenId
+    ) public view returns (string memory) {
+        return tokenAttributes[_tokenId].values[3];
+    }
+
+    function getDateOfBirthOf(
+        uint256 _tokenId
+    ) public view returns (string memory) {
+        return tokenAttributes[_tokenId].values[4];
+    }
+
+    function getGenderOf(uint256 _tokenId) public view returns (string memory) {
+        return tokenAttributes[_tokenId].values[5];
+    }
+
+    function getExpiryDateOf(
+        uint256 _tokenId
+    ) public view returns (string memory) {
+        return tokenAttributes[_tokenId].values[6];
+    }
+
+    function getOlderThanOf(
+        uint256 _tokenId
+    ) public view returns (string memory) {
+        return tokenAttributes[_tokenId].values[7];
     }
 }
