@@ -59,13 +59,10 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
 }) => {
   const [zkeyLoading, setZkeyLoading] = useState(false);
   const [zkeyLoaded, setZkeyLoaded] = useState(false);
-<<<<<<< HEAD
   const [age, setAge] = useState(18);
 
   const incrementAge = () => setAge(prevAge => prevAge + 1);
   const decrementAge = () => setAge(prevAge => prevAge > 0 ? prevAge - 1 : 0);
-=======
->>>>>>> 9b095e96545702b14ee90d6d6c13e189747c6962
 
   const getTx = (input: string | null): string => {
     if (!input) return '';

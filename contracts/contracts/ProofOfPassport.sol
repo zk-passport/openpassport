@@ -34,7 +34,10 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
 
     mapping(uint256 => Attributes) private tokenAttributes;
 
-    constructor(Groth16Verifier v, Formatter f) ERC721("ProofOfPassport", "ProofOfPassport") {
+    constructor(
+        Groth16Verifier v,
+        Formatter f
+    ) ERC721("ProofOfPassport", "ProofOfPassport") {
         verifier = v;
         formatter = f;
         setupAttributes();
@@ -44,11 +47,14 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
     function setupAttributes() internal {
         attributePositions.push(AttributePosition("issuing_state", 2, 4, 0));
         attributePositions.push(AttributePosition("name", 5, 43, 1));
-        attributePositions.push(AttributePosition("passport_number", 44, 52, 2));
+        attributePositions.push(
+            AttributePosition("passport_number", 44, 52, 2)
+        );
         attributePositions.push(AttributePosition("nationality", 54, 56, 3));
         attributePositions.push(AttributePosition("date_of_birth", 57, 62, 4));
         attributePositions.push(AttributePosition("gender", 64, 64, 5));
         attributePositions.push(AttributePosition("expiry_date", 65, 70, 6));
+        attributePositions.push(AttributePosition("older_than", 68, 68, 1));
     }
 
     function setCSCApubKey(address _CSCApubKey) public onlyOwner {
@@ -66,8 +72,6 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         // check that the nullifier has not been used before
         require(!nullifiers[inputs[3]], "Signature already nullified");
 
-
-
         // Verify that the public key for RSA matches the hardcoded one
         // for (uint256 i = body_len; i < msg_len - 1; i++) {
         //     require(mailServer.isVerified(domain, i - body_len, inputs[i]), "Invalid: RSA modulus not matched");
@@ -84,7 +88,6 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         _mint(addr, newTokenId);
         nullifiers[inputs[3]] = true;
 
-
         // Set attributes
         uint256[3] memory firstThree = sliceFirstThree(inputs);
         bytes memory charcodes = fieldElementsToBytes(firstThree);
@@ -94,7 +97,9 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
 
         for (uint i = 0; i < attributePositions.length; i++) {
             AttributePosition memory attribute = attributePositions[i];
-            bytes memory attributeBytes = new bytes(attribute.end - attribute.start + 1);
+            bytes memory attributeBytes = new bytes(
+                attribute.end - attribute.start + 1
+            );
             for (uint j = attribute.start; j <= attribute.end; j++) {
                 attributeBytes[j - attribute.start] = charcodes[j];
             }
@@ -104,7 +109,9 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         }
     }
 
-    function fieldElementsToBytes(uint256[3] memory publicSignals) public pure returns (bytes memory) {
+    function fieldElementsToBytes(
+        uint256[3] memory publicSignals
+    ) public pure returns (bytes memory) {
         uint8[3] memory bytesCount = [31, 31, 26];
         bytes memory bytesArray = new bytes(88); // 31 + 31 + 26
 
@@ -120,7 +127,9 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         return bytesArray;
     }
 
-    function sliceFirstThree(uint256[16] memory input) public pure returns (uint256[3] memory) {
+    function sliceFirstThree(
+        uint256[16] memory input
+    ) public pure returns (uint256[3] memory) {
         uint256[3] memory sliced;
 
         for (uint256 i = 0; i < 3; i++) {
@@ -137,7 +146,10 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         uint256 batchSize
     ) internal virtual override {
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
-        require(from == address(0), "Cannot transfer - Proof of Passport is soulbound");
+        require(
+            from == address(0),
+            "Cannot transfer - Proof of Passport is soulbound"
+        );
     }
 
     function tokenURI(
@@ -159,25 +171,25 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         bytes memory baseURI = (
             abi.encodePacked(
                 '{ "attributes": [',
-                    '{"trait_type": "Issuing State", "value": "',
-                    formatter.formatCountryName(attributes.values[0]),
-                    '"},{"trait_type": "FirstName", "value": "',
-                    firstName,
-                    '"},{"trait_type": "LastName", "value": "',
-                    lastName,
-                    '"},{"trait_type": "Passport Number", "value": "',
-                    attributes.values[2],
-                    '"},{"trait_type": "Nationality", "value": "',
-                    formatter.formatCountryName(attributes.values[3]),
-                    '"},{"trait_type": "Date of birth", "value": "',
-                    formatter.formatDate(attributes.values[4]),
-                    '"},{"trait_type": "Gender", "value": "',
-                    attributes.values[5],
-                    '"},{"trait_type": "Expiry date", "value": "',
-                    formatter.formatDate(attributes.values[6]),
-                    '"},{"trait_type": "Expired", "value": "',
-                    isExpired(_tokenId) ? "Yes" : "No",
-                    '"}',
+                '{"trait_type": "Issuing State", "value": "',
+                formatter.formatCountryName(attributes.values[0]),
+                '"},{"trait_type": "FirstName", "value": "',
+                firstName,
+                '"},{"trait_type": "LastName", "value": "',
+                lastName,
+                '"},{"trait_type": "Passport Number", "value": "',
+                attributes.values[2],
+                '"},{"trait_type": "Nationality", "value": "',
+                formatter.formatCountryName(attributes.values[3]),
+                '"},{"trait_type": "Date of birth", "value": "',
+                formatter.formatDate(attributes.values[4]),
+                '"},{"trait_type": "Gender", "value": "',
+                attributes.values[5],
+                '"},{"trait_type": "Expiry date", "value": "',
+                formatter.formatDate(attributes.values[6]),
+                '"},{"trait_type": "Expired", "value": "',
+                isExpired(_tokenId) ? "Yes" : "No",
+                '"}',
                 "],",
                 '"description": "Proof of Passport guarantees possession of a valid passport.","external_url": "https://github.com/zk-passport/proof-of-passport","image": "https://i.imgur.com/9kvetij.png","name": "Proof of Passport #',
                 _tokenId.toString(),
@@ -196,7 +208,9 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
 
     function isExpired(uint256 _tokenId) public view returns (bool) {
         Attributes memory attributes = tokenAttributes[_tokenId];
-        uint256 expiryDate = formatter.dateToUnixTimestamp(attributes.values[6]);
+        uint256 expiryDate = formatter.dateToUnixTimestamp(
+            attributes.values[6]
+        );
 
         return block.timestamp > expiryDate;
     }
