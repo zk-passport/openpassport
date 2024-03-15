@@ -59,10 +59,13 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
 }) => {
   const [zkeyLoading, setZkeyLoading] = useState(false);
   const [zkeyLoaded, setZkeyLoaded] = useState(false);
+<<<<<<< HEAD
   const [age, setAge] = useState(18);
 
   const incrementAge = () => setAge(prevAge => prevAge + 1);
   const decrementAge = () => setAge(prevAge => prevAge > 0 ? prevAge - 1 : 0);
+=======
+>>>>>>> 9b095e96545702b14ee90d6d6c13e189747c6962
 
   const getTx = (input: string | null): string => {
     if (!input) return '';
@@ -87,13 +90,6 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
       bottomOffset: 80,
     })
   };
-  const printHelloWorld = (key: string) => {
-    console.log(key);
-    console.log("Hello World");
-  };
-
-
-
 
   const downloadZkey = async () => {
     // TODO: don't redownload if already in the file system at path, if downloaded from previous session
@@ -319,7 +315,7 @@ const ProveScreen: React.FC<ProveScreenProps> = ({
               )}
             </Button>
             {(height > 750) && <Text fontSize={10} color={generatingProof ? "gray" : "white"} pb="$2" alignSelf='center'>This operation can take up to 2 mn, phone may freeze during this time</Text>}
-          </YStack>
+          </YStack >
 
         ) : step === Steps.TX_MINTED ? (
           <YStack flex={1} justifyContent='center' alignItems='center' gap="$5">

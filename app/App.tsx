@@ -420,7 +420,6 @@ function App(): JSX.Element {
 
   async function proveIOS(inputs: any) {
     try {
-      console.log(inputs);
       const startTime = Date.now();
       console.log('running mopro init action')
       await NativeModules.Prover.runInitAction()
