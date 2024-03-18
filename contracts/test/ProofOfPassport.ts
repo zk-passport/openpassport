@@ -3,7 +3,7 @@ import { expect, assert } from "chai";
 import { ethers } from "hardhat";
 import { getPassportData } from "../../common/src/utils/passportData";
 import { MAX_DATAHASHES_LEN, attributeToPosition } from "../../common/src/constants/constants";
-import { formatMrz, splitToWords, formatAndConcatenateDataHashes, toUnsignedByte, hash, bytesToBigDecimal } from "../../common/src/utils/utils";
+import { formatMrz, splitToWords, formatAndConcatenateDataHashes, toUnsignedByte, hash, bytesToBigDecimal, getCurrentDateYYMMDD } from "../../common/src/utils/utils";
 import { groth16 } from 'snarkjs'
 import { countryCodes } from "../../common/src/constants/constants";
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
@@ -31,7 +31,7 @@ describe("Proof of Passport", function () {
       expiry_date: true,
     }
 
-    const reveal_bitmap = Array(88).fill('0');
+    const reveal_bitmap = Array(89).fill('0');
 
     Object.entries(attributeToReveal).forEach(([attribute, reveal]) => {
       if (reveal) {
@@ -62,6 +62,8 @@ describe("Proof of Passport", function () {
         BigInt(32)
       ),
       address: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8", // hardhat account 1
+      majority: BigInt(18),
+      current_date: getCurrentDateYYMMDD().map(datePart => BigInt(datePart).toString()),
     }
 
     console.log('generating proof...');
@@ -73,7 +75,7 @@ describe("Proof of Passport", function () {
 
     console.log('proof done');
 
-    revealChars = publicSignals.slice(0, 88).map((byte: string) => String.fromCharCode(parseInt(byte, 10))).join('');
+    revealChars = publicSignals.slice(0, 89).map((byte: string) => String.fromCharCode(parseInt(byte, 10))).join('');
 
     const vKey = JSON.parse(fs.readFileSync("../circuits/build/verification_key.json"));
     const verified = await groth16.verify(
@@ -96,7 +98,7 @@ describe("Proof of Passport", function () {
       const Verifier = await ethers.getContractFactory("Groth16Verifier");
       const verifier = await Verifier.deploy();
       await verifier.waitForDeployment();
-    
+
       console.log(`Verifier deployed to ${verifier.target}`);
 
       const Formatter = await ethers.getContractFactory("Formatter");
@@ -109,10 +111,10 @@ describe("Proof of Passport", function () {
       const ProofOfPassport = await ethers.getContractFactory("ProofOfPassport");
       const proofOfPassport = await ProofOfPassport.deploy(verifier.target, formatter.target);
       await proofOfPassport.waitForDeployment();
-    
+
       console.log(`ProofOfPassport NFT deployed to ${proofOfPassport.target}`);
 
-      return {verifier, proofOfPassport, formatter, owner, otherAccount, thirdAccount}
+      return { verifier, proofOfPassport, formatter, owner, otherAccount, thirdAccount }
     }
 
     it("Verifier verifies a correct proof", async () => {
@@ -201,8 +203,8 @@ describe("Proof of Passport", function () {
       );
 
       const tx = await proofOfPassport
-      .connect(otherAccount)
-      .mint(...callData);
+        .connect(otherAccount)
+        .mint(...callData);
 
       await tx.wait();
 
