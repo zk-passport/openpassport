@@ -53,7 +53,7 @@ const attributeToPosition = {
   date_of_birth: [57, 63],
   gender: [64, 65],
   expiry_date: [65, 69],
-  older_than: [89, 89]
+  older_than: [88, 89]
 }
 
 function App(): JSX.Element {
@@ -323,7 +323,7 @@ function App(): JSX.Element {
     // 2. Format all the data as inputs for the circuit
     const formattedMrz = formatMrz(passportData.mrz);
 
-    const reveal_bitmap = Array.from({ length: 89 }, (_) => '0');
+    const reveal_bitmap = Array.from({ length: 90 }, (_) => '0');
 
     for (const attribute in disclosure) {
       if (disclosure[attribute as keyof typeof disclosure]) {
@@ -368,8 +368,8 @@ function App(): JSX.Element {
         BigInt(64),
         BigInt(32)
       ),
-      current_date: Array.from(getCurrentDateYYMMDD()).map(datePart => BigInt(datePart)),
-      majority: BigInt(majority),
+      current_date: getCurrentDateYYMMDD().map(datePart => BigInt(datePart).toString()),
+      majority: [BigInt(Math.floor(Number(majority) / 10) + 48).toString(), BigInt(Number(majority) % 10 + 48).toString()],
       address: address,
     }
 
@@ -429,7 +429,7 @@ function App(): JSX.Element {
         datahashes_padded_length: [inputs.datahashes_padded_length.toString()], // wrap everything in arrays for bindings 
         address: [BigInt(address).toString()],
         current_date: getCurrentDateYYMMDD().map(datePart => BigInt(datePart).toString()),
-        majority: [BigInt(majority).toString()],
+        majority: [BigInt(Math.floor(majority / 10) + 48).toString(), BigInt(majority % 10 + 48).toString()],
       })
       console.log('proof response:', response)
       const parsedResponse = JSON.parse(response)

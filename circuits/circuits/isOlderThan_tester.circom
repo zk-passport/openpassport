@@ -4,12 +4,12 @@ include "./isOlderThan.circom";
 
 template isOlderThan_tester() {
 
-    signal input majority;
+    signal input majority[2];
     signal input currDate[6];
     signal input birthDateASCII[6];
 
-    component is_older_than = isOlderThan();
-    is_older_than.majority <== majority;
+    component is_older_than = IsOlderThan();
+    is_older_than.majorityASCII <== majority;
     is_older_than.currDate <== currDate;
     is_older_than.birthDateASCII <== birthDateASCII;
 

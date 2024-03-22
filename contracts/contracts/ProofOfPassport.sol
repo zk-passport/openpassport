@@ -54,7 +54,7 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         attributePositions.push(AttributePosition("date_of_birth", 57, 62, 4));
         attributePositions.push(AttributePosition("gender", 64, 64, 5));
         attributePositions.push(AttributePosition("expiry_date", 65, 70, 6));
-        attributePositions.push(AttributePosition("older_than", 68, 68, 1));
+        attributePositions.push(AttributePosition("older_than", 88, 89, 7));
     }
 
     function setCSCApubKey(address _CSCApubKey) public onlyOwner {
@@ -65,7 +65,7 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         uint256[2] memory a,
         uint256[2][2] memory b,
         uint256[2] memory c,
-        uint256[16] memory inputs
+        uint256[22] memory inputs
     ) public {
         require(verifier.verifyProof(a, b, c, inputs), "Invalid Proof");
 
@@ -82,8 +82,23 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
         // commented out for now, since hard to keep up with all
         // require(cscaPubkey == inputs[], "Invalid pubkey in inputs");
 
+        // require that the current date is valid
+        // Convert the last four parameters into a valid timestamp, adding 30 years to adjust for block.timestamp starting in 1970
+        uint[6] memory dateNum;
+        for (uint i = 0; i < 6; i++) {
+            dateNum[i] = inputs[16 + i];
+        }
+        uint currentTimestamp = getCurrentTimestamp(dateNum);
+
+        // Check that the current date is within a +/- 1 day range
+        require(
+            currentTimestamp >= block.timestamp - 1 days  && currentTimestamp <= block.timestamp + 1 days,
+            "Current date is not within the valid range"
+        );
+
+
         // Effects: Mint token
-        address addr = address(uint160(inputs[inputs.length - 1])); // generally the last one
+        address addr = address(uint160(inputs[15])); // address is the 16th input
         uint256 newTokenId = totalSupply();
         _mint(addr, newTokenId);
         nullifiers[inputs[3]] = true;
@@ -112,8 +127,8 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
     function fieldElementsToBytes(
         uint256[3] memory publicSignals
     ) public pure returns (bytes memory) {
-        uint8[3] memory bytesCount = [31, 31, 27];
-        bytes memory bytesArray = new bytes(89); // 31 + 31 + 26
+        uint8[3] memory bytesCount = [31, 31, 28];
+        bytes memory bytesArray = new bytes(90); // 31 + 31 + 28
 
         uint256 index = 0;
         for (uint256 i = 0; i < 3; i++) {
@@ -128,7 +143,7 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
     }
 
     function sliceFirstThree(
-        uint256[16] memory input
+        uint256[22] memory input
     ) public pure returns (uint256[3] memory) {
         uint256[3] memory sliced;
 
@@ -190,7 +205,7 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
                 '"},{"trait_type": "Expired", "value": "',
                 isExpired(_tokenId) ? "Yes" : "No",
                 '"},{"trait_type": "Older Than", "value": "',
-                formatter.formatDate(attributes.values[7]),
+               attributes.values[7],
                 '"}',
                 "],",
                 '"description": "Proof of Passport guarantees possession of a valid passport.","external_url": "https://github.com/zk-passport/proof-of-passport","image": "https://i.imgur.com/9kvetij.png","name": "Proof of Passport #',
@@ -260,4 +275,14 @@ contract ProofOfPassport is ERC721Enumerable, Ownable {
     ) public view returns (string memory) {
         return tokenAttributes[_tokenId].values[7];
     }
+
+    function getCurrentTimestamp(uint256[6] memory dateNum) public view returns (uint256) {
+        string memory date = "";
+        for (uint i = 0; i < 6; i++) {
+            date = string(abi.encodePacked(date, bytes1(uint8(48 + dateNum[i] % 10))));
+        }
+        uint256 currentTimestamp = formatter.dateToUnixTimestamp(date);
+        return currentTimestamp;
+    }
+
 }

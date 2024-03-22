@@ -6,7 +6,7 @@ include "./dateIsLess.circom";
 
 template IsOlderThan() {
 
-    signal input majority;
+    signal input majorityASCII[2];
     signal input currDate[6];
     signal input birthDateASCII[6];
     
@@ -24,6 +24,10 @@ template IsOlderThan() {
     signal currDateYear <== currDate[0] * TEN + currDate[1];
     signal birthYear <== birthdateNum[0] * TEN + birthdateNum[1];
 
+    signal majorityNum;
+    majorityNum <== ( majorityASCII[0] - 48 ) * TEN + ( majorityASCII[1] - 48 );
+
+
     component isPrevCentury = LessThan(8);
 
     isPrevCentury.in[0] <== currDateYear;
@@ -33,7 +37,7 @@ template IsOlderThan() {
 
     component is_older_than = DateIsLess();
 
-    is_older_than.firstYear  <== birthYear + majority;
+    is_older_than.firstYear  <== birthYear + majorityNum;
     is_older_than.firstMonth <== birthdateNum[2] * TEN + birthdateNum[3];
     is_older_than.firstDay   <== birthdateNum[4] * TEN + birthdateNum[5];
 

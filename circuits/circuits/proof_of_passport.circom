@@ -17,11 +17,11 @@ template ProofOfPassport(n, k, max_datahashes_bytes) {
     signal input pubkey[k];
     signal input signature[k];
 
-    signal input reveal_bitmap[89];
+    signal input reveal_bitmap[90];
     signal input address;
 
     signal input current_date[6]; // current date: YYMMDD
-    signal input majority;
+    signal input majority[2];
 
     // Verify passport
     component PV = PassportVerifier(n, k, max_datahashes_bytes);
@@ -34,24 +34,26 @@ template ProofOfPassport(n, k, max_datahashes_bytes) {
 
     // Majority check
     component isOlderThan = IsOlderThan();
-    isOlderThan.majority <== majority;
+    isOlderThan.majorityASCII <== majority;
 
     for (var i = 0; i < 6; i++) {
         isOlderThan.currDate[i] <== current_date[i];
         isOlderThan.birthDateASCII[i] <== mrz[62 + i];
     }
-    signal user_majority <== majority * isOlderThan.out;
-
+    signal older_than[2];
+    older_than[0] <== isOlderThan.out * majority[0];
+    older_than[1] <== isOlderThan.out * majority[1];
     // reveal reveal_bitmap bits of MRZ
-    signal reveal[89];
+    signal reveal[90];
     for (var i = 0; i < 88; i++) {
         reveal[i] <== mrz[5+i] * reveal_bitmap[i];
     }
 
     // Add the majority as last bytes
-    reveal[88] <== user_majority * reveal_bitmap[88];
+    reveal[88] <== older_than[0] * reveal_bitmap[88];
+    reveal[89] <== older_than[1] * reveal_bitmap[89];
 
-    signal output reveal_packed[3] <== PackBytes(89, 3, 31)(reveal);
+    signal output reveal_packed[3] <== PackBytes(90, 3, 31)(reveal);
 
     // make nullifier public;
     // we take nullifier = signature[0, 1] which it 64 + 64 bits long, so chance of collision is 2^128

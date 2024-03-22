@@ -8,13 +8,13 @@ import { getCurrentDateYYMMDD } from '../../common/src/utils/utils';
 import { sha256Pad } from '@zk-email/helpers'; // Ensure this import is added
 const wasm_tester = require("circom_tester").wasm;
 
-describe("start testing of proof_of_passport_majority.circom", function () {
+describe.only("start testing of proof_of_passport_majority.circom", function () {
     this.timeout(0);
     let inputs: any;
     let circuit: any;
     let w: any;
     let current_date: any;
-    let majority: number = 18;
+    let majority: any = [49, 58];
 
     before(async () => {
 
@@ -27,11 +27,11 @@ describe("start testing of proof_of_passport_majority.circom", function () {
 
         const concatenatedDataHashesHashDigest = hash(passportData.dataGroupHashes);
         assert(
-            arraysAreEqual(passportData.eContent.slice(72, 72 + 32), concatenatedDataHashesHashDigest),
+            arraysAreEqual(passportData.eContent.slice(72, 72 + 33), concatenatedDataHashesHashDigest),
             'concatenatedDataHashesHashDigest is at the right place in passportData.eContent'
         )
 
-        const reveal_bitmap = Array(89).fill('1');
+        const reveal_bitmap = Array(90).fill('1');
         const [messagePadded, messagePaddedLen] = sha256Pad(
             new Uint8Array(passportData.dataGroupHashes),
             MAX_DATAHASHES_LEN
@@ -56,7 +56,7 @@ describe("start testing of proof_of_passport_majority.circom", function () {
             ),
             address: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8", // sample address
             current_date: current_date,
-            majority: majority
+            majority: majority.map(byte => String(byte))
         }
         w = await circuit.calculateWitness(inputs);
 
@@ -80,7 +80,7 @@ describe("start testing of proof_of_passport_majority.circom", function () {
 
 function unpackRevealPacked(packed) {
     let unpacked = [];
-    const bytesCount = [31, 31, 27];
+    const bytesCount = [31, 31, 28];
 
     Object.keys(packed).forEach((key, index) => {
         let element = BigInt(packed[key]);
@@ -97,9 +97,10 @@ function unpackRevealPacked(packed) {
 function generateExpectedReveals(inputs, user_majority) {
     let expectedReveals = [];
     //Keep the last bytes for majority check
-    for (let i = 0; i < inputs.reveal_bitmap.length - 1; i++) {
+    for (let i = 0; i < inputs.reveal_bitmap.length - user_majority.length; i++) {
         expectedReveals.push(inputs.reveal_bitmap[i] === '1' ? parseInt(inputs.mrz[i + 5]) : 0);
     }
-    expectedReveals.push(user_majority) * inputs.reveal_bitmap[-1];
+    expectedReveals.push(user_majority[0]) * inputs.reveal_bitmap[88];
+    expectedReveals.push(user_majority[1]) * inputs.reveal_bitmap[89];
     return expectedReveals;
 }

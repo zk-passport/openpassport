@@ -75,7 +75,7 @@ describe('DateIsLessChecker Circuit Test', function () {
         majorityBirthDates.forEach((date, index) => {
             it(`majority check for birthdate ${genDateStr(majorityBirthDates[index])} and current date ${genDateStr(currentDates[index])} and age: ${getAgeFromDates(majorityBirthDates[index], currentDates[index])}`, async function () {
                 const inputs = {
-                    majority: majority,
+                    majority: [49, 56],
                     currDate: [
                         Math.floor(currentDates[index].year / 10) % 10,
                         currentDates[index].year % 10,
@@ -109,7 +109,7 @@ describe('DateIsLessChecker Circuit Test', function () {
         minorityBirthDates.forEach((date, index) => {
             it(`minority check for birthdate ${genDateStr(minorityBirthDates[index])} and current date ${genDateStr(currentDates[index])} and age: ${getAgeFromDates(minorityBirthDates[index], currentDates[index])}`, async function () {
                 const inputs = {
-                    majority: majority,
+                    majority: [49, 58],
                     currDate: [
                         Math.floor(currentDates[index].year / 10) % 10,
                         currentDates[index].year % 10,

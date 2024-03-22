@@ -224,8 +224,9 @@ export function formatInputsIOS(inputs: number[]) {
   return splitted.map(bytesToBigInt);
 }
 
-export function getCurrentDateYYMMDD(): number[] {
+export function getCurrentDateYYMMDD(dayDiff: number = 0): number[] {
   const date = new Date();
+  date.setDate(date.getDate() + dayDiff); // Adjust the date by the dayDiff
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth() + 1;
   const day = date.getUTCDate();
