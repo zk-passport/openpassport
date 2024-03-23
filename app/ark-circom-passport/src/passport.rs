@@ -236,11 +236,6 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_provePassport(
             "datahashes_padded_length".to_string(),
             vec![datahashes_padded_length_bigint],
         );
-        // let majority_i32 = majority_str
-        //     .parse::<i32>()
-        //     .expect("Failed to parse majority to i32");
-        // let majority_bigint = BigInt::from(majority_i32);
-        // inputs.insert("majority".to_string(), vec![majority_bigint]);
 
         println!("generating witness...");
         let now = Instant::now();
@@ -284,6 +279,14 @@ pub extern "C" fn Java_io_tradle_nfc_RNPassportReaderModule_provePassport(
             b: serialized_constraint_matrices.b.data,
             c: serialized_constraint_matrices.c.data,
         };
+
+        /* adding file reading for testing locally
+        let file_bytes: &'static [u8] =
+            include_bytes!("../passport/proof_of_passport_final.arkzkey");
+        log::error!("PROOF OF PASSPORT ---- zkey size: {}", file_bytes.len());
+        let (proving_key, constraint_matrices) = read_arkzkey_from_bytes(file_bytes).unwrap();
+         end of file reading for testing locally */
+
         let zkey = (proving_key, constraint_matrices);
 
         log::error!(
