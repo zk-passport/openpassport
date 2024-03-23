@@ -69,5 +69,4 @@ yarn-error.log
 
 .expo/
 
-./android/react-native-passport-reader/android/src/main/jniLibs/arm64/libark_circom_passport.so
 android/react-native-passport-reader/android/src/main/jniLibs/arm64/libark_circom_passport.so
