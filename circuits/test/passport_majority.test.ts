@@ -14,7 +14,7 @@ describe.only("start testing of proof_of_passport_majority.circom", function () 
     let circuit: any;
     let w: any;
     let current_date: any;
-    let majority: any = [49, 58];
+    let majority: any = [49, 56];
 
     before(async () => {
 

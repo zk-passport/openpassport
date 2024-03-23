@@ -5,10 +5,6 @@ include "@zk-email/circuits/helpers/extract.circom";
 include "./passport_verifier.circom";
 include "./isOlderThan.circom";
 
-// Proof of passport with majority check
-// This circuit is used to prove that a passport is valid and that the user is major
-// Majority is currently hardcoded in this circuit
-
 template ProofOfPassport(n, k, max_datahashes_bytes) {
     signal input mrz[93]; // formatted mrz (5 + 88) chars
     signal input dataHashes[max_datahashes_bytes];
@@ -20,8 +16,8 @@ template ProofOfPassport(n, k, max_datahashes_bytes) {
     signal input reveal_bitmap[90];
     signal input address;
 
-    signal input current_date[6]; // current date: YYMMDD
-    signal input majority[2];
+    signal input current_date[6]; // YYMMDD - num
+    signal input majority[2]; // YY - ASCII
 
     // Verify passport
     component PV = PassportVerifier(n, k, max_datahashes_bytes);
@@ -32,7 +28,7 @@ template ProofOfPassport(n, k, max_datahashes_bytes) {
     PV.pubkey <== pubkey;
     PV.signature <== signature;
 
-    // Majority check
+    // Age range check
     component isOlderThan = IsOlderThan();
     isOlderThan.majorityASCII <== majority;
 

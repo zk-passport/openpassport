@@ -1,7 +1,7 @@
 import { describe } from 'mocha'
 import chai, { assert, expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import { hash, toUnsignedByte, arraysAreEqual, bytesToBigDecimal, formatMrz, splitToWords } from '../../common/src/utils/utils'
+import { hash, toUnsignedByte, arraysAreEqual, bytesToBigDecimal, formatMrz, splitToWords, getCurrentDateYYMMDD } from '../../common/src/utils/utils'
 import { groth16 } from 'snarkjs'
 import { getPassportData } from '../../common/src/utils/passportData'
 import { MAX_DATAHASHES_LEN, attributeToPosition } from '../../common/src/constants/constants'
@@ -18,6 +18,7 @@ describe('Circuit tests', function () {
   this.timeout(0)
 
   let inputs: any;
+  let majority: any = [49, 56];
 
   this.beforeAll(async () => {
     const passportData = getPassportData();
@@ -38,7 +39,7 @@ describe('Circuit tests', function () {
       new Uint8Array(passportData.dataGroupHashes),
       MAX_DATAHASHES_LEN
     );
-
+    let current_date = getCurrentDateYYMMDD();
     inputs = {
       mrz: formattedMrz.map(byte => String(byte)),
       reveal_bitmap: reveal_bitmap.map(byte => String(byte)),
@@ -56,6 +57,9 @@ describe('Circuit tests', function () {
         BigInt(32)
       ),
       address: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8", // sample address
+      current_date: current_date,
+      majority: majority.map(byte => String(byte)),
+
     }
 
     console.log('inputs', inputs);

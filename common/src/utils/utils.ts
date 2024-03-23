@@ -40,7 +40,6 @@ export function formatAndConcatenateDataHashes(
   dataHashes: [number, number[]][],
 ) {
   // Let's replace the first array with the MRZ hash
-  // why shift to unshit right after ?
   dataHashes.shift();
   dataHashes.unshift([1, mrzHash]);
   // concatenating dataHashes :
