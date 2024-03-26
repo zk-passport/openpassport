@@ -36,11 +36,9 @@ class Prover: NSObject {
 
       print("Private Frameworks Path: \(Bundle.main.privateFrameworksPath ?? "Not Found")")
       
-      if let frameworksPath = Bundle.main.privateFrameworksPath {
-        let dylibPath = frameworksPath + "/proof_of_passport.dylib"
-
+      if let pathForWasmString = Bundle.main.path(forResource: "proofofpassport", ofType: "dylib", inDirectory: "Frameworks/proofofpassport.framework") {
         do {
-          try initializeMoproDylib(dylibPath: dylibPath)
+          try initializeMoproDylib(dylibPath: pathForWasmString)
 
           // Record end time and compute duration
           let end = CFAbsoluteTimeGetCurrent()
