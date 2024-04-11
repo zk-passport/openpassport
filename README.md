@@ -32,7 +32,7 @@ As a first application, users who can prove they indeed hold a valid passport ca
 
 #### Does my passport support Proof of Passport ?
 
-![EPassport_logo_grey](https://github.com/zk-passport/proof-of-passport/assets/62038140/c3263600-19b6-45f9-9b5f-63f352992c88)
+![image](https://github.com/zk-passport/proof-of-passport/assets/5999852/8358ac64-a85d-4953-bb5a-277155be15b6)
 
 If it has this symbol on the front cover, yes.
 
