@@ -5,5 +5,6 @@
   "Deploy_Registry#Verifier_disclose": "0x214007909475A4Eed3f0a8C827E86de55EcFc340",
   "Deploy_Registry#Verifier_register_sha256WithRSAEncryption_65537": "0x3C183200751Aa52958Ae2419D165ADA04Fba5c00",
   "Deploy_Registry#ProofOfPassportRegister": "0xFd84F23Be557133DCa47Fc9aa22031AcCE557335",
-  "Deploy_Registry#SBT": "0x09082fb07341F4e664af8EBdcf16C95512fe3185"
+  "Deploy_Registry#SBT": "0x09082fb07341F4e664af8EBdcf16C95512fe3185",
+  "Deploy_Registry#GitcoinProofOfPassportSBT": "0xFD6e5d2918f6f726C720BEf6bFfb71d1842272B2"
 }

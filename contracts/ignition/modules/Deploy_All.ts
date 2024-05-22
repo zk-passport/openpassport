@@ -23,7 +23,7 @@ export default buildModule("Deploy_Registry", (m) => {
 
     m.call(register, "addSignatureAlgorithm", [1, verifier_register]);
     const verifier_disclose = m.contract("Verifier_disclose");
-    const sbt = m.contract("SBT", [verifier_disclose, formatter, register]);
+    const sbt = m.contract("SBT", ["ProofOfPassport", "POP", verifier_disclose, formatter, register]);
 
     return { registry, register, verifier_register, sbt };
 });

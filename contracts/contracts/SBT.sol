@@ -52,10 +52,12 @@ contract SBT is ERC721Enumerable, Ownable {
     mapping(uint256 => Attributes) private tokenAttributes;
 
     constructor(
+        string memory name,
+        string memory symbol,
         Verifier_disclose v,
         Formatter f,
         IRegister r
-    ) ERC721("ProofOfPassport", "ProofOfPassport") {
+    ) ERC721(name, symbol) {
         verifier = v;
         formatter = f;
         register = r;

@@ -119,6 +119,8 @@ describe("Proof of Passport - Contracts - Register & Disclose flow", function ()
 
         SBT = await ethers.getContractFactory("SBT");
         sbt = await SBT.deploy(
+            "ProofOfPassport",
+            "POP",
             verifier_disclose.target,
             formatter.target,
             register.target,
