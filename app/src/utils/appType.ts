@@ -32,6 +32,8 @@ export type AppType = {
 
   successComponent: () => React.JSX.Element;
   finalButtonAction: () => void;
+
+  finalButtonIcon: () => React.JSX.Element;
   finalButtonText: string;
 
   scope: string;

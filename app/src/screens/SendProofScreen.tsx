@@ -28,6 +28,7 @@ const SendProofScreen: React.FC = () => {
     successComponent,
     finalButtonAction,
     finalButtonText,
+    finalButtonIcon,
   } = selectedApp;
 
   const useAppStore = appStoreMapping[selectedApp.id as keyof typeof appStoreMapping]
@@ -62,7 +63,8 @@ const SendProofScreen: React.FC = () => {
             mb="$8"
             backgroundColor="#3185FC"
           >
-            <Copy color="white" size="$1" /><Text color={textColor1} fow="bold">
+            {finalButtonIcon()}
+            <Text color={textColor1} fow="bold">
               {finalButtonText}
             </Text>
           </Button>

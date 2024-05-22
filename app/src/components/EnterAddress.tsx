@@ -4,16 +4,21 @@ import { borderColor, componentBgColor, componentBgColor2, textColor1, textColor
 import ENS from "../images/ens_mark_dao.png"
 import { useToastController } from '@tamagui/toast'
 import { ethers } from 'ethers';
-import useSbtStore from '../stores/sbtStore';
+import { appStoreMapping } from '../screens/ProveScreen';
+import useNavigationStore from '../stores/navigationStore';
+import { AppType } from '../utils/appType';
 
 const EnterAddress: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
+  const selectedApp = useNavigationStore(state => state.selectedApp) as AppType;
+
+  const useAppStore = appStoreMapping[selectedApp.id as keyof typeof appStoreMapping]
 
   const {
     address,
     ens,
     update
-  } = useSbtStore();
+  } = useAppStore();
   
   const provider = new ethers.JsonRpcProvider(`https://eth-mainnet.g.alchemy.com/v2/lpOn3k6Fezetn1e5QF-iEsn-J0C6oGE0`);
   const toast = useToastController()

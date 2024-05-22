@@ -13,9 +13,11 @@ import useUserStore from '../stores/userStore';
 import useNavigationStore from '../stores/navigationStore';
 import { AppType } from '../utils/appType';
 import useSbtStore from '../stores/sbtStore';
+import useGitcoinStore from '../stores/gitcoinStore';
 
 export const appStoreMapping = {
   'soulbound': useSbtStore,
+  'gitcoin': useGitcoinStore,
   // Add more app ID to store mappings as needed
 };
 
@@ -93,13 +95,13 @@ const ProveScreen: React.FC = () => {
           }
         </YStack>
         <Text color={textColor1} fontSize="$5" fontWeight="bold" ml="$2" mb="$1">
-          Hi {" "}
+          Hi{" "}
           {
             hideData
               ? maskString(getFirstName(passportData.mrz))
               : getFirstName(passportData.mrz)
           }
-          👋
+          {" "}👋
         </Text>
 
         {fields.map((Field, index) => (
@@ -117,90 +119,97 @@ const ProveScreen: React.FC = () => {
                   <XStack gap="$2">
                     <Text fontSize={16} fow="bold" color="#ededed">Disclose</Text>
                   </XStack>
-                  <Text color="#a0a0a0">Select what to disclose</Text>
+                  <Text color="#a0a0a0">
+                    {Object.keys(selectedApp.disclosureOptions).length > 0
+                      ? "Select what to disclose"
+                      : "No disclosure is needed for this app"
+                    } </Text>
                 </YStack>
               </XStack>
             </YStack>
-            <YStack
-              gap="$2"
-              p="$3"
-              bc="#232323"
-              borderWidth={1.2}
-              borderLeftWidth={0}
-              borderRightWidth={0}
-              borderBottomWidth={0}
-              borderColor="#343434"
-              borderBottomLeftRadius="$6"
-              borderBottomRightRadius="$6"
-            >
-              <ScrollView h={height < 750 ? "$6" : ""} >
-                {selectedApp && Object.keys(selectedApp.disclosureOptions).map((key) => {
-                  const key_ = key;
-                  const indexes = attributeToPosition[key_ as keyof typeof attributeToPosition];
-                  const keyFormatted = key_.replace(/_/g, ' ').split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                  const mrzAttribute = passportData.mrz.slice(indexes[0], indexes[1] + 1);
-                  const mrzAttributeFormatted = formatAttribute(key_, mrzAttribute);
+            {Object.keys(selectedApp.disclosureOptions).length > 0
+              ? <YStack
+                gap="$2"
+                p="$3"
+                bc="#232323"
+                borderWidth={1.2}
+                borderLeftWidth={0}
+                borderRightWidth={0}
+                borderBottomWidth={0}
+                borderColor="#343434"
+                borderBottomLeftRadius="$6"
+                borderBottomRightRadius="$6"
+              >
+                <ScrollView h={height < 750 ? "$6" : ""} >
+                  {selectedApp && Object.keys(selectedApp.disclosureOptions).map((key) => {
+                    const key_ = key;
+                    const indexes = attributeToPosition[key_ as keyof typeof attributeToPosition];
+                    const keyFormatted = key_.replace(/_/g, ' ').split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                    const mrzAttribute = passportData.mrz.slice(indexes[0], indexes[1] + 1);
+                    const mrzAttributeFormatted = formatAttribute(key_, mrzAttribute);
 
-                  return (
-                    <XStack key={key} mx="$2" gap="$3" alignItems='center'>
-                      <XStack p="$2" onPress={() => handleDisclosureChange(key_)} >
-                        <Checkbox
-                          bg={componentBgColor}
-                          borderColor={borderColor}
-                          value={key}
-                          checked={disclosure[key_ as keyof typeof disclosure]}
-                          onCheckedChange={() => handleDisclosureChange(key_)}
-                          aria-label={keyFormatted}
-                          size="$6"
-                        >
-                          <Checkbox.Indicator >
-                            <Check color={textColor1} />
-                          </Checkbox.Indicator>
-                        </Checkbox>
-                      </XStack>
-                      <Text color={textColor2} >{keyFormatted}: </Text>
-
-                      {key_ === 'older_than' ? (
-                        <XStack gap="$1.5" jc='center' ai='center'>
-                          <XStack mr="$2">
-                            <Text color={textColor1} w="$1" fontSize={16}>{majority}</Text>
-                            <Text color={textColor1} fontSize={16}> yo</Text>
-                          </XStack>
-                          <Button
+                    return (
+                      <XStack key={key} mx="$2" gap="$3" alignItems='center'>
+                        <XStack p="$2" onPress={() => handleDisclosureChange(key_)} >
+                          <Checkbox
                             bg={componentBgColor}
                             borderColor={borderColor}
-                            h="$2"
-                            w="$3"
-                            onPress={() => update({
-                              majority: majority - 1
-                            })}
+                            value={key}
+                            checked={disclosure[key_ as keyof typeof disclosure]}
+                            onCheckedChange={() => handleDisclosureChange(key_)}
+                            aria-label={keyFormatted}
+                            size="$6"
                           >
-                            <Minus color={textColor1} size={18} />
-                          </Button>
-                          <Button
-                            bg={componentBgColor}
-                            borderColor={borderColor}
-                            h="$2"
-                            w="$3"
-                            onPress={() => update({
-                              majority: majority + 1
-                            })}
-                          >
-                            <Plus color={textColor1} size={18} />
-                          </Button>
+                            <Checkbox.Indicator >
+                              <Check color={textColor1} />
+                            </Checkbox.Indicator>
+                          </Checkbox>
                         </XStack>
-                      ) : (
-                        <Text
-                          color={textColor1}
-                        >
-                          {hideData ? maskString(mrzAttributeFormatted) : mrzAttributeFormatted}
-                        </Text>
-                      )}
-                    </XStack>
-                  );
-                })}
-              </ScrollView >
-            </YStack >
+                        <Text color={textColor2} >{keyFormatted}: </Text>
+
+                        {key_ === 'older_than' ? (
+                          <XStack gap="$1.5" jc='center' ai='center'>
+                            <XStack mr="$2">
+                              <Text color={textColor1} w="$1" fontSize={16}>{majority}</Text>
+                              <Text color={textColor1} fontSize={16}> yo</Text>
+                            </XStack>
+                            <Button
+                              bg={componentBgColor}
+                              borderColor={borderColor}
+                              h="$2"
+                              w="$3"
+                              onPress={() => update({
+                                majority: majority - 1
+                              })}
+                            >
+                              <Minus color={textColor1} size={18} />
+                            </Button>
+                            <Button
+                              bg={componentBgColor}
+                              borderColor={borderColor}
+                              h="$2"
+                              w="$3"
+                              onPress={() => update({
+                                majority: majority + 1
+                              })}
+                            >
+                              <Plus color={textColor1} size={18} />
+                            </Button>
+                          </XStack>
+                        ) : (
+                          <Text
+                            color={textColor1}
+                          >
+                            {hideData ? maskString(mrzAttributeFormatted) : mrzAttributeFormatted}
+                          </Text>
+                        )}
+                      </XStack>
+                    );
+                  })}
+                </ScrollView >
+              </YStack >
+              : null
+            }
           </YStack >
         </YStack >
         <Button

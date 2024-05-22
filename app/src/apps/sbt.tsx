@@ -20,10 +20,11 @@ import { COMMITMENT_TREE_TRACKER_URL, PASSPORT_ATTESTATION_ID, RPC_URL } from ".
 import { poseidon2 } from "poseidon-lite";
 import axios from 'axios';
 import { LeanIMT } from "@zk-kit/imt";
+import { Copy } from '@tamagui/lucide-icons';
 
-const sepolia = () => (
-  <YStack ml="$2" p="$2" px="$3" bc="#0d1e18" borderRadius="$10">
-    <Text color="#3bb178" fow="bold">Sepolia</Text>
+export const optimism = () => (
+  <YStack ml="$2" p="$2" px="$3" bc="#ed3d4f" borderRadius="$10">
+    <Text color="#FFFFFF" fow="bold">Optimism</Text>
   </YStack>
 );
 
@@ -36,7 +37,7 @@ export const sbtApp: AppType = {
   colorOfTheText: 'black',
   selectable: true,
   icon: Flame,
-  tags: [sepolia()],
+  tags: [optimism()],
   
   // ProveScreen UI
   name: 'Soulbound token',
@@ -46,55 +47,6 @@ export const sbtApp: AppType = {
     older_than: "optional"
   },
   
-  // SendProofScreen UI before sending proof
-  beforeSendText1: "You can now use this proof to mint a Soulbound token.",
-  beforeSendText2: "Disclosed information will be displayed on SBT.",
-  sendButtonText: 'Mint Soulbound token',
-  sendingButtonText: 'Minting...',
-
-  // SendProofScreen UI after sending proof
-  successTitle: 'You just have minted a Soulbound token 🎉',
-  successText: 'You can now share this proof with the selected app.',
-
-  successComponent: () => {
-    const txHash = useSbtStore.getState().txHash;
-    const toast = useNavigationStore.getState().toast;
-
-    return (
-      <Pressable onPress={() => {
-          Clipboard.setString(txHash);
-          toast?.show('🖨️', {
-            message: "Tx copied to clipboard",
-            customData: {
-              type: "success",
-            },
-          })
-        }}
-      >
-        <XStack jc='space-between' h="$2" ai="center">
-          <Text color={textColor1} fontWeight="bold" fontSize="$5">
-            Tx: {shortenTxHash(txHash)}
-          </Text>
-        </XStack>
-      </Pressable>
-    )
-  },
-
-  finalButtonAction: () => {
-    const txHash = useSbtStore.getState().txHash;
-    const toast = useNavigationStore.getState().toast;
-
-    Clipboard.setString(txHash);
-    toast?.show('🖨️', {
-      message: "Tx copied to clipboard",
-      customData: {
-        type: "success",
-      },
-    })
-  },
-
-  finalButtonText: 'Copy to clipboard',
-
   scope: '1',
   circuit: "disclose",
 
@@ -178,6 +130,12 @@ export const sbtApp: AppType = {
     }
   },
 
+  // SendProofScreen UI before sending proof
+  beforeSendText1: "You can now use this proof to mint a Soulbound token.",
+  beforeSendText2: "Disclosed information will be displayed on SBT.",
+  sendButtonText: 'Mint Soulbound token',
+  sendingButtonText: 'Minting...',
+
   handleSendProof: async () => {
     const {
       update,
@@ -206,13 +164,16 @@ export const sbtApp: AppType = {
     const provider = new ethers.JsonRpcProvider(RPC_URL);
 
     try {
-      const serverResponse = await mintSBT(proof)
+      const serverResponse = await mintSBT(
+        proof,
+        "Deploy_Registry#SBT"
+      )
       const txHash = serverResponse?.data.hash;
 
       setStep(Steps.PROOF_SENT);
       update({
         txHash: txHash,
-        proofSentText: `SBT minting... Network: Sepolia. Transaction hash: ${txHash}`
+        proofSentText: `SBT minting... Network: Optimism. Transaction hash: ${txHash}`
       });
       
       const receipt = await provider.waitForTransaction(txHash);
@@ -226,7 +187,7 @@ export const sbtApp: AppType = {
           },
         })
         update({
-          proofSentText: `SBT minted. Network: Sepolia. Transaction hash: ${txHash}`
+          proofSentText: `SBT minted. Network: Optimism. Transaction hash: ${txHash}`
         });
       } else {
         toast?.show('Error', {
@@ -236,14 +197,14 @@ export const sbtApp: AppType = {
           },
         })
         update({
-          proofSentText: `Error minting SBT. Network: Sepolia. Transaction hash: ${txHash}`
+          proofSentText: `Error minting SBT. Network: Optimism. Transaction hash: ${txHash}`
         });
         setStep(Steps.PROOF_GENERATED);
       }
     } catch (error: any) {
       setStep(Steps.PROOF_GENERATED);
       update({
-        proofSentText: `Error minting SBT. Network: Sepolia.`
+        proofSentText: `Error minting SBT. Network: Optimism.`
       });
       if (error.isAxiosError && error.response) {
         const errorMessage = error.response.data.error;
@@ -271,7 +232,51 @@ export const sbtApp: AppType = {
       }
       amplitude.track(error.message);
     }
-  }
+  },
+
+  // SendProofScreen UI after sending proof
+  successTitle: 'You just have minted a Soulbound token 🎉',
+  successText: 'You can now share this proof with the selected app.',
+
+  successComponent: () => {
+    const txHash = useSbtStore.getState().txHash;
+    const toast = useNavigationStore.getState().toast;
+
+    return (
+      <Pressable onPress={() => {
+          Clipboard.setString(txHash);
+          toast?.show('🖨️', {
+            message: "Tx copied to clipboard",
+            customData: {
+              type: "success",
+            },
+          })
+        }}
+      >
+        <XStack jc='space-between' h="$2" ai="center">
+          <Text color={textColor1} fontWeight="bold" fontSize="$5">
+            Tx: {shortenTxHash(txHash)}
+          </Text>
+        </XStack>
+      </Pressable>
+    )
+  },
+
+  finalButtonIcon: () => <Copy color="white" size="$1" />,
+  finalButtonText: 'Copy to clipboard',
+
+  finalButtonAction: () => {
+    const txHash = useSbtStore.getState().txHash;
+    const toast = useNavigationStore.getState().toast;
+
+    Clipboard.setString(txHash);
+    toast?.show('🖨️', {
+      message: "Tx copied to clipboard",
+      customData: {
+        type: "success",
+      },
+    })
+  },
 }
 
 export default sbtApp;

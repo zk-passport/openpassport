@@ -24,9 +24,9 @@ const AppScreen: React.FC = () => {
 
   // add new apps here
   const cardsData = [
+    gitcoinApp,
     sbtApp,
     zupassApp,
-    gitcoinApp
   ];
 
   return (

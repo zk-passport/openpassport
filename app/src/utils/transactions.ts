@@ -65,10 +65,11 @@ export const sendRegisterTransaction = async (
 
 export const mintSBT = async (
   proof: Proof,
+  name: string,
 ) => {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
 
-  if (!contractAddresses["Deploy_Registry#SBT"] || !sbtArtefacts.abi) {
+  if (!contractAddresses[name as keyof typeof contractAddresses] || !sbtArtefacts.abi) {
     console.log('contracts addresses or abi not found');
     return;
   }
@@ -82,7 +83,7 @@ export const mintSBT = async (
   
   try {
     const proofOfPassportContract = new ethers.Contract(
-      contractAddresses["Deploy_Registry#SBT"],
+      contractAddresses[name as keyof typeof contractAddresses],
       sbtArtefacts.abi,
       provider
     );
