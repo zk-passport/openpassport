@@ -19,7 +19,7 @@ contract SBT is ERC721Enumerable, Ownable {
     Formatter public formatter;
     IRegister public register;
 
-    uint constant scope = 1;
+    uint immutable scope;
 
     mapping(uint256 => bool) public nullifiers;
 
@@ -54,10 +54,12 @@ contract SBT is ERC721Enumerable, Ownable {
     constructor(
         string memory name,
         string memory symbol,
+        uint _scope,
         Verifier_disclose v,
         Formatter f,
         IRegister r
     ) ERC721(name, symbol) {
+        scope = _scope;
         verifier = v;
         formatter = f;
         register = r;
@@ -83,6 +85,8 @@ contract SBT is ERC721Enumerable, Ownable {
             register.checkRoot(uint(proof.merkle_root)),
             "Invalid merkle root"
         );
+        
+        require(proof.scope == scope, "Invalid scope");
         // require(!nullifiers[proof.nullifier], "Signature already nullified");
 
         // require that the current date is valid

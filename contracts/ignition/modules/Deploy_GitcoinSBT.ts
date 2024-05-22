@@ -10,6 +10,7 @@ export default buildModule("Deploy_Registry", (m) => {
         [
             "GitcoinProofOfPassportSBT",
             "GPOP",
+            2,
             verifier_disclose_address,
             formatter_address,
             register_address

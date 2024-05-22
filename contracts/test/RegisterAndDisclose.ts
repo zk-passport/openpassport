@@ -121,6 +121,7 @@ describe("Proof of Passport - Contracts - Register & Disclose flow", function ()
         sbt = await SBT.deploy(
             "ProofOfPassport",
             "POP",
+            1,
             verifier_disclose.target,
             formatter.target,
             register.target,
@@ -309,6 +310,10 @@ describe("Proof of Passport - Contracts - Register & Disclose flow", function ()
         it("SBT mint should fail with a wrong merkle_root - SBT", async function () {
             await expect(sbt.mint({ ...formattedCallData_disclose, merkle_root: 0 }))
                 .to.be.revertedWith("Invalid merkle root");
+        });
+        it("SBT mint should fail with the wrong scope - SBT", async function () {
+            await expect(sbt.mint({ ...formattedCallData_disclose, scope: 2 }))
+                .to.be.revertedWith("Invalid scope");
         });
         it("Verifier_disclose.sol verifies a correct proof - Disclose", async () => {
             expect(
