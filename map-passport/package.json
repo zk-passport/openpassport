@@ -1,0 +1,29 @@
+{
+  "name": "map-passport",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/material": "^5.15.18",
+    "next": "14.2.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-simple-maps": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/react-simple-maps": "^3.0.4",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.3",
+    "typescript": "^5"
+  }
+}
