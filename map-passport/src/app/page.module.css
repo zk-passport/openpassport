@@ -1,3 +1,60 @@
-.w40{
-  width: 40%;
+.homeTitle{
+  color: #28a745;
+}
+
+.homeDescription {
+  font-size: 14px;
+  margin-top: 12px;
+  color: #28a745;
+}
+
+.mapSection {
+  width: 70%;
+  /* margin-top: -3rem; */
+}
+
+.mapRow {
+  display: flex;
+  margin-top: 16px;
+}
+
+.countryInfo {
+  margin-left: 20px;
+  width: calc(30% - 20px);
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.countryInfo p {
+  font-size: 18px;
+}
+
+.countryInfo span {
+  font-weight: bold;
+  font-size: 18px;
+  filter: saturate(0.6);
+}
+
+p.countryName {
+  color: #28a745;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.countryIsIssues {
+  color: #9673b9;
+  margin-top: 12px;
+}
+
+.proofSupported {
+  color: #6c757d;
+}
+
+.algorithmsInfos {
+  margin-top: 8px;
+}
+
+.algorithmsInfos .algorithmsInfo {
+  font-size: 14px;
+  color: #007bff;
 }
