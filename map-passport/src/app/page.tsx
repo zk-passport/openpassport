@@ -3,17 +3,32 @@
 import styles from './page.module.css';
 import MapChart from '@/components/home-map';
 import Grid from '@mui/material/Grid';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { CSSTransition } from 'react-transition-group';
 
 export default function Home() {
-  const [toolTipInfo, setTooltipInfo] = useState({});
-  const [isCountrySelected, setIsCountrySelected] = useState(false);
+  const encryptionNames = {
+    'sha1WithRSAEncryption':'Sha1 RSA Encryption',
+    'sha256WithRSAEncryption':'Sha256 RSA Encryption',
+    'sha512WithRSAEncryption':'Sha512 RSA Encryption',
+    'rsassaPss        ':'RSASSA PSS Encryption',
+    'ecdsa-with-SHA1':'ECDSA with SHA-1',
+    'ecdsa-with-SHA256':'ECDSA with SHA-256',
+    'ecdsa-with-SHA384':'ECDSA with SHA-384',
+    'ecdsa-with-SHA512':'ECDSA with SHA-512',
+  };
+  const [selectedCountryInfo, setSelectedCountryInfo] = useState({});
+  const [allCountriesData, setAllCountriesData] = useState({});
+  const [selectedCountryName, setSelectedCountryName] = useState('');
+  const infoElRef = useRef(null);
 
   const handleToolTip = (countryName: string) => {
+    setSelectedCountryName(countryName);
     if (countryName) {
-      setIsCountrySelected(true);
-    } else {
-      setIsCountrySelected(false);
+      const selectedCountryInfo = allCountriesData[countryName];
+      if (selectedCountryInfo) {
+        setSelectedCountryInfo(selectedCountryInfo);
+      }
     }
     console.log('countryName :>> ', countryName);
   };
@@ -22,58 +37,90 @@ export default function Home() {
   const parseDistinguishedName = (dn) => {
     const parts = dn.split(', ');
     const obj = {};
-    
-    parts.forEach(part => {
+
+    parts.forEach((part) => {
       const [key, value] = part.split('=');
       obj[key] = value;
     });
-    
+
     return obj;
-  }
+  };
 
-  const formatJsonData = (input) => {
-    delete input.default;
-    const signedInfo: any = []
+  const formatJsonData = (input: any = {}, countryNames: any = {}): any => {
+    delete input?.default;
+    const signedInfo: any = [];
 
-    for(const inputData of Object.entries(input)){
+    console.log('input :>> ', input);
+    
+    for (const inputData of Object.entries(input)) {
       const encryptionData = input[inputData[0]];
       for (const [dn, count] of Object.entries(encryptionData)) {
         const parsedDN = parseDistinguishedName(dn);
         parsedDN['COUNT'] = count;
-        parsedDN['ENCRYPTION'] = inputData[0];
+        parsedDN['ENCRYPTION'] = encryptionNames[inputData[0]] || inputData[0];
+        parsedDN['ENCRYPTION_CODE'] = inputData[0];
+        parsedDN['COUNTRY_NAME'] = countryNames[parsedDN['C'].toUpperCase()] || parsedDN['C'];
         signedInfo.push(parsedDN);
-      }  
+      }
     }
 
-    if(signedInfo.length == 0){
-      return;
-    }
-    const countryData = {};
-    for(const signedData of signedInfo){
-      //skip the iteration if the contry not having a passport records
-      if(!signedData?.C){
-        continue;
-      }
-      if(countryData[signedData.C]){
-        countryData[signedData.C].push(signedData);
-        continue;
-      }
-      countryData[signedData.C] = [signedData];
+    if (signedInfo.length == 0) {
+      return [];
     }
     
+    // remove duplicated encryption count of a country
+    const validatedRecord = {};
+    const eliminatingIndexes: number[] = [];
+    for(let i = 0; i< signedInfo.length; i++){
+      const validateKey = signedInfo[i].C + signedInfo[i].ENCRYPTION_CODE;
+      if(validatedRecord[validateKey] === undefined){
+        validatedRecord[validateKey] = i;
+        continue;
+      }
+
+      const currentRecord = signedInfo[i];
+      const existRecord = signedInfo[validatedRecord[validateKey]];
+      const countSum = (existRecord.COUNT || 0) + (currentRecord.COUNT || 0);
+      signedInfo[validatedRecord[validateKey]].COUNT = countSum;
+      eliminatingIndexes.push(i);
+    }
+
+    if(eliminatingIndexes.length > 0){
+      for(const ind of eliminatingIndexes){
+        signedInfo.splice(ind, 1);
+      }
+    }
+    
+    const countryData = {};
+    for (const signedData of signedInfo) {
+      //skip the iteration if the contry not having a passport records
+      if (!signedData?.C) {
+        continue;
+      }
+      let countryKey = countryNames[signedData.C.toUpperCase()] || signedData.C;
+      if (countryData[countryKey]) {
+        countryData[countryKey].push(signedData);
+        continue;
+      }
+      countryData[countryKey] = [signedData];
+    }
+
     return countryData;
   };
 
   const fetchJsonInfo = async () => {
-    console.log('calling');
     const jsonData = await import(
       './../../../registry/outputs/signature_algorithms.json'
     );
+    const countryNames = await import('./../../public/all-countries.json');
 
-    if(!jsonData){
+    if (!jsonData) {
       return;
     }
-    console.log('jsonData :>> ', formatJsonData({...jsonData}));
+
+    const allCountriesData = formatJsonData({ ...jsonData }, countryNames);
+    setAllCountriesData(allCountriesData);
+    console.log('jsonData :>> ', allCountriesData);
   };
 
   useEffect(() => {
@@ -108,25 +155,36 @@ export default function Home() {
         <div className={styles.mapSection}>
           <MapChart setTooltipContent={handleToolTip} />
         </div>
-        <div className={styles.countryInfo}>
-          <p className={styles.countryName}>India</p>
-          <p className={styles.countryIsIssues}>
-            <span>Issues</span> Electronic Passports
-          </p>
-          <p className={styles.proofSupported}>
-            Proof of passport <span>supported</span>
-          </p>
-          <div className={styles.algorithmsInfos}>
-            <p className={styles.algorithmsInfo}>
-              <span>10</span> passports signed with{' '}
-              <span>Sha256WithRSAEncryption</span>
+
+        <CSSTransition
+          in={selectedCountryName != null}
+          nodeRef={infoElRef}
+          timeout={300}
+          classNames="animate"
+          unmountOnExit
+        >
+          <div className={styles.countryInfo} ref={infoElRef}>
+            {selectedCountryName ? (
+              <p className={styles.countryName}> {selectedCountryName} </p>
+            ) : null}
+            <p className={styles.countryIsIssues}>
+              <span>Issues</span> Electronic Passports
             </p>
-            <p className={styles.algorithmsInfo}>
-              <span>15</span> passports signed with{' '}
-              <span>Sha1WithRSAEncryption</span>
+            <p className={styles.proofSupported}>
+              Proof of passport <span>supported</span>
             </p>
+            <div className={styles.algorithmsInfos}>
+              <p className={styles.algorithmsInfo}>
+                <span>10</span> passports signed with{' '}
+                <span>Sha256WithRSAEncryption</span>
+              </p>
+              <p className={styles.algorithmsInfo}>
+                <span>15</span> passports signed with{' '}
+                <span>Sha1WithRSAEncryption</span>
+              </p>
+            </div>
           </div>
-        </div>
+        </CSSTransition>
       </div>
     </main>
   );

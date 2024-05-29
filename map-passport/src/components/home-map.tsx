@@ -44,7 +44,7 @@ export default function MapChart({ setTooltipContent }) {
                       setTooltipContent(`${geo.properties.name}`);
                     }}
                     onMouseLeave={() => {
-                      setTooltipContent('');
+                      // setTooltipContent('');
                     }}
                     style={{
                       hover: {
