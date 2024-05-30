@@ -8,16 +8,16 @@ import { CSSTransition } from 'react-transition-group';
 
 export default function Home() {
   const encryptionNames = {
-    'sha1WithRSAEncryption':'Sha1 RSA Encryption',
-    'sha256WithRSAEncryption':'Sha256 RSA Encryption',
-    'sha512WithRSAEncryption':'Sha512 RSA Encryption',
-    'rsassaPss        ':'RSASSA PSS Encryption',
-    'ecdsa-with-SHA1':'ECDSA with SHA-1',
-    'ecdsa-with-SHA256':'ECDSA with SHA-256',
-    'ecdsa-with-SHA384':'ECDSA with SHA-384',
-    'ecdsa-with-SHA512':'ECDSA with SHA-512',
+    sha1WithRSAEncryption: 'Sha1 RSA Encryption',
+    sha256WithRSAEncryption: 'Sha256 RSA Encryption',
+    sha512WithRSAEncryption: 'Sha512 RSA Encryption',
+    'rsassaPss        ': 'RSASSA PSS Encryption',
+    'ecdsa-with-SHA1': 'ECDSA with SHA-1',
+    'ecdsa-with-SHA256': 'ECDSA with SHA-256',
+    'ecdsa-with-SHA384': 'ECDSA with SHA-384',
+    'ecdsa-with-SHA512': 'ECDSA with SHA-512',
   };
-  const [selectedCountryInfo, setSelectedCountryInfo] = useState({});
+  const [selectedCountryInfo, setSelectedCountryInfo] = useState([]);
   const [allCountriesData, setAllCountriesData] = useState({});
   const [selectedCountryName, setSelectedCountryName] = useState('');
   const infoElRef = useRef(null);
@@ -26,11 +26,11 @@ export default function Home() {
     setSelectedCountryName(countryName);
     if (countryName) {
       const selectedCountryInfo = allCountriesData[countryName];
+      setSelectedCountryInfo([]);
       if (selectedCountryInfo) {
         setSelectedCountryInfo(selectedCountryInfo);
       }
     }
-    console.log('countryName :>> ', countryName);
   };
 
   // parse details from the json key field
@@ -50,8 +50,6 @@ export default function Home() {
     delete input?.default;
     const signedInfo: any = [];
 
-    console.log('input :>> ', input);
-    
     for (const inputData of Object.entries(input)) {
       const encryptionData = input[inputData[0]];
       for (const [dn, count] of Object.entries(encryptionData)) {
@@ -59,7 +57,8 @@ export default function Home() {
         parsedDN['COUNT'] = count;
         parsedDN['ENCRYPTION'] = encryptionNames[inputData[0]] || inputData[0];
         parsedDN['ENCRYPTION_CODE'] = inputData[0];
-        parsedDN['COUNTRY_NAME'] = countryNames[parsedDN['C'].toUpperCase()] || parsedDN['C'];
+        parsedDN['COUNTRY_NAME'] =
+          countryNames[parsedDN['C'].toUpperCase()] || parsedDN['C'];
         signedInfo.push(parsedDN);
       }
     }
@@ -67,13 +66,13 @@ export default function Home() {
     if (signedInfo.length == 0) {
       return [];
     }
-    
+
     // remove duplicated encryption count of a country
     const validatedRecord = {};
     const eliminatingIndexes: number[] = [];
-    for(let i = 0; i< signedInfo.length; i++){
+    for (let i = 0; i < signedInfo.length; i++) {
       const validateKey = signedInfo[i].C + signedInfo[i].ENCRYPTION_CODE;
-      if(validatedRecord[validateKey] === undefined){
+      if (validatedRecord[validateKey] === undefined) {
         validatedRecord[validateKey] = i;
         continue;
       }
@@ -85,12 +84,12 @@ export default function Home() {
       eliminatingIndexes.push(i);
     }
 
-    if(eliminatingIndexes.length > 0){
-      for(const ind of eliminatingIndexes){
+    if (eliminatingIndexes.length > 0) {
+      for (const ind of eliminatingIndexes) {
         signedInfo.splice(ind, 1);
       }
     }
-    
+
     const countryData = {};
     for (const signedData of signedInfo) {
       //skip the iteration if the contry not having a passport records
@@ -153,7 +152,11 @@ export default function Home() {
       {/* {toolTipInfo ? toolTipInfo : null} */}
       <div className={styles.mapRow}>
         <div className={styles.mapSection}>
-          <MapChart setTooltipContent={handleToolTip} />
+          <MapChart
+            setTooltipContent={handleToolTip}
+            selectedCountryData={selectedCountryInfo}
+            selectedCountryName={selectedCountryName}
+          />
         </div>
 
         <CSSTransition
