@@ -261,7 +261,7 @@ export const gitcoinApp: AppType = {
   finalButtonText: 'Claim it on Gitcoin Passport',
 
   finalButtonAction: () => {
-    Linking.openURL('https://passport.gitcoin.co/#/welcome');
+    Linking.openURL('https://staging.passport.gitcoin.co/');
   },
   
 }
