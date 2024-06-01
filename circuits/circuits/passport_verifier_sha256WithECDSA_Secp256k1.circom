@@ -1,7 +1,5 @@
 pragma circom 2.1.5;
 
-include "@zk-email/circuits/helpers/rsa.circom";
-include "@zk-email/circuits/helpers/extract.circom";
 include "@zk-email/circuits/helpers/sha.circom";
 include "./utils/Sha256BytesStatic.circom";
 include "circom-ecdsa/circuits/ecdsa.circom";
