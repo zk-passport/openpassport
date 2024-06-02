@@ -1,6 +1,7 @@
-import { PassportData } from "../../common/src/utils/types";
+import { PassportData, PassportData_ECDSA } from "../../common/src/utils/types";
 import { hash, assembleEContent, formatAndConcatenateDataHashes, formatMrz, hexToDecimal } from "../../common/src/utils/utils";
 import * as forge from 'node-forge';
+import * as secp256k1 from '@noble/secp256k1';
 
 const sampleMRZ = "P<FRADUPONT<<ALPHONSE<HUGUES<ALBERT<<<<<<<<<24HB818324FRA0402111M3111115<<<<<<<<<<<<<<02"
 const sampleDataHashes_256 = [
@@ -123,4 +124,37 @@ export function genMockPassportData_sha1WithRSAEncryption(): PassportData {
   }
 }
 
-console.log(JSON.stringify(genMockPassportData_sha256WithRSAEncryption_65537(), null, 2));
+export function genMockPassportData_ecdsa_with_SHA256(): PassportData_ECDSA {
+  const signatureAlgorithm = 'ecdsa-with-SHA256'
+  const mrzHash = hash(signatureAlgorithm, formatMrz(sampleMRZ));
+  sampleDataHashes_256.unshift([1, mrzHash]);
+  const concatenatedDataHashes = formatAndConcatenateDataHashes(
+    mrzHash,
+    sampleDataHashes_256 as [number, number[]][],
+  );
+  const eContent = assembleEContent(
+    hash(signatureAlgorithm, concatenatedDataHashes),
+    sampleTimeOfSig,
+  );
+  const privKey = secp256k1.utils.randomPrivateKey();
+  const pubKey = secp256k1.getPublicKey(privKey, false);
+  const pub_x = pubKey.slice(1, 33);
+  const pub_y = pubKey.slice(33, 65);
+  const md = forge.md.sha256.create();
+  md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
+  const digest = md.digest().getBytes();
+
+  const signature = secp256k1.sign(digest, privKey).toCompactRawBytes();
+  const sig_r = signature.slice(0, 32);
+  const sig_s = signature.slice(32, 64);
+
+  return {
+    mrz: sampleMRZ,
+    signatureAlgorithm: signatureAlgorithm,
+    pubKey: { x: pub_x, y: pub_y },
+    dataGroupHashes: concatenatedDataHashes,
+    eContent: eContent,
+    signature: { r: sig_r, s: sig_s },
+    photoBase64: "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABjElEQVR42mL8//8/AyUYiBQYmIw3...",
+  };
+}

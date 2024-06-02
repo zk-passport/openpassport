@@ -125,5 +125,4 @@ describe("Proof of Passport - Circuits - Register flow", function () {
             expect(error.message).to.include("Assert Failed");
         }
     });
-
 });

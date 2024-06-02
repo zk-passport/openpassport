@@ -8,6 +8,7 @@
     "install-circuits": "cd ../common && yarn && cd ../circuits && yarn"
   },
   "dependencies": {
+    "@noble/secp256k1": "^2.1.0",
     "@types/chai-as-promised": "^7.1.6",
     "@types/node": "^20.11.19",
     "@types/node-forge": "^1.3.5",
@@ -18,8 +19,8 @@
     "@zk-kit/circuits": "^1.0.0-beta",
     "@zk-kit/imt": "https://gitpkg.now.sh/0xturboblitz/zk-kit/packages/imt?6d417675",
     "@zk-kit/lean-imt": "^2.0.1",
-    "circom-ecdsa": "github:0xPARC/circom-ecdsa",
     "chai-as-promised": "^7.1.1",
+    "circom-ecdsa": "github:0xPARC/circom-ecdsa",
     "circom_tester": "github:Atomic-Buy/circom_tester#main",
     "circomlib": "^2.0.5",
     "circomlibjs": "^0.1.7",

@@ -8,6 +8,16 @@ export type PassportData = {
   photoBase64: string;
 };
 
+export type PassportData_ECDSA = {
+  mrz: string;
+  signatureAlgorithm: string;
+  dataGroupHashes: number[];
+  pubKey: {x: Uint8Array, y: Uint8Array, curveName?: string};
+  eContent: number[];
+  signature: {r: Uint8Array, s: Uint8Array};
+  photoBase64: string;
+}
+
 export type Proof = {
   proof: {
     a: [string, string],
