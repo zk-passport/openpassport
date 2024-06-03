@@ -34,7 +34,7 @@ template PassportVerifier_sha1WithRSAEncryption_65537(n, k, max_datahashes_bytes
 
     // assert mrz_hash equals the one extracted from dataHashes input (bytes 20 to 40)
     for(var i = 0; i < 20; i++) {
-        dataHashes[19 + i] === mrzSha_bytes[i].out;
+        dataHashes[31 + i] === mrzSha_bytes[i].out;
     }
 
     // hash dataHashes dynamically
