@@ -20,7 +20,7 @@ export default function Home() {
   const [selectedCountryInfo, setSelectedCountryInfo] = useState([]);
   const [allCountriesData, setAllCountriesData] = useState({});
   const [selectedCountryName, setSelectedCountryName] = useState('');
-  const infoElRef = useRef(null);
+  const [mapParams, setMapParams] = useState({zoom: 1, center: [0, 0]});
 
   const handleToolTip = (countryName: string) => {
     setSelectedCountryName(countryName);
@@ -64,7 +64,7 @@ export default function Home() {
     }
 
     if (signedInfo.length == 0) {
-      return [];
+      return {};
     }
 
     // remove duplicated encryption count of a country
@@ -83,16 +83,15 @@ export default function Home() {
       signedInfo[validatedRecord[validateKey]].COUNT = countSum;
       eliminatingIndexes.push(i);
     }
-
     if (eliminatingIndexes.length > 0) {
       for (const ind of eliminatingIndexes) {
-        signedInfo.splice(ind, 1);
+        delete signedInfo[ind];
       }
     }
 
     const countryData = {};
     for (const signedData of signedInfo) {
-      //skip the iteration if the contry not having a passport records
+      //skip the iteration if the passport records not having a valid details/country
       if (!signedData?.C) {
         continue;
       }
@@ -126,6 +125,22 @@ export default function Home() {
     fetchJsonInfo();
   }, []);
 
+  const handleMapSizing = (action: string) => {
+    const {zoom } = mapParams;
+    if(action==='zoomin'){
+      setMapParams({...mapParams, zoom: zoom+0.1});
+      return;
+    }
+    if(action==='zoomout'){
+      setMapParams({...mapParams, zoom: zoom-0.1});
+      return;
+    }
+    if(action==='reset'){
+      setMapParams({...mapParams, zoom: 1, center: [0, 0]});
+      return;
+    }
+  } 
+
   return (
     <main className={styles.main}>
       <h2 className={styles.homeTitle}>Electronic passports coverage</h2>
@@ -149,45 +164,26 @@ export default function Home() {
           </p>
         </Grid>
       </Grid>
-      {/* {toolTipInfo ? toolTipInfo : null} */}
       <div className={styles.mapRow}>
         <div className={styles.mapSection}>
           <MapChart
+            mapParams={mapParams}
             setTooltipContent={handleToolTip}
             selectedCountryData={selectedCountryInfo}
             selectedCountryName={selectedCountryName}
           />
         </div>
-
-        <CSSTransition
-          in={selectedCountryName != null}
-          nodeRef={infoElRef}
-          timeout={300}
-          classNames="animate"
-          unmountOnExit
-        >
-          <div className={styles.countryInfo} ref={infoElRef}>
-            {selectedCountryName ? (
-              <p className={styles.countryName}> {selectedCountryName} </p>
-            ) : null}
-            <p className={styles.countryIsIssues}>
-              <span>Issues</span> Electronic Passports
-            </p>
-            <p className={styles.proofSupported}>
-              Proof of passport <span>supported</span>
-            </p>
-            <div className={styles.algorithmsInfos}>
-              <p className={styles.algorithmsInfo}>
-                <span>10</span> passports signed with{' '}
-                <span>Sha256WithRSAEncryption</span>
-              </p>
-              <p className={styles.algorithmsInfo}>
-                <span>15</span> passports signed with{' '}
-                <span>Sha1WithRSAEncryption</span>
-              </p>
-            </div>
-          </div>
-        </CSSTransition>
+        <div className={styles.mapActions}>
+          <button className={styles.resetBtn} onClick={() => handleMapSizing('zoomin')}>
+            <img src="add.png" alt="Reset" title="Zoom In" />
+          </button>
+          <button className={styles.resetBtn} onClick={() => handleMapSizing('zoomout')}>
+            <img src="minus.png" alt="Reset" title="Zoom Out" />
+          </button>
+          <button className={styles.resetBtn} onClick={() => handleMapSizing('reset')}>
+            <img src="circular-icon.png" alt="Reset" title="Reset Map" />
+          </button>
+        </div>
       </div>
     </main>
   );

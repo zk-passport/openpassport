@@ -17,6 +17,7 @@ export default function MapChart({
   setTooltipContent,
   selectedCountryData,
   selectedCountryName,
+  mapParams
 }) {
   const highLightInfo = (countryDscs: any = []) => {
     if (countryDscs?.length > 0) {
@@ -57,7 +58,7 @@ export default function MapChart({
   return (
     <div data-tip="">
       <ComposableMap>
-        <ZoomableGroup center={[0, -14]} zoom={1}>
+        <ZoomableGroup center={mapParams?.center || [0, 0]} zoom={mapParams?.zoom || 1} >
           <Graticule stroke="#999" strokeWidth={0.1} />
           <Sphere
             stroke="#fff"

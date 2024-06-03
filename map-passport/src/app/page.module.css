@@ -1,4 +1,4 @@
-.homeTitle{
+.homeTitle {
   color: #28a745;
 }
 
@@ -9,52 +9,25 @@
 }
 
 .mapSection {
-  width: 70%;
-  /* margin-top: -3rem; */
+  width: 95%;
+  background: #0c0c0c;
+  border-radius: 12px;
+}
+
+.mapActions {
+  margin-left: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mapActions .resetBtn {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 
 .mapRow {
   display: flex;
   margin-top: 16px;
-}
-
-.countryInfo {
-  margin-left: 20px;
-  width: calc(30% - 20px);
-  margin-top: 1rem;
-  text-align: right;
-}
-
-.countryInfo p {
-  font-size: 18px;
-}
-
-.countryInfo span {
-  font-weight: bold;
-  font-size: 18px;
-  filter: saturate(0.6);
-}
-
-p.countryName {
-  color: #28a745;
-  font-size: 30px;
-  font-weight: bold;
-}
-
-.countryIsIssues {
-  color: #9673b9;
-  margin-top: 12px;
-}
-
-.proofSupported {
-  color: #6c757d;
-}
-
-.algorithmsInfos {
-  margin-top: 8px;
-}
-
-.algorithmsInfos .algorithmsInfo {
-  font-size: 14px;
-  color: #007bff;
 }

@@ -1,5 +1,8 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Map Preview
+![Map](./screenshots/world-map.png?raw=true "World map of electronic passports")
+
 ## Getting Started
 
 First, run the development server:
