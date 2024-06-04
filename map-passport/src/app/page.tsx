@@ -20,7 +20,6 @@ export default function Home() {
   const [selectedCountryInfo, setSelectedCountryInfo] = useState([]);
   const [allCountriesData, setAllCountriesData] = useState({});
   const [selectedCountryName, setSelectedCountryName] = useState('');
-  const [mapParams, setMapParams] = useState({zoom: 1, center: [0, 0]});
 
   const handleToolTip = (countryName: string) => {
     setSelectedCountryName(countryName);
@@ -125,64 +124,16 @@ export default function Home() {
     fetchJsonInfo();
   }, []);
 
-  const handleMapSizing = (action: string) => {
-    const {zoom } = mapParams;
-    if(action==='zoomin'){
-      setMapParams({...mapParams, zoom: zoom+0.1});
-      return;
-    }
-    if(action==='zoomout'){
-      setMapParams({...mapParams, zoom: zoom-0.1});
-      return;
-    }
-    if(action==='reset'){
-      setMapParams({...mapParams, zoom: 1, center: [0, 0]});
-      return;
-    }
-  } 
-
   return (
     <main className={styles.main}>
-      <h2 className={styles.homeTitle}>Electronic passports coverage</h2>
-      <Grid container spacing={1}>
-        <Grid item xs={4}>
-          <p className={`${styles.homeDescription}`}>
-            In 2021, ICAO (the International Civil Aviation Organization, which
-            standardises passports) released an updated standard, introducing
-            LDS2 (Logical Data Structure 2). This is a new section of the
-            passport chip that allows the storage of further data, including
-            travel history, visa records, and additional biometric data. LDS2
-            completely changes what a passport is.
-          </p>
-        </Grid>
-        <Grid item xs={4}>
-          <p className={`${styles.homeDescription}`}>
-            Current passports are read-only, but with LDS2, they become
-            writable. Passport stamps and visas become digital. Passports go
-            from being an identification document to a detailed record of your
-            movements.
-          </p>
-        </Grid>
-      </Grid>
+      <h2 className={styles.homeTitle}>Proof of Passport country coverage</h2>
       <div className={styles.mapRow}>
         <div className={styles.mapSection}>
           <MapChart
-            mapParams={mapParams}
             setTooltipContent={handleToolTip}
             selectedCountryData={selectedCountryInfo}
             selectedCountryName={selectedCountryName}
           />
-        </div>
-        <div className={styles.mapActions}>
-          <button className={styles.resetBtn} onClick={() => handleMapSizing('zoomin')}>
-            <img src="add.png" alt="Reset" title="Zoom In" />
-          </button>
-          <button className={styles.resetBtn} onClick={() => handleMapSizing('zoomout')}>
-            <img src="minus.png" alt="Reset" title="Zoom Out" />
-          </button>
-          <button className={styles.resetBtn} onClick={() => handleMapSizing('reset')}>
-            <img src="circular-icon.png" alt="Reset" title="Reset Map" />
-          </button>
         </div>
       </div>
     </main>

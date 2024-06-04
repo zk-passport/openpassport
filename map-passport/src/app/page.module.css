@@ -9,22 +9,9 @@
 }
 
 .mapSection {
-  width: 95%;
+  width: 100%;
   background: #0c0c0c;
   border-radius: 12px;
-}
-
-.mapActions {
-  margin-left: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.mapActions .resetBtn {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
 }
 
 .mapRow {
