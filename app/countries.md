@@ -9,7 +9,7 @@ Crashing:
 
 
  E  FATAL EXCEPTION: main
-                                                                                                    Process: com.proofofpassport, PID: 14479
+                                                                                                    Process: com.proofofpassportapp, PID: 14479
                                                                                                     java.lang.ClassCastException: org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey cannot be cast to java.security.interfaces.RSAPublicKey
                                                                                                     	at io.tradle.nfc.RNPassportReaderModule$ReadTask.onPostExecute(RNPassportReaderModule.kt:510)
                                                                                                     	at io.tradle.nfc.RNPassportReaderModule$ReadTask.onPostExecute(RNPassportReaderModule.kt:238)
