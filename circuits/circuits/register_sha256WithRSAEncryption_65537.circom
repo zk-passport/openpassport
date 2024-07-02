@@ -24,16 +24,15 @@ template Register_sha256WithRSAEncryption_65537(n, k, max_datahashes_bytes, nLev
     splitSignalsToWords_modulus.in <== dsc_modulus;
     splitSignalsToWords_signature.in <== signature;
 
+    component nullifier_hasher = Poseidon(9);
     component dsc_commitment_hasher = Poseidon(10);
-    component nullifier_hasher = Poseidon(10);
     component leaf_hasher = Poseidon(10);
     dsc_commitment_hasher.inputs[0] <== dsc_secret;
-    nullifier_hasher.inputs[0] <== secret;
     leaf_hasher.inputs[0] <== signatureAlgorithm;
     for (var i= 0; i < 9; i++) {
         dsc_commitment_hasher.inputs[i+1] <== splitSignalsToWords_modulus.out[i];
         leaf_hasher.inputs[i+1] <== splitSignalsToWords_modulus.out[i];
-        nullifier_hasher.inputs[i+1] <== splitSignalsToWords_signature.out[i];
+        nullifier_hasher.inputs[i] <== splitSignalsToWords_signature.out[i];
     }
     signal output blinded_dsc_commitment <== dsc_commitment_hasher.out;
     signal output nullifier <== nullifier_hasher.out;
