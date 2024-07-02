@@ -4,6 +4,7 @@ import { Check, Plus, Minus, PenTool } from '@tamagui/lucide-icons';
 import { getFirstName, maskString } from '../../utils/utils';
 import { attributeToPosition } from '../../../common/src/constants/constants';
 import USER from '../images/user.png'
+import USA from '../images/usa.png'
 import { borderColor, componentBgColor, componentBgColor2, textColor1, textColor2 } from '../utils/colors';
 import { ethers } from 'ethers';
 import { Platform } from 'react-native';
@@ -16,6 +17,7 @@ import useSbtStore from '../stores/sbtStore';
 
 export const appStoreMapping = {
   'soulbound': useSbtStore,
+  'election': useSbtStore, // temp, because not used
   // Add more app ID to store mappings as needed
 };
 
@@ -73,7 +75,7 @@ const ProveScreen: React.FC = () => {
     <YStack px="$4" f={1} mb={Platform.OS === 'ios' ? "$5" : "$0"}>
       <YStack flex={1} mx="$2" gap="$2">
         <YStack alignSelf='center' my="$3">
-          {hideData
+          {/* {hideData
             ? <Image
               w={height > 750 ? 150 : 100}
               h={height > 750 ? 190 : 80}
@@ -90,7 +92,15 @@ const ProveScreen: React.FC = () => {
                 uri: passportData.photoBase64 ?? USER,
               }}
             />
-          }
+          } */}
+          <Image
+            w={height > 750 ? 320 : 218}
+            h={height > 750 ? 190 : 130}
+            borderRadius={height > 750 ? "$7" : "$6"}
+            source={{
+              uri: USA,
+            }}
+          />
         </YStack>
         <Text color={textColor1} fontSize="$5" fontWeight="bold" ml="$2" mb="$1">
           Hi{" "}
@@ -102,9 +112,9 @@ const ProveScreen: React.FC = () => {
           {" "}👋
         </Text>
 
-        {fields.map((Field, index) => (
+        {/* {fields.map((Field, index) => (
           <Field key={index} />
-        ))}
+        ))} */}
 
         <YStack f={1} >
           <YStack bc="#1c1c1c" borderWidth={1.2} borderColor="#343434" borderRadius="$6">
@@ -148,7 +158,7 @@ const ProveScreen: React.FC = () => {
                           bg={componentBgColor}
                           borderColor={borderColor}
                           value={key}
-                          checked={disclosure[key_ as keyof typeof disclosure]}
+                          checked={disclosure[key_ as keyof typeof disclosure] || selectedApp.disclosureOptions[key_ as keyof typeof selectedApp.disclosureOptions] === 'required'}
                           onCheckedChange={() => handleDisclosureChange(key_)}
                           aria-label={keyFormatted}
                           size="$6"
@@ -204,13 +214,13 @@ const ProveScreen: React.FC = () => {
           </YStack >
         </YStack >
         <Button
-          disabled={isZkeyDownloading[selectedApp.circuit] || (address == ethers.ZeroAddress)}
+          disabled={isZkeyDownloading[selectedApp.circuit]}
           borderWidth={1.3}
           borderColor={borderColor}
           borderRadius={100}
           onPress={handleProve}
           mt="$8"
-          backgroundColor={address == ethers.ZeroAddress ? "#cecece" : "#3185FC"}
+          backgroundColor={"#3185FC"}
           alignSelf='center'
         >
           {!registered ? (
@@ -224,23 +234,19 @@ const ProveScreen: React.FC = () => {
             <XStack ai="center" gap="$1">
               <Spinner />
               <Text color={textColor1} fow="bold">
-                Downloading ZK proving key
+                Downloading proving key
               </Text>
             </XStack>
           ) : step === Steps.GENERATING_PROOF ? (
             <XStack ai="center" gap="$1">
               <Spinner />
               <Text color={textColor2} marginLeft="$2" fow="bold">
-                Generating ZK proof
+                Generating proof
               </Text>
             </XStack>
-          ) : address == ethers.ZeroAddress ? (
-            <Text color={textColor2} fow="bold">
-              Enter address
-            </Text>
           ) : (
             <Text color={textColor1} fow="bold">
-              Generate ZK proof
+              Generate proof
             </Text>
           )}
         </Button>

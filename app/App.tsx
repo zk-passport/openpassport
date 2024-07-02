@@ -21,10 +21,10 @@ function App(): JSX.Element {
   }, [toast, setToast]);
 
   useEffect(() => {
+    initUserStore();
     if (AMPLITUDE_KEY) {
       amplitude.init(AMPLITUDE_KEY);
     }
-    initUserStore();
   }, []);
 
   // TODO: when passportData already stored, retrieve and jump to main screen

@@ -7,6 +7,7 @@ import { AppType } from '../utils/appType';
 import sbtApp from '../apps/sbt';
 import zupassApp from '../apps/zupass';
 import gitcoinApp from '../apps/gitcoin';
+import electionApp from '../apps/election';
 
 const AppScreen: React.FC = () => {
   const {
@@ -24,9 +25,10 @@ const AppScreen: React.FC = () => {
 
   // add new apps here
   const cardsData = [
-    sbtApp,
-    zupassApp,
-    gitcoinApp
+    // sbtApp,
+    // zupassApp,
+    // gitcoinApp,
+    electionApp
   ];
 
   return (

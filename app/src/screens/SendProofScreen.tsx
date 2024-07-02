@@ -1,6 +1,6 @@
 import React from 'react';
 import { YStack, XStack, Text, Button, Spinner } from 'tamagui';
-import { Copy } from '@tamagui/lucide-icons';
+import { Copy, Link } from '@tamagui/lucide-icons';
 import { formatDuration } from '../../utils/utils';
 import { Steps } from '../utils/utils';
 import ProofGrid from '../components/ProofGrid';
@@ -62,7 +62,7 @@ const SendProofScreen: React.FC = () => {
             mb="$8"
             backgroundColor="#3185FC"
           >
-            <Copy color="white" size="$1" /><Text color={textColor1} fow="bold">
+            <Link color="white" size="$1" /><Text color={textColor1} fow="bold">
               {finalButtonText}
             </Text>
           </Button>
@@ -74,7 +74,7 @@ const SendProofScreen: React.FC = () => {
 
           <YStack mt="$6" >
             <Text color={textColor1} fontWeight="bold" fontSize="$5" mt="$3">
-              ZK proof generated  🎉
+              Proof generated  🎉
             </Text>
             <Text color={textColor2} mt="$1">
               Proof generation duration: {formatDuration(proofTime as number)}

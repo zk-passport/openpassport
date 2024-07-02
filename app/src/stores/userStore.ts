@@ -121,7 +121,7 @@ const useUserStore = create<UserState>((set, get) => ({
       setStep,
       update: updateNavigationStore,
     } = useNavigationStore.getState();
-    const secret = await loadSecret() as string;
+    const secret = get().secret;
     let passportData = get().passportData
     if (mockPassportData) {
       passportData = mockPassportData
