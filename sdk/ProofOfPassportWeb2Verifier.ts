@@ -7,7 +7,7 @@ import { ProofOfPassportVerifierReport } from './ProofOfPassportVerifierReport';
 
 dotenv.config();
 
-const path_disclose_vkey = "../circuits/build/disclose_vkey.json";
+const path_disclose_vkey = "./circuits/build/disclose_vkey.json";
 const MOCK_MERKLE_ROOT_CHECK = process.env.MOCK_MERKLE_ROOT_CHECK === 'true' ? true : false;
 
 export class ProofOfPassportWeb2Verifier {
