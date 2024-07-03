@@ -2,8 +2,8 @@ import fs from "fs";
 import { groth16 } from "snarkjs";
 import path from 'path';
 
-const path_register_vkey = path.join(__dirname, '..', 'sdk/circuits', 'register_sha256WithRSAEncryption_65537_vkey.json');
-const path_csca_vkey = path.join(__dirname, '..', 'sdk/circuits', 'dsc_4096_vkey.json');
+const path_register_vkey = path.join(__dirname, '..', '..', 'circuits', 'register_sha256WithRSAEncryption_65537_vkey.json');
+const path_csca_vkey = path.join(__dirname, '..', '..', 'circuits', 'dsc_4096_vkey.json');
 const vkey_register = require(path_register_vkey);
 const vkey_csca = require(path_csca_vkey);
 

@@ -4,10 +4,11 @@ import { attributeToPosition, countryCodes, DEFAULT_RPC_URL, PASSPORT_ATTESTATIO
 import { checkMerkleRoot, getCurrentDateFormatted, parsePublicSignals, unpackReveal } from './utils';
 import dotenv from 'dotenv';
 import { ProofOfPassportVerifierReport } from './ProofOfPassportVerifierReport';
+import path from 'path';
 
 dotenv.config();
 
-const path_disclose_vkey = "./circuits/build/disclose_vkey.json";
+const path_disclose_vkey = path.join(__dirname, '..', '..', 'circuits', 'disclose_vkey.json');
 const MOCK_MERKLE_ROOT_CHECK = process.env.MOCK_MERKLE_ROOT_CHECK === 'true' ? true : false;
 
 export class ProofOfPassportWeb2Verifier {
