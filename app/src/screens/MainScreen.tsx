@@ -204,7 +204,8 @@ const MainScreen: React.FC = () => {
             },
           })
         }
-        sendTransaction();
+        //sendTransaction();
+        console.log("YOU NEED TO ADD THE NEW REGISTER REQUEST HERE TOO!");
       }
 
     }

@@ -18,7 +18,11 @@ export const sendCSCARequest = async (inputs_csca: any, setModalProofStep: (moda
             }
             return response.json();
         }).then(data => {
-            useUserStore.getState().cscaProof = castCSCAProof(data);
+            const proof_csca = {
+                proof: data.proof,
+                publicSignals: data.pub_signals
+            }
+            useUserStore.getState().cscaProof = proof_csca;
             setModalProofStep(ModalProofSteps.MODAL_SERVER_SUCCESS);
             console.log('Response from server:', data);
         }).catch(error => {

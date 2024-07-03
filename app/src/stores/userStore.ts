@@ -29,7 +29,7 @@ interface UserState {
   passportData: PassportData
   secret: string
   dscCertificate: any
-  cscaProof: Proof | null
+  cscaProof: any | null
   localProof: Proof | null
   dscSecret: string | null
   initUserStore: () => void
@@ -189,14 +189,97 @@ const useUserStore = create<UserState>((set, get) => ({
 
       if ((get().cscaProof !== null) && (get().localProof !== null)) {
         console.log("Proof from Modal server already received, sending transaction");
-        const provider = new ethers.JsonRpcProvider(RPC_URL);
-        const serverResponse = await sendRegisterTransaction(proof, get().cscaProof as Proof, sigAlgIndex)
-        const txHash = serverResponse?.data.hash;
-        const receipt = await provider.waitForTransaction(txHash);
-        console.log('receipt status:', receipt?.status);
-        if (receipt?.status === 0) {
-          throw new Error("Transaction failed");
+        const request = {
+          proof: proof,
+          proof_csca: get().cscaProof,
         }
+        const response = await fetch('https://app.proofofpassport.com/apiv3/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(request),
+        });
+        // download merkle tree url: https://app.proofofpassport.com/apiv3/download
+
+        /******* EXAMPLE OF VALID REQUEST *******/
+        // !!! proofs are not parsed the same way and that's ok, that's handle in the sdk
+        const valid_request = {
+          "proof": {
+            "proof": {
+              "pi_a": [
+                "16419579113510834491565531160077751610403971604192408854317198387544449540689",
+                "19708649717585955207413837582496282420637555884521568035130538512934342820826",
+                "1"
+              ],
+              "pi_b": [
+                [
+                  "14679909310546314819382083760700898763160700588956691234118749471746302594027",
+                  "279560696217401421178401246590943617449792866009942562723162046413282532177"
+                ],
+                [
+                  "21623259974688348674111581930620919412356839321850892018570405257434957183830",
+                  "6529926714146902197947935597180036864533483713027945013883950777140902496167"
+                ],
+                [
+                  "1",
+                  "0"
+                ]
+              ],
+              "pi_c": [
+                "9176329247311006831127738607556982126516918170112475588238899351771973207924",
+                "16488819329650057990309385687697374165282191978370257811305402171484159748954",
+                "1"
+              ],
+              "protocol": "groth16",
+              "curve": "bn128"
+            },
+            "publicSignals": [
+              "3024342369770083205277676417000541928218842535300840137930294206510168723413",
+              "7553636423677555276396119121300202111887470782748270600180491475976791952842",
+              "15557922383494890810755516196314262996012424602354678584082040506449040792081",
+              "8518753152044246090169372947057357973469996808638122125210848696986717482788"
+            ]
+          },
+          "proof_csca": {
+            "proof": {
+              "a": [
+                "12483942904828891606585845536320462012194273301738676123069757950041032090503",
+                "4005902649605338985676669500187884844168350956787551863933189961621555781555"
+              ],
+              "b": [
+                [
+                  "1127900237150184710666467700842381335057028112133222501346239738919472300617",
+                  "5611860306083973167533484685500662487114811256741194408398892235948902184091"
+                ],
+                [
+                  "13482809225957313830578295365741081331442192857290273490028928364266517373402",
+                  "3366070997969506393055448504643789283493502251107544194566213774818740419251"
+                ]
+              ],
+              "c": [
+                "6837632445645612930913004811010773675474273430493342453280754571884708562167",
+                "14596431856364405762209316166507134341102401651869473426443602039334472098934"
+              ]
+            },
+            "publicSignals": [
+              "3024342369770083205277676417000541928218842535300840137930294206510168723413",
+              "11406887179192998141316434121926377942525639172220901846038964800699077034561"
+            ]
+          }
+        }
+
+
+
+
+        // const provider = new ethers.JsonRpcProvider(RPC_URL);
+        // const serverResponse = await sendRegisterTransaction(proof, get().cscaProof as Proof, sigAlgIndex)
+        // const txHash = serverResponse?.data.hash;
+        // const receipt = await provider.waitForTransaction(txHash);
+        // console.log('receipt status:', receipt?.status);
+        // if (receipt?.status === 0) {
+        //   throw new Error("Transaction failed");
+        // }
         set({ registered: true });
         setStep(Steps.REGISTERED);
         toast.show('✅', {
