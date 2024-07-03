@@ -1,4 +1,4 @@
-REGISTER_CIRCUIT_NAME="register_sha256WithRSAEncryption_65537_csca2"
+REGISTER_CIRCUIT_NAME="register_sha256WithRSAEncryption_65537_us_election"
 DISCLOSE_CIRCUIT_NAME="disclose3"
 
 mkdir -p build/s3bucket
