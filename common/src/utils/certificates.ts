@@ -86,9 +86,15 @@ function extractModulus(publicKeyInfo: string): string | null {
     return modulus;
 }
 
-export function readCertificate(filePath: string): jsrsasign.X509 {
+export function readCertificate(filePath: string): { certificate: jsrsasign.X509, issuerCountry: string | null } {
     const certPem = fs.readFileSync(filePath, 'utf8');
     const certificate = new jsrsasign.X509();
     certificate.readCertPEM(certPem);
-    return certificate;
+
+    // Extract issuer country from the issuer string
+    const issuerString = certificate.getIssuerString();
+    const countryMatch = issuerString.match(/C=([^,/]+)/);
+    const issuerCountry = countryMatch ? countryMatch[1] : null;
+
+    return { certificate, issuerCountry };
 }

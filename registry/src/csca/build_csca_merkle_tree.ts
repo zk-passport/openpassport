@@ -64,12 +64,16 @@ function processCertificate(certificate: jsrsasign.X509, filePath: string) {
 
 async function buildCscaMerkleTree() {
     const tree = new IMT(poseidon2, CSCA_TREE_DEPTH, 0, 2);
-
     const path_to_pem_files = "outputs/unique_pem";
     for (const file of fs.readdirSync(path_to_pem_files)) {
         const file_path = path.join(path_to_pem_files, file);
         try {
-            const certificate = readCertificate(file_path);
+            const { certificate, issuerCountry } = readCertificate(file_path);
+            if (issuerCountry !== "US") {
+                console.log(`Skipping file ${file_path}: Not from the US`);
+                continue;
+            }
+            console.log(`Issuer Country: ${issuerCountry}`);
             const leafValue = processCertificate(certificate, file_path);
             if (leafValue) {
                 tree.insert(leafValue);
@@ -116,6 +120,7 @@ async function serializeCscaTree(tree: IMT) {
 
 async function main() {
     const tree = await buildCscaMerkleTree();
+    console.log("\x1b[32m%s\x1b[0m", "Final tree root: ", tree.root.toString());
     await serializeCscaTree(tree);
 }
 
