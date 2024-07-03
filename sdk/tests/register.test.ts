@@ -90,7 +90,6 @@ describe("Testing the register flow", function () {
         try {
             console.log('Requesting CSCA proof...');
             cscaProof = await requestCSCAProof(inputs_csca);
-            console.log('CSCA proof received:', cscaProof);
             // Add assertions here to verify the proof structure
             // For example:
             // assert.ok(cscaProof.proof, 'Proof should exist');
@@ -110,6 +109,8 @@ describe("Testing the register flow", function () {
             proof: cscaProof.proof,
             publicSignals: cscaProof.pub_signals
         }
+        console.log("proof_register :", JSON.stringify(proof_register, null, 2));
+        console.log("proof_csca :", JSON.stringify(proof_csca, null, 2));
         const result = await verifyProofs(proof_register, proof_csca);
         console.log('Verification result:', result);
 

@@ -1,11 +1,11 @@
 import fs from "fs";
 import { groth16 } from "snarkjs";
+import path from 'path';
 
-const path_register_vkey = "./circuits/register_sha256WithRSAEncryption_65537_vkey.json";
-const path_csca_vkey = "./circuits/dsc_4096_vkey.json";
-
-const vkey_register = JSON.parse(fs.readFileSync(path_register_vkey) as unknown as string);
-const vkey_csca = JSON.parse(fs.readFileSync(path_csca_vkey) as unknown as string);
+const path_register_vkey = path.join(__dirname, '..', 'sdk/circuits', 'register_sha256WithRSAEncryption_65537_vkey.json');
+const path_csca_vkey = path.join(__dirname, '..', 'sdk/circuits', 'dsc_4096_vkey.json');
+const vkey_register = require(path_register_vkey);
+const vkey_csca = require(path_csca_vkey);
 
 
 
@@ -17,7 +17,7 @@ export async function verifyProofs(proof: Proof, proof_csca: Proof) {
     const verified_register = await groth16.verify(
         vkey_register,
         proof.publicSignals,
-        proof.proof
+        proof.proof as any
     );
 
     // Restructure the CSCA proof to match the expected format
@@ -32,13 +32,13 @@ export async function verifyProofs(proof: Proof, proof_csca: Proof) {
         protocol: 'groth16',
         curve: 'bn128'
     };
-    console.log("restructured_csca_proof :", restructured_csca_proof);
+    //console.log("restructured_csca_proof :", restructured_csca_proof);
     const verified_csca = await groth16.verify(
         vkey_csca,
         proof_csca.publicSignals,
         restructured_csca_proof
     );
-    console.log("verified_csca :", verified_csca);
+    //console.log("verified_csca :", verified_csca);
 
     const dsc_commitment_match = formatted_public_signals.blinded_dsc_commitment === formatted_public_signals_csca.blinded_dsc_commitment;
     return verified_register && verified_csca && dsc_commitment_match;
@@ -52,6 +52,10 @@ export const getNullifier = (proof: Proof) => {
     return formatted_public_signals.nullifier;
 }
 
+export const getCommitment = (proof: Proof) => {
+    const formatted_public_signals = parsePublicSignals(proof.publicSignals);
+    return formatted_public_signals.commitment;
+}
 export class Proof {
     publicSignals: string[];
     proof: string[];

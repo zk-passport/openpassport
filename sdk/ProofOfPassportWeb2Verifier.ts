@@ -1,6 +1,6 @@
 import { groth16 } from 'snarkjs';
 import fs from 'fs';
-import { attributeToPosition, countryCodes, DEFAULT_RPC_URL, PASSPORT_ATTESTATION_ID } from '../common/src/constants/constants';
+import { attributeToPosition, countryCodes, DEFAULT_RPC_URL, PASSPORT_ATTESTATION_ID } from './common/src/constants/constants';
 import { checkMerkleRoot, getCurrentDateFormatted, parsePublicSignals, unpackReveal } from './utils';
 import dotenv from 'dotenv';
 import { ProofOfPassportVerifierReport } from './ProofOfPassportVerifierReport';
