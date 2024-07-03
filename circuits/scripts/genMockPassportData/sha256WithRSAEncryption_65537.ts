@@ -6,7 +6,7 @@ import { writeFileSync, readFileSync } from "fs";
 
 const dsc_key = readFileSync('../common/src/mock_certificates/sha256_rsa_4096/mock_dsc.key', 'utf8');
 
-const sampleMRZ = "P<FRADUPONT<<ALPHONSE<HUGUES<ALBERT<<<<<<<<<24HB818324FRA0402111M3111115<<<<<<<<<<<<<<02"
+const sampleMRZ = "P<FRADUPONT<<ALPHONSE<HUGUES<ALBERT<<<<<<<<<24HB818324USA0402111M3111115<<<<<<<<<<<<<<02"
 const sampleDataHashes = [
   [
     2,

@@ -56,6 +56,12 @@ export const getCommitment = (proof: Proof) => {
     const formatted_public_signals = parsePublicSignals(proof.publicSignals);
     return formatted_public_signals.commitment;
 }
+
+export const getSIV = (proof: Proof) => {
+    const formatted_public_signals = parsePublicSignals(proof.publicSignals);
+    return formatted_public_signals.SIV;
+}
+
 export class Proof {
     publicSignals: string[];
     proof: string[];
@@ -71,6 +77,7 @@ export function parsePublicSignals(publicSignals) {
         nullifier: publicSignals[1],
         commitment: publicSignals[2],
         attestation_id: publicSignals[3],
+        SIV: publicSignals[4]
     }
 }
 export function parsePublicSignals_csca(publicSignals) {

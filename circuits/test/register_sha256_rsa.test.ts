@@ -43,6 +43,7 @@ describe("Circuits - sha256WithRSAEncryption_65537 Register flow", function () {
             BigInt(0).toString(),
             attestation_id,
             passportData,
+            "SIV USER ID",
             n_dsc,
             k_dsc,
             [mockPassportData_sha256WithRSAEncryption_65537]

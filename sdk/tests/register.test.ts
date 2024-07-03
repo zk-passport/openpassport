@@ -73,6 +73,7 @@ describe("Testing the register flow", function () {
             BigInt(0).toString(),
             attestation_id,
             mockPassportData_sha256WithRSAEncryption_65537,
+            "0101010",
             n_dsc,
             k_dsc,
             [mockPassportData_sha256WithRSAEncryption_65537]
@@ -109,7 +110,7 @@ describe("Testing the register flow", function () {
             proof: cscaProof.proof,
             publicSignals: cscaProof.pub_signals
         }
-        console.log("proof_register :", JSON.stringify(proof_register, null, 2));
+        console.log("proof :", JSON.stringify(proof_register, null, 2));
         console.log("proof_csca :", JSON.stringify(proof_csca, null, 2));
         const result = await verifyProofs(proof_register, proof_csca);
         console.log('Verification result:', result);

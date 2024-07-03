@@ -18,6 +18,13 @@ template Register_sha256WithRSAEncryption_65537(n, k, max_datahashes_bytes, nLev
     signal input dsc_modulus[k];
     signal input dsc_secret;
     signal input attestation_id;
+    signal input SIV;
+
+    // assert nationality is USA
+    mrz[54 + 5] === 85;
+    mrz[55 + 5] === 83;
+    mrz[56 + 5] === 65;
+
 
     component splitSignalsToWords_modulus = SplitSignalsToWords(n,k,230,9); // TODO refactor and create assertion that 121*17 < 254 * 9 and 254 <= 254
     component splitSignalsToWords_signature = SplitSignalsToWords(n,k,230,9); // TODO refactor and create assertion that 121*17 < 254 * 9 and 254 <= 254
@@ -62,4 +69,4 @@ template Register_sha256WithRSAEncryption_65537(n, k, max_datahashes_bytes, nLev
 }
 
 // We hardcode 1 here for sha256WithRSAEncryption_65537
-component main { public [ attestation_id ] } = Register_sha256WithRSAEncryption_65537(121, 17, 320, 16, 1);
+component main { public [ attestation_id , SIV] } = Register_sha256WithRSAEncryption_65537(121, 17, 320, 16, 1);

@@ -21,6 +21,7 @@ export function generateCircuitInputsRegister(
   dscSecret: string,
   attestation_id: string,
   passportData: PassportData,
+  SIV: string,
   n_dsc: number,
   k_dsc: number,
   mocks: PassportData[] = mockPassportDatas
@@ -106,7 +107,8 @@ export function generateCircuitInputsRegister(
       BigInt(k_dsc)
     ),
     attestation_id: [attestation_id],
-    dsc_secret: [dscSecret]
+    dsc_secret: [dscSecret],
+    SIV: [SIV]
   };
 }
 
