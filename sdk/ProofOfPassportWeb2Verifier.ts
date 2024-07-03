@@ -82,7 +82,7 @@ export class ProofOfPassportWeb2Verifier {
         const verified_disclose = await groth16.verify(
             vkey_disclose,
             proofOfPassportWeb2Inputs.publicSignals,
-            proofOfPassportWeb2Inputs.proof
+            proofOfPassportWeb2Inputs.proof as any
         )
         if (!verified_disclose) {
             this.report.exposeAttribute('proof');
