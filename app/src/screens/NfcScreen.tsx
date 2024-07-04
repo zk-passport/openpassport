@@ -3,6 +3,7 @@ import { YStack, Text, XStack, Button, Image } from 'tamagui';
 import { Nfc } from '@tamagui/lucide-icons';
 import { blueColorDark, blueColorLight, borderColor, componentBgColor2, greenColorDark, greenColorLight, redColorDark, redColorLight, textColor1, textColor2 } from '../utils/colors';
 import NFCHelp from '../images/nfc_help.png'
+import { Platform } from 'react-native';
 
 interface NfcScreenProps {
   handleNFCScan: () => void;
@@ -23,22 +24,27 @@ const NfcScreen: React.FC<NfcScreenProps> = ({ handleNFCScan }) => {
         <YStack mt="$2">
           <Text fontSize="$7" fow="bold" mt="$1" color={textColor1}>Scan the NFC chip in your passport.</Text>
           <Text fontSize="$6" color={textColor1} mt="$2">How do I find and scan the NFC chip?</Text>
-          <YStack ml="$3" gap="$2" mt="$1" >
+          <YStack ml="$3" gap="$2" mt="$3">
             <XStack gap="$1">
-              <Text fontSize="$4" color={textColor2}>1.</Text>
-              <Text fontSize="$4" color={textColor2}>Close your passport and hold the middle of the back cover of your passport to the top of the phoneThe passport should touch the phone.</Text>
+              <Text fontSize="$5" color={textColor2}>1.</Text>
+              <Text fontSize="$5" color={textColor2}>Open your passport to the photo page.</Text>
             </XStack>
             <XStack gap="$1">
-              <Text fontSize="$4" color={textColor2}>2.</Text>
-              <Text fontSize="$4" color={textColor2}>If that does not work, try using the front cover of your passport.</Text>
+              <Text fontSize="$5" color={textColor2}>2.</Text>
+              <Text fontSize="$5" color={textColor2}>
+                {Platform.OS === "android"
+                  ? "Press the center of your phone against the top page."
+                  : "Press the top half of your phone against the top page, as in the image."
+                }
+              </Text>
             </XStack>
             <XStack gap="$1">
-              <Text fontSize="$4" color={textColor2}>3.</Text>
-              <Text fontSize="$4" color={textColor2}>Move your phone slowly up and down until scanning starts.</Text>
+              <Text fontSize="$5" color={textColor2}>3.</Text>
+              <Text fontSize="$5" color={textColor2}>When device vibrates, hold still until scanning is complete.</Text>
             </XStack>
             <XStack gap="$1">
-              <Text fontSize="$4" color={textColor2}>4.</Text>
-              <Text fontSize="$4" color={textColor2}>Hold your device still when scanning starts.</Text>
+              <Text fontSize="$5" color={textColor2}>4.</Text>
+              <Text fontSize="$5" color={textColor2}>If scanning fails to start, slowly move your phone around the open passport, keeping them pressed close together, until it vibrates and scanning starts. You may need to remove your case.</Text>
             </XStack>
           </YStack>
 

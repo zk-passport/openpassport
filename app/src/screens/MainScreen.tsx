@@ -39,6 +39,7 @@ import AppScreen from './AppScreen';
 // import constants
 import { RPC_URL, SignatureAlgorithm } from '../../../common/src/constants/constants';
 import { mock_csca_sha256_rsa_4096, mock_dsc_sha256_rsa_4096 } from '../../../common/src/constants/mockCertificates';
+import IntroScreen from './IntroScreen';
 
 
 const MainScreen: React.FC = () => {
@@ -81,9 +82,9 @@ const MainScreen: React.FC = () => {
 
   const handleRestart = () => {
     updateNavigationStore({
-      selectedTab: "scan",
+      selectedTab: "intro",
       selectedApp: null,
-      step: Steps.MRZ_SCAN,
+      step: Steps.INTRO,
     })
     deleteMrzFields();
   }
@@ -137,6 +138,9 @@ const MainScreen: React.FC = () => {
   }
 
   const decrementStep = () => {
+    if (selectedTab === "scan") {
+      setStep(Steps.INTRO);
+    }
     if (selectedTab === "nfc") {
       setStep(Steps.MRZ_SCAN);
     }
@@ -226,7 +230,15 @@ const MainScreen: React.FC = () => {
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
-    if (step == Steps.MRZ_SCAN) {
+    if (step == Steps.INTRO) {
+      updateNavigationStore({
+        selectedTab: "intro",
+      })
+      timeoutId = setTimeout(() => {
+        setNFCScanIsOpen(false);
+      }, 0);
+    }
+    else if (step == Steps.MRZ_SCAN) {
       updateNavigationStore({
         selectedTab: "scan",
       })
@@ -282,10 +294,19 @@ const MainScreen: React.FC = () => {
       <YStack f={1} bc="#161616" mt={Platform.OS === 'ios' ? "$8" : "$0"} >
         <YStack >
           <XStack jc="space-between" ai="center" px="$3">
-            <Button p="$2" py="$3" unstyled onPress={decrementStep}><ChevronLeft color={(selectedTab === "scan") ? "transparent" : "#a0a0a0"} /></Button>
+            <Button p="$2" py="$3" unstyled onPress={decrementStep}>
+              <ChevronLeft color={(selectedTab === "intro") ? "transparent" : "#a0a0a0"} />
+            </Button>
 
             <Text fontSize="$6" color="#a0a0a0">
-              {selectedTab === "scan" ? "Scan" : (selectedTab === "app" ? "Apps" : "Prove")}
+              {selectedTab === "intro" ? "Welcome"
+                : selectedTab === "scan" ? "Scan"
+                : selectedTab === "nfc" ? "Verify"
+                : selectedTab === "next" ? "Success!"
+                : selectedTab === "register" ? "Certification"
+                : selectedTab === "app" ? "Apps"
+                : "Prove"
+              }
             </Text>
             <XStack>
               <Button p="$2" py="$3" unstyled onPress={() => setSettingsIsOpen(true)}><Cog color="#a0a0a0" /></Button>
@@ -506,7 +527,7 @@ const MainScreen: React.FC = () => {
             <Sheet.Overlay />
             <Sheet.Frame bg={bgColor} borderRadius="$9" pt="$2">
               <YStack p="$4" f={1} gap="$3">
-                <Text fontSize="$6" mb="$4" color={textColor1}>Enter your the information manually</Text>
+                <Text fontSize="$6" mb="$4" color={textColor1}>Please provide the following information</Text>
                 <Fieldset gap="$4" horizontal>
                   <Text color={textColor1} width={160} justifyContent="flex-end" fontSize="$4">
                     Passport Number
@@ -602,6 +623,9 @@ const MainScreen: React.FC = () => {
         >
           <ToastViewport flexDirection="column-reverse" top={15} right={0} left={0} />
           <ToastMessage />
+          <Tabs.Content value="intro" f={1}>
+            <IntroScreen />
+          </Tabs.Content>
           <Tabs.Content value="scan" f={1}>
             <CameraScreen
               sheetIsOpen={sheetIsOpen}

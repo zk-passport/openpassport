@@ -200,7 +200,7 @@ const handleResponseIOS = async (
     useNavigationStore.getState().setStep(Steps.MRZ_SCAN_COMPLETED);
     amplitude.track('Signature algorithm unsupported (ecdsa not parsed)', { error: JSON.stringify(e) });
     toast.show('Error', {
-      message: "Your signature algorithm is not supported at that time. Please try again later.",
+      message: "Your signature algorithm or country is not supported for this vote.",
       customData: {
         type: "error",
       },

@@ -20,19 +20,16 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ sheetIsOpen, setSheetIsOpen
           h="$13"
           source={{ uri: SCANHelp }}
         />
-        <YStack gap="$0.5" mt="$3.5">
-          <Text mt="$1" color={textColor1}>Use your camera to scan the main page of your passport.</Text>
-          <Text fontSize="$2" color={textColor2} mt="$2">You can also enter those data manually.</Text>
-          <Text fontSize="$2" style={{ fontStyle: 'italic' }} color={textColor2}>The app does not take a picture of your passport, it only reads some fields.</Text>
+        <YStack  gap="$0.5" mt="$3.5">
+          <Text textAlign='center' fontSize="$8" mt="$1" color={textColor1}>Scan or type your passport ID</Text>
+          <Text textAlign='center' fontSize="$5" color={textColor2} mt="$2">This information never leaves your device</Text>
         </YStack>
 
+        <YStack gap="$2" my="$6">
+          <Button borderWidth={1.3} borderColor={borderColor} borderRadius="$10" bg="#3185FC" onPress={startCameraScan}><Camera color={textColor1} /></Button>
+          <Button bg={textColor2} borderColor={borderColor} borderRadius="$10" onPress={() => setSheetIsOpen(true)}><SquarePen /></Button>
+        </YStack>
       </YStack>
-
-      <YStack gap="$2" mb="$6">
-        <Button borderWidth={1.3} borderColor={borderColor} borderRadius="$10" bg="#3185FC" onPress={startCameraScan}><Camera color={textColor1} /></Button>
-        <Button bg={textColor2} borderColor={borderColor} borderRadius="$10" onPress={() => setSheetIsOpen(true)}><SquarePen /></Button>
-      </YStack>
-
     </YStack >
   );
 };

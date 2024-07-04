@@ -10,7 +10,6 @@ import { formatAttribute, Steps } from '../utils/utils';
 import useUserStore from '../stores/userStore';
 import useNavigationStore from '../stores/navigationStore';
 
-
 const NextScreen: React.FC = () => {
   const {
     hideData,
@@ -49,7 +48,7 @@ const NextScreen: React.FC = () => {
               h={height > 750 ? 190 : 130}
               borderRadius={height > 750 ? "$7" : "$6"}
               source={{
-                uri: passportData.photoBase64 ?? USER,
+                uri: (passportData.photoBase64 && passportData.photoBase64.length > 200) ? passportData.photoBase64 : USER,
               }}
             />
           }

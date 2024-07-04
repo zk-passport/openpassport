@@ -20,7 +20,7 @@ interface NavigationState {
 }
 
 const useNavigationStore = create<NavigationState>((set, get) => ({
-  step: Steps.MRZ_SCAN,
+  step: Steps.INTRO,
   isZkeyDownloading: {
     register_sha256WithRSAEncryption_65537: false,
     disclose: false,
@@ -37,7 +37,7 @@ const useNavigationStore = create<NavigationState>((set, get) => ({
 
   toast: null as unknown as ReturnType<typeof useToastController>,
 
-  selectedTab: "scan",
+  selectedTab: "intro",
   selectedApp: null,
 
   setToast: (toast) => set({ toast }),
