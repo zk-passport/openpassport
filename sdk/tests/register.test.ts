@@ -48,7 +48,7 @@ let inputs: any;
 let attestation_id: string;
 import path from "path";
 import { poseidon1 } from "poseidon-lite";
-import { verifyProofs } from "../ProofOfPassportRegister";
+import { getDSCModulus, getNullifier, getSIV, verifyProofs } from "../ProofOfPassportRegister";
 let proof: any;
 let publicSignals: any;
 let cscaProof: any;
@@ -89,8 +89,8 @@ describe("Testing the register flow", function () {
 
     it('should successfully request and receive a CSCA proof', async () => {
         try {
-            console.log('Requesting CSCA proof...');
-            cscaProof = await requestCSCAProof(inputs_csca);
+            console.log('Not requesting CSCA proof...');
+            //cscaProof = await requestCSCAProof(inputs_csca);
             // Add assertions here to verify the proof structure
             // For example:
             // assert.ok(cscaProof.proof, 'Proof should exist');
@@ -106,14 +106,20 @@ describe("Testing the register flow", function () {
             proof: proof,
             publicSignals: publicSignals
         }
-        const proof_csca = {
-            proof: cscaProof.proof,
-            publicSignals: cscaProof.pub_signals
-        }
+        // const proof_csca = {
+        //     proof: cscaProof.proof,
+        //     publicSignals: cscaProof.pub_signals
+        // }
         console.log("proof :", JSON.stringify(proof_register, null, 2));
-        console.log("proof_csca :", JSON.stringify(proof_csca, null, 2));
-        const result = await verifyProofs(proof_register, proof_csca);
+        //console.log("proof_csca :", JSON.stringify(proof_csca, null, 2));
+        const result = await verifyProofs(proof_register);
         console.log('Verification result:', result);
+        const dsc_modulus = await getDSCModulus(proof_register);
+        console.log('dsc_modulus:', dsc_modulus);
+        const nullifier = await getNullifier(proof_register);
+        console.log('nullifier:', nullifier);
+        const SIV = await getSIV(proof_register);
+        console.log('SIV:', SIV);
 
     });
 });

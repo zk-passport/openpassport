@@ -6,9 +6,7 @@ include "./passport_verifier_sha256WithRSAEncryption_65537.circom";
 include "binary-merkle-root.circom";
 include "./utils/splitSignalsToWords.circom";
 
-template Register_sha256WithRSAEncryption_65537(n, k, max_datahashes_bytes, nLevels, signatureAlgorithm) {
-    signal input secret;
-
+template Register_sha256WithRSAEncryption_65537(n, k, max_datahashes_bytes) {
     signal input mrz[93];
     signal input dg1_hash_offset;
     signal input econtent[max_datahashes_bytes];
@@ -16,8 +14,6 @@ template Register_sha256WithRSAEncryption_65537(n, k, max_datahashes_bytes, nLev
     signal input signed_attributes[104];
     signal input signature[k];
     signal input dsc_modulus[k];
-    signal input dsc_secret;
-    signal input attestation_id;
     signal input SIV;
 
     // assert nationality is USA
@@ -25,23 +21,13 @@ template Register_sha256WithRSAEncryption_65537(n, k, max_datahashes_bytes, nLev
     mrz[55 + 5] === 83;
     mrz[56 + 5] === 65;
 
-
-    component splitSignalsToWords_modulus = SplitSignalsToWords(n,k,230,9); // TODO refactor and create assertion that 121*17 < 254 * 9 and 254 <= 254
-    component splitSignalsToWords_signature = SplitSignalsToWords(n,k,230,9); // TODO refactor and create assertion that 121*17 < 254 * 9 and 254 <= 254
-    splitSignalsToWords_modulus.in <== dsc_modulus;
+    component splitSignalsToWords_signature = SplitSignalsToWords(n,k,230,9);
     splitSignalsToWords_signature.in <== signature;
 
     component nullifier_hasher = Poseidon(9);
-    component dsc_commitment_hasher = Poseidon(10);
-    component leaf_hasher = Poseidon(10);
-    dsc_commitment_hasher.inputs[0] <== dsc_secret;
-    leaf_hasher.inputs[0] <== signatureAlgorithm;
     for (var i= 0; i < 9; i++) {
-        dsc_commitment_hasher.inputs[i+1] <== splitSignalsToWords_modulus.out[i];
-        leaf_hasher.inputs[i+1] <== splitSignalsToWords_modulus.out[i];
         nullifier_hasher.inputs[i] <== splitSignalsToWords_signature.out[i];
     }
-    signal output blinded_dsc_commitment <== dsc_commitment_hasher.out;
     signal output nullifier <== nullifier_hasher.out;
 
     // Verify passport validity
@@ -53,20 +39,7 @@ template Register_sha256WithRSAEncryption_65537(n, k, max_datahashes_bytes, nLev
     PV.eContentBytes <== signed_attributes;
     PV.dsc_modulus <== dsc_modulus;
     PV.signature <== signature;
-
-    // Generate the commitment
-    component poseidon_hasher = Poseidon(6);
-    poseidon_hasher.inputs[0] <== secret;
-    poseidon_hasher.inputs[1] <== attestation_id;
-    poseidon_hasher.inputs[2] <== leaf_hasher.out;
-
-    signal mrz_packed[3] <== PackBytes(93)(mrz);
-    for (var i = 0; i < 3; i++) {
-        poseidon_hasher.inputs[i + 3] <== mrz_packed[i];
-    }
-    signal output commitment <== poseidon_hasher.out;
-
 }
 
 // We hardcode 1 here for sha256WithRSAEncryption_65537
-component main { public [ attestation_id , SIV] } = Register_sha256WithRSAEncryption_65537(121, 17, 320, 16, 1);
+component main { public [ SIV, dsc_modulus] } = Register_sha256WithRSAEncryption_65537(121, 17, 320);
