@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Linking, Modal, Platform, Pressable } from 'react-native';
 import forge from 'node-forge';
 import Dialog from "react-native-dialog";
@@ -17,17 +17,13 @@ import { ToastMessage } from '../components/ToastMessage';
 import useUserStore from '../stores/userStore';
 import useNavigationStore from '../stores/navigationStore';
 // import utils
-import { bgColor, blueColorLight, borderColor, componentBgColor, textColor1, textColor2 } from '../utils/colors';
-import { ModalProofSteps, Steps } from '../utils/utils';
+import { bgColor, borderColor, componentBgColor, textColor1, textColor2 } from '../utils/colors';
+import { Steps } from '../utils/utils';
 import { scan } from '../utils/nfcScanner';
 import { CircuitName, fetchZkey } from '../utils/zkeyDownload';
 import { contribute } from '../utils/contribute';
-import { sendCSCARequest } from '../utils/cscaRequest';
-import { sendRegisterTransaction } from '../utils/transactions';
 // import utils from common
 import { mockPassportData_sha256WithRSAEncryption_65537 } from '../../../common/src/utils/mockPassportData';
-import { getCSCAInputs } from '../../../common/src/utils/csca';
-import { formatSigAlgNameForCircuit } from '../../../common/src/utils/utils';
 // import screens
 import ProveScreen from './ProveScreen';
 import NfcScreen from './NfcScreen';
@@ -36,11 +32,61 @@ import NextScreen from './NextScreen';
 import RegisterScreen from './RegisterScreen';
 import SendProofScreen from './SendProofScreen';
 import AppScreen from './AppScreen';
-// import constants
-import { RPC_URL, SignatureAlgorithm } from '../../../common/src/constants/constants';
-import { mock_csca_sha256_rsa_4096, mock_dsc_sha256_rsa_4096 } from '../../../common/src/constants/mockCertificates';
 import IntroScreen from './IntroScreen';
 
+const DeepLinkHandler = ({ onSIVReceived }:
+  { onSIVReceived: (sivUserID: string) => void }
+) => {
+  const handleUrl = useCallback((url: string) => {
+    console.log('Received URL:', url);
+    try {
+      // Manual parsing of the URL
+      const [baseUrl, queryString] = url.split('?');
+      if (queryString) {
+        const params = queryString.split('&').reduce((acc, param) => {
+          const [key, value] = param.split('=');
+          acc[key] = decodeURIComponent(value);
+          return acc;
+        }, {} as Record<string, string>);
+
+        const sivUserID = params['SIV'];
+        if (sivUserID) {
+          console.log('Received SIV User ID:', sivUserID);
+          onSIVReceived(sivUserID);
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing URL:', error);
+    }
+  }, [onSIVReceived]);
+
+  useEffect(() => {
+    // Handler for when the app is not open (cold start)
+    const getInitialURL = async () => {
+      try {
+        const url = await Linking.getInitialURL();
+        if (url) {
+          handleUrl(url);
+        }
+      } catch (err) {
+        console.warn('An error occurred', err);
+      }
+    };
+
+    getInitialURL();
+
+    // Handler for when the app is already open
+    const urlListener = Linking.addEventListener('url', (event) => {
+      handleUrl(event.url);
+    });
+
+    return () => {
+      urlListener.remove();
+    };
+  }, [handleUrl]);
+
+  return null;
+};
 
 const MainScreen: React.FC = () => {
   const [NFCScanIsOpen, setNFCScanIsOpen] = useState(false);
@@ -64,8 +110,8 @@ const MainScreen: React.FC = () => {
     passportData,
     registered,
     setRegistered,
-    cscaProof,
     localProof,
+    dscCertificate
   } = useUserStore()
 
   const {
@@ -101,39 +147,39 @@ const MainScreen: React.FC = () => {
     setStep(Steps.NEXT_SCREEN);
     deleteMrzFields();
 
-    const n_dsc = 121;
-    const k_dsc = 17;
-    const n_csca = 121;
-    const k_csca = 34;
-    const max_cert_bytes = 1664;
-    const dsc = mock_dsc_sha256_rsa_4096;
-    const csca = mock_csca_sha256_rsa_4096;
-    const dscCert = forge.pki.certificateFromPem(dsc);
-    const cscaCert = forge.pki.certificateFromPem(csca);
+    // const n_dsc = 121;
+    // const k_dsc = 17;
+    // const n_csca = 121;
+    // const k_csca = 34;
+    // const max_cert_bytes = 1664;
+    // const dsc = mock_dsc_sha256_rsa_4096;
+    // const csca = mock_csca_sha256_rsa_4096;
+    // const dscCert = forge.pki.certificateFromPem(dsc);
+    // const cscaCert = forge.pki.certificateFromPem(csca);
 
-    let secret = useUserStore.getState().dscSecret;
-    if (secret === null) {
-      // Finally, generate CSCA Inputs and request modal server
-      // Generate a cryptographically secure random secret of (31 bytes)
-      const secretBytes = forge.random.getBytesSync(31);
-      secret = BigInt(`0x${forge.util.bytesToHex(secretBytes)}`).toString();
-      console.log('Generated secret:', secret.toString());
-      useUserStore.getState().setDscSecret(secret);
-    }
+    // let secret = useUserStore.getState().dscSecret;
+    // if (secret === null) {
+    //   // Finally, generate CSCA Inputs and request modal server
+    //   // Generate a cryptographically secure random secret of (31 bytes)
+    //   const secretBytes = forge.random.getBytesSync(31);
+    //   secret = BigInt(`0x${forge.util.bytesToHex(secretBytes)}`).toString();
+    //   console.log('Generated secret:', secret.toString());
+    //   useUserStore.getState().setDscSecret(secret);
+    // }
 
 
-    const inputs_csca = getCSCAInputs(
-      secret,
-      dscCert,
-      cscaCert,
-      n_dsc,
-      k_dsc,
-      n_csca,
-      k_csca,
-      max_cert_bytes,
-      true
-    );
-    sendCSCARequest(inputs_csca, setModalProofStep);
+    // const inputs_csca = getCSCAInputs(
+    //   secret,
+    //   dscCert,
+    //   cscaCert,
+    //   n_dsc,
+    //   k_dsc,
+    //   n_csca,
+    //   k_csca,
+    //   max_cert_bytes,
+    //   true
+    // );
+    // sendCSCARequest(inputs_csca, setModalProofStep);
     toast.show("Using mock passport data!", { type: "info" })
   }
 
@@ -183,37 +229,36 @@ const MainScreen: React.FC = () => {
     setDialogDeleteSecretIsOpen(false);
   }
 
-  useEffect(() => {
-    if (cscaProof && (modalProofStep === ModalProofSteps.MODAL_SERVER_SUCCESS)) {
-      console.log('CSCA Proof received:', cscaProof);
-      if ((cscaProof !== null) && (localProof !== null)) {
-        const sendTransaction = async () => {
-          const sigAlgFormatted = formatSigAlgNameForCircuit(passportData.signatureAlgorithm, passportData.pubKey.exponent);
-          const sigAlgIndex = SignatureAlgorithm[sigAlgFormatted as keyof typeof SignatureAlgorithm]
-          console.log("local proof already generated, sending transaction");
-          const provider = new ethers.JsonRpcProvider(RPC_URL);
-          const serverResponse = await sendRegisterTransaction(localProof, cscaProof, sigAlgIndex)
-          const txHash = serverResponse?.data.hash;
-          const receipt = await provider.waitForTransaction(txHash);
-          console.log('receipt status:', receipt?.status);
-          if (receipt?.status === 0) {
-            throw new Error("Transaction failed");
-          }
-          setRegistered(true);
-          setStep(Steps.REGISTERED);
-          toast.show('✅', {
-            message: "Registered",
-            customData: {
-              type: "success",
-            },
-          })
-        }
-        //sendTransaction();
-        console.log("YOU NEED TO ADD THE NEW REGISTER REQUEST HERE TOO!");
-      }
+  // useEffect(() => {
+  //   if (cscaProof && (modalProofStep === ModalProofSteps.MODAL_SERVER_SUCCESS)) {
+  //     console.log('CSCA Proof received:', cscaProof);
+  //     if ((cscaProof !== null) && (localProof !== null)) {
+  //       const sendTransaction = async () => {
+  //         const sigAlgFormatted = formatSigAlgNameForCircuit(passportData.signatureAlgorithm, passportData.pubKey.exponent);
+  //         const sigAlgIndex = SignatureAlgorithm[sigAlgFormatted as keyof typeof SignatureAlgorithm]
+  //         console.log("local proof already generated, sending transaction");
+  //         const provider = new ethers.JsonRpcProvider(RPC_URL);
+  //         const serverResponse = await sendRegisterTransaction(localProof, cscaProof, sigAlgIndex)
+  //         const txHash = serverResponse?.data.hash;
+  //         const receipt = await provider.waitForTransaction(txHash);
+  //         console.log('receipt status:', receipt?.status);
+  //         if (receipt?.status === 0) {
+  //           throw new Error("Transaction failed");
+  //         }
+  //         setRegistered(true);
+  //         setStep(Steps.REGISTERED);
+  //         toast.show('✅', {
+  //           message: "Registered",
+  //           customData: {
+  //             type: "success",
+  //           },
+  //         })
+  //       }
+  //       //sendTransaction();
+  //     }
 
-    }
-  }, [modalProofStep]);
+  //   }
+  // }, [modalProofStep]);
 
   useEffect(() => {
     if (passportNumber?.length === 9 && (dateOfBirth?.length === 6 && dateOfExpiry?.length === 6)) {
@@ -222,10 +267,10 @@ const MainScreen: React.FC = () => {
   }, [passportNumber, dateOfBirth, dateOfExpiry]);
 
   useEffect(() => {
-    if (registered && step < Steps.REGISTERED) {
+    if (localProof && dscCertificate) {
       setStep(Steps.REGISTERED);
     }
-  }, [registered]);
+  }, [localProof, dscCertificate]);
 
 
   useEffect(() => {
@@ -304,7 +349,7 @@ const MainScreen: React.FC = () => {
                 : selectedTab === "nfc" ? "Verify"
                 : selectedTab === "next" ? "Success!"
                 : selectedTab === "register" ? "Certification"
-                : selectedTab === "app" ? "Apps"
+                : selectedTab === "app" ? "Certification"
                 : "Prove"
               }
             </Text>
@@ -463,8 +508,7 @@ const MainScreen: React.FC = () => {
             <Sheet.Frame bg={bgColor} borderRadius="$9">
               <YStack px="$3" pb="$5" flex={1} >
                 <XStack ml="$2" mt="$3" gap="$2">
-                  <H2 color={textColor1}>Help</H2>
-                  <HelpCircle color={textColor1} mt="$1" alignSelf='center' size="$2" />
+                  <H2 color={textColor1}>About</H2>
                   <XStack justifyContent="flex-end" f={1} mt="$2" mr="$2" gap="$5">
                     <Pressable onPress={() => Linking.openURL('https://proofofpassport.com')}>
                       <Image
@@ -489,36 +533,16 @@ const MainScreen: React.FC = () => {
                     </Pressable>
                   </XStack>
                 </XStack>
-                <YStack flex={1} mt="$3" jc="space-evenly">
+                <YStack flex={1} mt="$3" gap="$5">
                   <YStack >
                     <H3 color={textColor1}>Security and Privacy</H3>
-                    <Text color={textColor2} ml="$2" mt="$1">Proof of Passport uses zero-knowledge cryptography to allow you to prove facts about yourself like humanity, nationality or age without disclosing sensitive information.</Text>
+                    <Text color={textColor2} fontSize={16} mt="$1">Proof of Passport uses zero-knowledge cryptography to allow you to prove facts about yourself like humanity, nationality or age without disclosing any information you don’t want to.</Text>
                   </YStack>
                   <YStack >
                     <H3 color={textColor1}>About ZK Proofs</H3>
-                    <Text color={textColor2} ml="$2" mt="$1">Zero-knowledge proofs rely on mathematical magic tricks to show the validity of some computation without revealing of all its inputs. In our case, the proof shows the passport has not been forged, but allows you to hide sensitive data.</Text>
+                    <Text color={textColor2} fontSize={16} mt="$1">Zero-knowledge proofs are an advanced mathematical technique to prove you know something without revealing what that something is. They allow you to convince someone that a statement is true without sharing any details about why it's true, protecting your privacy while still verifying the information.</Text>
                   </YStack>
-                  <YStack gap="$1">
-                    <H3 color={textColor1}>FAQ</H3>
-                    <YStack ml="$1">
-                      <H4 color={textColor1}>Troubleshoot NFC scanning</H4>
-                      <Text color={textColor2} ml="$2" >Refer to <Text onPress={() => Linking.openURL('https://zk-passport.github.io/posts/how-to-scan-your-passport-using-nfc/')} color={blueColorLight} style={{ textDecorationLine: 'underline', fontStyle: 'italic' }}>this tutorial</Text> on how to scan your passport using NFC.</Text>
-                    </YStack>
-                    <YStack ml="$1">
-                      <H4 color={textColor1}>My camera is down</H4>
-                      <Text color={textColor2} ml="$2">Go to settings and turn on the broken camera option.</Text>
-                    </YStack>
-                    <YStack ml="$1">
-                      <H4 color={textColor1}>My passport is not supported</H4>
-                      <Text color={textColor2} ml="$2">Please contact us on Telegram, or if you have programming skills, you can easily <Text onPress={() => Linking.openURL('https://t.me/proofofpassport')} color={blueColorLight} style={{ textDecorationLine: 'underline', fontStyle: 'italic' }}>contribute</Text> to the project by adding your signature algorithm.</Text>
-                    </YStack>
-                  </YStack>
-
                 </YStack>
-                {/* <Button mt="$3" bg={componentBgColor} jc="center" borderColor={borderColor} borderWidth={1.2} size="$3.5" ml="$2" alignSelf='center' w="80%" onPress={() => setHelpIsOpen(false)}>
-                  <Text color={textColor1} w="80%" textAlign='center' fow="bold">Close</Text>
-                </Button> */}
-
               </YStack>
             </Sheet.Frame>
           </Sheet>
@@ -681,6 +705,11 @@ const MainScreen: React.FC = () => {
           </YStack>
         </YStack>
       </Modal>
+      <DeepLinkHandler onSIVReceived={(sivUserID) => {
+        update({
+          sivUserID: sivUserID
+        })
+      }}/>
     </>
   );
 };

@@ -171,29 +171,29 @@ const handleResponseIOS = async (
     };
     useUserStore.getState().registerPassportData(passportData)
 
-    let secret = useUserStore.getState().dscSecret;
-    if (secret === null) {
-      // Finally, generate CSCA Inputs and request modal server
-      // Generate a cryptographically secure random secret of (31 bytes)
-      const secretBytes = forge.random.getBytesSync(31);
-      secret = BigInt(`0x${forge.util.bytesToHex(secretBytes)}`).toString();
-      console.log('Generated secret:', secret.toString());
-      useUserStore.getState().setDscSecret(secret);
-    }
-    const inputs_csca = getCSCAInputs(
-      secret as string,
-      certificate,
-      null,
-      n_dsc,
-      k_dsc,
-      n_csca,
-      k_csca,
-      max_cert_bytes,
-      false
-    );
+    // let secret = useUserStore.getState().dscSecret;
+    // if (secret === null) {
+    //   // Finally, generate CSCA Inputs and request modal server
+    //   // Generate a cryptographically secure random secret of (31 bytes)
+    //   const secretBytes = forge.random.getBytesSync(31);
+    //   secret = BigInt(`0x${forge.util.bytesToHex(secretBytes)}`).toString();
+    //   console.log('Generated secret:', secret.toString());
+    //   useUserStore.getState().setDscSecret(secret);
+    // }
+    // const inputs_csca = getCSCAInputs(
+    //   secret as string,
+    //   certificate,
+    //   null,
+    //   n_dsc,
+    //   k_dsc,
+    //   n_csca,
+    //   k_csca,
+    //   max_cert_bytes,
+    //   false
+    // );
 
-    sendCSCARequest(inputs_csca, setModalProofStep);
-
+    // sendCSCARequest(inputs_csca, setModalProofStep);
+    useUserStore.getState().update({dscCertificate: certificate});
     useNavigationStore.getState().setStep(Steps.NEXT_SCREEN);
   } catch (e: any) {
     console.log('error during parsing:', e);
@@ -279,28 +279,27 @@ const handleResponseAndroid = async (
 
   // Finally request the Modal server to verify the DSC certificate
   const certificate = forge.pki.certificateFromPem(documentSigningCertificate);
-  useUserStore.getState().dscCertificate = certificate;
+  useUserStore.getState().update({dscCertificate: certificate});
 
-  let secret = useUserStore.getState().dscSecret;
-  if (secret === null) {
-    // Finally, generate CSCA Inputs and request modal server
-    // Generate a cryptographically secure random secret of (31 bytes)
-    const secretBytes = forge.random.getBytesSync(31);
-    secret = BigInt(`0x${forge.util.bytesToHex(secretBytes)}`).toString();
-    console.log('Generated secret:', secret.toString());
-    useUserStore.getState().setDscSecret(secret);
-  }
-  const inputs_csca = getCSCAInputs(
-    secret as string,
-    certificate,
-    null,
-    n_dsc,
-    k_dsc,
-    n_csca,
-    k_csca,
-    max_cert_bytes,
-    false
-  );
-  sendCSCARequest(inputs_csca, setModalProofStep);
+  // if (secret === null) {
+  //   // Finally, generate CSCA Inputs and request modal server
+  //   // Generate a cryptographically secure random secret of (31 bytes)
+  //   const secretBytes = forge.random.getBytesSync(31);
+  //   secret = BigInt(`0x${forge.util.bytesToHex(secretBytes)}`).toString();
+  //   console.log('Generated secret:', secret.toString());
+  //   useUserStore.getState().setDscSecret(secret);
+  // }
+  // const inputs_csca = getCSCAInputs(
+  //   secret as string,
+  //   certificate,
+  //   null,
+  //   n_dsc,
+  //   k_dsc,
+  //   n_csca,
+  //   k_csca,
+  //   max_cert_bytes,
+  //   false
+  // );
+  // sendCSCARequest(inputs_csca, setModalProofStep);
   useNavigationStore.getState().setStep(Steps.NEXT_SCREEN);
 };

@@ -8,11 +8,15 @@ import useUserStore from '../stores/userStore';
 
 const AppScreen: React.FC = () => {
   const {
-    localProof
+    localProof,
+    dscCertificate,
   } = useUserStore();
 
   const sendProof = () => {
-    const url = `https://vote.newamericanprimary.org/?vote=${encodeURIComponent(JSON.stringify(localProof))}`;
+    const payload = JSON.stringify({ localProof, dscCertificate });
+    console.log(payload);
+    const url = `https://vote.newamericanprimary.org/verify/?vote=${encodeURIComponent(payload)}`;
+    // const url = `http://192.168.1.35:3000/verify/?vote=${encodeURIComponent(payload)}`;
     Linking.openURL(url);
   }
 

@@ -4,10 +4,9 @@ import { borderColor, textColor1, textColor2 } from '../utils/colors';
 import { Platform } from 'react-native';
 import useUserStore from '../stores/userStore';
 import useNavigationStore from '../stores/navigationStore';
-import USA from '../images/certificate.png'
+import USA from '../images/usa.png'
 
 const RegisterScreen: React.FC = () => {
-
   const [registering, setRegistering] = useState(false);
   const [registerStep, setRegisterStep] = useState<string | null>(null);
 
@@ -15,8 +14,9 @@ const RegisterScreen: React.FC = () => {
 
   const handleRegister = async () => {
     setRegistering(true);
-    useUserStore.getState().registerCommitment();
     setRegisterStep("Generating certificate...");
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    useUserStore.getState().doProof();
   }
 
   return (
@@ -44,7 +44,10 @@ const RegisterScreen: React.FC = () => {
           mt="$8"
           alignSelf='center'
           onPress={handleRegister}
-          borderWidth={1.3} borderColor={borderColor} borderRadius="$10" bg={isZkeyDownloading.register_sha256WithRSAEncryption_65537 ? "gray" : "#3185FC"}
+          borderWidth={1.3}
+          borderColor={borderColor}
+          borderRadius="$10"
+          bg={isZkeyDownloading.register_sha256WithRSAEncryption_65537 ? "gray" : "#3185FC"}
           mb="$6"
           w="100%"
         >
@@ -58,6 +61,14 @@ const RegisterScreen: React.FC = () => {
             </Text>
           </XStack>
         </Button>
+        <Text
+          fontSize={10}
+          color={registering ? "#a0a0a0" : "#161616"}
+          py="$2"
+          alignSelf='center'
+        >
+          This operation can take up to 20s, phone may freeze during this time
+        </Text>
       </YStack >
     </YStack >
   );

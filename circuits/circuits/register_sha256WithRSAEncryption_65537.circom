@@ -16,10 +16,10 @@ template Register_sha256WithRSAEncryption_65537(n, k, max_datahashes_bytes) {
     signal input dsc_modulus[k];
     signal input SIV;
 
-    // assert nationality is USA
-    mrz[54 + 5] === 85;
-    mrz[55 + 5] === 83;
-    mrz[56 + 5] === 65;
+    // assert nationality is USA (commented, can be checked with DSC)
+    // mrz[54 + 5] === 85;
+    // mrz[55 + 5] === 83;
+    // mrz[56 + 5] === 65;
 
     component splitSignalsToWords_signature = SplitSignalsToWords(n,k,230,9);
     splitSignalsToWords_signature.in <== signature;

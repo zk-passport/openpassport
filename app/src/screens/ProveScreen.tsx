@@ -258,7 +258,7 @@ const ProveScreen: React.FC = () => {
             py="$2"
             alignSelf='center'
           >
-            This operation can take up to 1 mn, phone may freeze during this time
+            This operation can take up to 20s, phone may freeze during this time
           </Text>
         }
       </YStack >

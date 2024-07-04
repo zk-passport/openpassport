@@ -38,11 +38,9 @@ export function generateCircuitInputsRegister(
 
   if (![
     "sha256WithRSAEncryption",
-    "sha1WithRSAEncryption",
-    "sha256WithRSASSAPSS"
   ].includes(signatureAlgorithm)) {
-    console.error(`${signatureAlgorithm} has not been implemented.`);
-    throw new Error(`${signatureAlgorithm} has not been implemented.`);
+    console.error(`${signatureAlgorithm} is not supported.`);
+    throw new Error(`${signatureAlgorithm} is not supported.`);
   }
 
   const hashLen = getHashLen(signatureAlgorithm);
@@ -106,7 +104,7 @@ export function generateCircuitInputsRegister(
       BigInt(n_dsc),
       BigInt(k_dsc)
     ),
-    //attestation_id: [attestation_id],
+    // attestation_id: [attestation_id],
     // dsc_secret: [dscSecret],
     SIV: [SIV]
   };

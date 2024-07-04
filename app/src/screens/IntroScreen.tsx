@@ -10,7 +10,7 @@ import { Lock } from '@tamagui/lucide-icons';
 import useUserStore from '../stores/userStore';
 
 const IntroScreen: React.FC = () => {
-  const { setStep } = useNavigationStore()
+  const { setStep, toast } = useNavigationStore()
   const { sivUserID, update } = useUserStore()
 
   const [input, setInput] = useState("");
@@ -74,7 +74,18 @@ const IntroScreen: React.FC = () => {
           : <Button
               mt="$4"
               alignSelf='center'
-              onPress={() => update({sivUserID: input})}
+              onPress={() => {
+                if (isNaN(Number(input))) {
+                  toast.show('Please enter a valid number', {
+                    customData: {
+                      type: "error",
+                    },
+                  });
+                  return;
+                }
+
+                update({sivUserID: input})
+              }}
               borderWidth={1.3} borderColor={borderColor} borderRadius="$10" bg="#3185FC"
               mb="$12"
               w="50%"

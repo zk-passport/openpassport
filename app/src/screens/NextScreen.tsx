@@ -14,7 +14,6 @@ const NextScreen: React.FC = () => {
   const {
     hideData,
     setStep,
-
   } = useNavigationStore()
 
   const {
