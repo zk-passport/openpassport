@@ -32,6 +32,7 @@ interface UserState {
   cscaProof: any | null
   localProof: Proof | null
   dscSecret: string | null
+  sivUserID: string | null
   initUserStore: () => void
   registerPassportData: (passportData: PassportData) => void
   registerCommitment: (passportData?: PassportData) => void
@@ -55,6 +56,7 @@ const useUserStore = create<UserState>((set, get) => ({
   dscCertificate: null,
   cscaProof: null,
   localProof: null,
+  sivUserID: null,
   setRegistered: (registered: boolean) => {
     set({ registered });
   },
@@ -70,7 +72,7 @@ const useUserStore = create<UserState>((set, get) => ({
   initUserStore: async () => {
     // download zkeys if they are not already downloaded
     downloadZkey("register_sha256WithRSAEncryption_65537"); // might move after nfc scanning
-    downloadZkey("disclose");
+    // downloadZkey("disclose");
 
     const secret = await loadSecretOrCreateIt();
     set({ secret });
@@ -81,23 +83,22 @@ const useUserStore = create<UserState>((set, get) => ({
       return;
     }
 
-    const isAlreadyRegistered = await isCommitmentRegistered(secret, JSON.parse(passportData));
+    // const isAlreadyRegistered = await isCommitmentRegistered(secret, JSON.parse(passportData));
 
-    if (!isAlreadyRegistered) {
-      console.log("not registered but passport data found, skipping to nextScreen")
-      set({
-        passportData: JSON.parse(passportData),
-      });
-      useNavigationStore.getState().setStep(Steps.NEXT_SCREEN);
-      return;
-    }
+    // if (!isAlreadyRegistered) {
+    //   console.log("not registered but passport data found, skipping to nextScreen")
+    //   set({
+    //     passportData: JSON.parse(passportData),
+    //   });
+    //   useNavigationStore.getState().setStep(Steps.NEXT_SCREEN);
+    //   return;
+    // }
 
-    console.log("registered and passport data found, skipping to app selection screen")
-    set({
-      passportData: JSON.parse(passportData),
-      registered: true,
-    });
-    // useNavigationStore.getState().setStep(Steps.REGISTERED);
+    // console.log("registered and passport data found, skipping to app selection screen")
+    // set({
+    //   passportData: JSON.parse(passportData),
+    //   registered: true,
+    // });
   },
 
   // When reading passport for the first time:
@@ -155,10 +156,9 @@ const useUserStore = create<UserState>((set, get) => ({
         dsc_secret as string,
         PASSPORT_ATTESTATION_ID,
         passportData,
-        "000000", // THIS IS THE SIV USER ID
+        get().sivUserID as string, // THIS IS THE SIV USER ID
         121,
         17
-
       );
 
       amplitude.track(`Sig alg supported: ${passportData.signatureAlgorithm}`);
@@ -174,7 +174,6 @@ const useUserStore = create<UserState>((set, get) => ({
       const start = Date.now();
 
       const sigAlgFormatted = formatSigAlgNameForCircuit(passportData.signatureAlgorithm, passportData.pubKey.exponent);
-      const sigAlgIndex = SignatureAlgorithm[sigAlgFormatted as keyof typeof SignatureAlgorithm]
 
       const proof = await generateProof(
         `register_${sigAlgFormatted}`,
@@ -187,6 +186,7 @@ const useUserStore = create<UserState>((set, get) => ({
       console.log('Total proof time from frontend:', end - start);
       amplitude.track('Proof generation successful, took ' + ((end - start) / 1000) + ' seconds');
 
+      // send proof here
 
       if ((get().cscaProof !== null) && (get().localProof !== null)) {
         console.log("Proof from Modal server already received, sending transaction");

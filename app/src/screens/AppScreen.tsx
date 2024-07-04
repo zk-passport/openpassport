@@ -1,56 +1,57 @@
 import React from 'react';
-import { ScrollView, YStack } from 'tamagui';
-import AppCard from '../components/AppCard';
-import { Steps } from '../utils/utils';
-import useNavigationStore from '../stores/navigationStore';
-import { AppType } from '../utils/appType';
-import sbtApp from '../apps/sbt';
-import zupassApp from '../apps/zupass';
-import gitcoinApp from '../apps/gitcoin';
-import electionApp from '../apps/election';
+import { Button, Image, Text, YStack } from 'tamagui';
+import CERTIFICATE from '../images/certificate.png'
+import { Linking, Platform } from 'react-native';
+import { textColor1, textColor2 } from '../utils/colors';
+import { Link } from '@tamagui/lucide-icons';
+import useUserStore from '../stores/userStore';
 
 const AppScreen: React.FC = () => {
   const {
-    selectedApp,
-    update
-  } = useNavigationStore();
+    localProof
+  } = useUserStore();
 
-  const handleCardSelect = (app: AppType) => {
-    update({
-      selectedTab: "prove",
-      selectedApp: app,
-      step: Steps.APP_SELECTED,
-    })
-  };
-
-  // add new apps here
-  const cardsData = [
-    // sbtApp,
-    // zupassApp,
-    // gitcoinApp,
-    electionApp
-  ];
+  const sendProof = () => {
+    const url = `https://vote.newamericanprimary.org/?vote=${encodeURIComponent(JSON.stringify(localProof))}`;
+    Linking.openURL(url);
+  }
 
   return (
-    <ScrollView f={1}>
-      <YStack my="$8" gap="$5" px="$5" jc="center" alignItems='center'>
-        {
-          cardsData.map(app => (
-            <AppCard
-              key={app.id}
-              title={app.title}
-              description={app.description}
-              id={app.id}
-              onTouchStart={() => handleCardSelect(app)}
-              selected={selectedApp && selectedApp.id === app.id ? true : false}
-              selectable={app.selectable}
-              icon={app.icon}
-              tags={app.tags}
-            />
-          ))
-        }
-      </YStack>
-    </ScrollView>
+    <YStack px="$4" f={1} mb={Platform.OS === 'ios' ? "$5" : "$0"}>
+      <YStack flex={1} mx="$2" gap="$2">
+        <YStack alignSelf='center' my="$8">
+          <Image
+            w={195}
+            h={176}
+            borderRadius={"$6"}
+            source={{
+              uri: CERTIFICATE,
+            }}
+          />
+        </YStack>
+        <Text color={textColor1} fontSize="$8" my="$1" textAlign='center' fontWeight="bold">
+          Citizenship certificate generated!
+        </Text>
+        <Text color={textColor2} fontSize="$6" my="$1" textAlign='center'>
+          You can now confirm your vote.
+        </Text>
+
+        <Button
+          mt="$8"
+          alignSelf='center'
+          onPress={sendProof}
+          borderWidth={1.3}
+          borderRadius="$10"
+          bg={"#3185FC"}
+          mb="$6"
+          w="100%"
+        >
+          <Link color="white" size="$1" /><Text color={textColor1} fow="bold">
+            Back to website
+          </Text>
+        </Button>
+      </YStack >
+    </YStack >
   );
 }
 
