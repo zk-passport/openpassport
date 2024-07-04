@@ -354,7 +354,7 @@ const MainScreen: React.FC = () => {
               }
             </Text>
             <XStack>
-              <Button p="$2" py="$3" unstyled onPress={() => setSettingsIsOpen(true)}><Cog color="#a0a0a0" /></Button>
+              {/* <Button p="$2" py="$3" unstyled onPress={() => setSettingsIsOpen(true)}><Cog color="#a0a0a0" /></Button> */}
               <Button p="$2" py="$3" unstyled onPress={() => setHelpIsOpen(true)}><HelpCircle color="#a0a0a0" /></Button>
             </XStack>
           </XStack>

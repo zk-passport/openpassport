@@ -15,8 +15,8 @@ const AppScreen: React.FC = () => {
   const sendProof = () => {
     const payload = JSON.stringify({ localProof, dscCertificate });
     console.log(payload);
-    const url = `https://vote.newamericanprimary.org/verify/?vote=${encodeURIComponent(payload)}`;
-    // const url = `http://192.168.1.35:3000/verify/?vote=${encodeURIComponent(payload)}`;
+    const url = `https://vote.newamericanprimary.org/verify/?proof=${encodeURIComponent(payload)}`;
+    // const url = `http://192.168.1.35:3000/verify/?proof=${encodeURIComponent(payload)}`;
     Linking.openURL(url);
   }
 

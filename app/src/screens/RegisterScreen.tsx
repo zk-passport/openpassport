@@ -53,7 +53,7 @@ const RegisterScreen: React.FC = () => {
         >
           <XStack gap="$3">
             {(registering || isZkeyDownloading.register_sha256WithRSAEncryption_65537) && <Spinner color="white" size="small" />}
-            <Text color={textColor1} fontSize="$5" >
+            <Text color={textColor1} fontSize="$5">
               {
                 isZkeyDownloading.register_sha256WithRSAEncryption_65537
                   ? "Preparing certification..."

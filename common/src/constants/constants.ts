@@ -13,7 +13,7 @@ export const CHAIN_NAME = "optimism"
 export const RPC_URL = "https://opt-mainnet.g.alchemy.com/v2/Mjj_SdklUaCdR6EPfVKXb7m6Pj5TjzWL"
 
 // we make it global here because passing it to generateCircuitInputsRegister caused trouble
-export const DEVELOPMENT_MODE = true
+export const DEVELOPMENT_MODE = false
 
 export enum SignatureAlgorithm {
   sha256WithRSAEncryption_65537 = 1,
