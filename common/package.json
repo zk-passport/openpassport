@@ -1,4 +1,8 @@
 {
+  "name": "common-utils",
+  "version": "0.0.1",
+  "author": "",
+  "license": "MIT",
   "scripts": {
     "test": "yarn ts-mocha test/**/*.test.ts --exit"
   },
