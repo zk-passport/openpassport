@@ -71,20 +71,13 @@ async function buildCscaMerkleTree() {
             const { certificate, issuerCountry } = readCertificate(file_path);
             if (issuerCountry !== "US") {
                 console.log(`Skipping file ${file_path}: Not from the US`);
-                tree.insert("0");
                 continue;
             }
-            else {
-                const leafValue = processCertificate(certificate, file_path);
-                console.log(`US cert: Leaf Value: ${leafValue}`);
-                if (leafValue) {
-                    tree.insert(leafValue);
-                }
-                else {
-                    console.log(`Skipping file ${file_path}: Not a valid certificate`);
-                }
+            console.log(`Issuer Country: ${issuerCountry}`);
+            const leafValue = processCertificate(certificate, file_path);
+            if (leafValue) {
+                tree.insert(leafValue);
             }
-
         } catch (error) {
             console.error(`Error processing file ${file}:`, error);
         }
