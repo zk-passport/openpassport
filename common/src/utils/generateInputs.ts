@@ -90,7 +90,7 @@ export function generateCircuitInputsRegister(
   );
 
   return {
-    secret: [secret],
+    // secret: [secret],
     mrz: formattedMrz.map(byte => String(byte)),
     dg1_hash_offset: [dg1HashOffset.toString()], // uncomment when adding new circuits
     econtent: Array.from(messagePadded).map((x) => x.toString()),
@@ -106,8 +106,8 @@ export function generateCircuitInputsRegister(
       BigInt(n_dsc),
       BigInt(k_dsc)
     ),
-    attestation_id: [attestation_id],
-    dsc_secret: [dscSecret],
+    //attestation_id: [attestation_id],
+    // dsc_secret: [dscSecret],
     SIV: [SIV]
   };
 }
