@@ -23,7 +23,7 @@ const NfcScreen: React.FC<NfcScreenProps> = ({ handleNFCScan }) => {
 
         <YStack f={1} gap="$2">
           <YStack mt="$2">
-            <Text fontSize="$7" fow="bold" mt="$1" color={textColor1}>Scan the NFC chip in your passport.</Text>
+            <Text fontSize="$7" fow="bold" mt="$1" color={textColor1}>Scan the NFC chip in your passport</Text>
             <Text fontSize="$6" color={textColor1} mt="$2">How do I find and scan the NFC chip?</Text>
             <YStack ml="$3" gap="$2" mt="$3">
               <XStack gap="$1">

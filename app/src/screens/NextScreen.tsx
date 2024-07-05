@@ -100,7 +100,7 @@ const NextScreen: React.FC = () => {
             mb="$6"
             w="100%"
           >
-            <Text color="white" fontSize="$5">Next</Text>
+            <Text color="white" fontSize="$6">Next</Text>
           </Button>
         </YStack >
       </YStack >

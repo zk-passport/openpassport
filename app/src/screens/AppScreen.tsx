@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Image, ScrollView, Text, YStack } from 'tamagui';
+import { Button, Image, ScrollView, Text, XStack, YStack } from 'tamagui';
 import CERTIFICATE from '../images/certificate.png'
 import { Linking, Platform } from 'react-native';
 import { textColor1, textColor2 } from '../utils/colors';
@@ -33,14 +33,16 @@ const AppScreen: React.FC = () => {
               source={{
                 uri: CERTIFICATE,
               }}
+
             />
           </YStack>
-          <Text color={textColor1} fontSize="$8" my="$1" textAlign='center' fontWeight="bold">
+          <Text color={textColor1} fontSize="$9" my="$3" textAlign='center' fontWeight="bold">
             Citizenship certificate generated!
           </Text>
-          <Text color={textColor2} fontSize="$6" my="$1" textAlign='center'>
-            You can now confirm your vote.
+          <Text color={textColor2} fontSize="$7" my="$1" textAlign='center'>
+            🗳️ You can now confirm your vote.
           </Text>
+          <XStack f={1} />
 
           <Button
             mt="$8"
@@ -52,7 +54,8 @@ const AppScreen: React.FC = () => {
             mb="$6"
             w="100%"
           >
-            <Link color="white" size="$1" /><Text color={textColor1} fow="bold">
+            <Link color="white" size={26} />
+            <Text color={textColor1} fontSize="$6">
               Back to website
             </Text>
           </Button>

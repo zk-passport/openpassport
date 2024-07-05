@@ -345,12 +345,12 @@ const MainScreen: React.FC = () => {
 
             <Text fontSize="$6" color="#a0a0a0">
               {selectedTab === "intro" ? "Welcome"
-                : selectedTab === "scan" ? "Scan"
-                : selectedTab === "nfc" ? "Verify"
-                : selectedTab === "next" ? "Success!"
-                : selectedTab === "register" ? "Certification"
-                : selectedTab === "app" ? "Certification"
-                : "Prove"
+                : selectedTab === "scan" ? "Scan 1/2"
+                  : selectedTab === "nfc" ? "Scan 2/2"
+                    : selectedTab === "next" ? "Success!"
+                      : selectedTab === "register" ? "Certification"
+                        : selectedTab === "app" ? "Certification"
+                          : "Prove"
               }
             </Text>
             <XStack>
@@ -358,7 +358,7 @@ const MainScreen: React.FC = () => {
               <Button p="$2" py="$3" unstyled onPress={() => setHelpIsOpen(true)}><HelpCircle color="#a0a0a0" /></Button>
             </XStack>
           </XStack>
-          <Sheet 
+          <Sheet
             open={NFCScanIsOpen}
             onOpenChange={setNFCScanIsOpen}
             dismissOnSnapToBottom
@@ -721,7 +721,7 @@ const MainScreen: React.FC = () => {
         update({
           sivUserID: sivUserID
         })
-      }}/>
+      }} />
     </>
   );
 };
