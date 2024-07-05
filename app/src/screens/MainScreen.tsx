@@ -358,18 +358,28 @@ const MainScreen: React.FC = () => {
               <Button p="$2" py="$3" unstyled onPress={() => setHelpIsOpen(true)}><HelpCircle color="#a0a0a0" /></Button>
             </XStack>
           </XStack>
-          <Sheet open={NFCScanIsOpen} onOpenChange={setNFCScanIsOpen} dismissOnSnapToBottom modal dismissOnOverlayPress={false} disableDrag animation="medium" snapPoints={[35]}>
+          <Sheet 
+            open={NFCScanIsOpen}
+            onOpenChange={setNFCScanIsOpen}
+            dismissOnSnapToBottom
+            modal
+            dismissOnOverlayPress={false}
+            disableDrag
+            animation="medium"
+            snapPoints={[35]}
+          >
             <Sheet.Overlay />
             <Sheet.Frame>
               <YStack gap="$5" f={1} pt="$3">
                 <H2 textAlign='center'>Ready to scan</H2>
-                {step >= Steps.NEXT_SCREEN ?
+                {step >= Steps.NEXT_SCREEN ? (
                   <CheckCircle2
                     size="$8"
                     alignSelf='center'
                     color="#3185FC"
                     animation="quick"
-                  /> :
+                  />
+                ) : (
                   <Image
                     h="$8"
                     w="$8"
@@ -379,8 +389,10 @@ const MainScreen: React.FC = () => {
                       uri: NFC_IMAGE
                     }}
                   />
-                }
-                <Text textAlign='center'>Hold your device near the NFC tag and stop moving when it vibrates.</Text>
+                )}
+                <Text textAlign='center' px="$5">
+                  Hold your device near the NFC tag and stop moving when it vibrates. This will take a few seconds.
+                </Text>
               </YStack>
             </Sheet.Frame>
           </Sheet>
