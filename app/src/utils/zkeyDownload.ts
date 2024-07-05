@@ -111,6 +111,7 @@ export async function fetchZkey(
 
   const {
     isZkeyDownloading,
+    zkeyDownloadProgress,
     toast,
     update
   } = useNavigationStore.getState();
@@ -132,10 +133,18 @@ export async function fetchZkey(
       console.log('Download has begun');
     },
     progress: (res: any) => {
-      const percentComplete = Math.floor((res.bytesWritten / res.contentLength) * 100);
-      if (percentComplete % 5 === 0 && percentComplete !== previousPercentComplete) {
-        console.log(`${percentComplete}%`);
-        previousPercentComplete = percentComplete;
+      const percentComplete = res.bytesWritten / res.contentLength;
+      const currentPercent = Math.floor(percentComplete * 10) * 10; // Round to nearest 10%
+
+      if (currentPercent !== previousPercentComplete) {
+        update({
+          zkeyDownloadProgress: {
+            ...zkeyDownloadProgress,
+            [circuit]: percentComplete,
+          }
+        });
+        console.log(`${currentPercent}%`);
+        previousPercentComplete = currentPercent;
       }
     }
   };
@@ -143,6 +152,12 @@ export async function fetchZkey(
   RNFS.downloadFile(options).promise
     .then(async () => {
       console.log('Download complete');
+      update({
+        zkeyDownloadProgress: {
+          ...zkeyDownloadProgress,
+          [circuit]: 1, // Ensure it shows 100% at the end
+        }
+      });
 
       RNFS.readDir(RNFS.DocumentDirectoryPath)
         .then((result) => {
@@ -155,7 +170,13 @@ export async function fetchZkey(
       const files = await RNFS.readDir(unzipPath);
       const zkeyFile = files.find(file => file.name.endsWith('.zkey'));
       if (zkeyFile) {
-        await RNFS.moveFile(zkeyFile.path, `${RNFS.DocumentDirectoryPath}/${circuit}.zkey`);
+        const zkeyPath = `${RNFS.DocumentDirectoryPath}/${circuit}.zkey`;
+        const fileExists = await RNFS.exists(zkeyPath);
+        if (fileExists) {
+          await RNFS.unlink(zkeyPath);
+          console.log(`Existing file ${circuit}.zkey deleted`);
+        }
+        await RNFS.moveFile(zkeyFile.path, zkeyPath);
         console.log(`File renamed to ${circuit}.zkey`);
       } else {
         throw new Error('Zkey file not found in the unzipped directory');
@@ -200,6 +221,10 @@ export async function fetchZkey(
         isZkeyDownloading: {
           ...isZkeyDownloading,
           [circuit]: false,
+        },
+        zkeyDownloadProgress: {
+          ...zkeyDownloadProgress,
+          [circuit]: 0, // Reset progress on error
         }
       });
       amplitude.track('zkey download failed: ' + error.message);

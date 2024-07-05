@@ -7,6 +7,9 @@ import { AppType } from '../utils/appType';
 interface NavigationState {
   step: number
   isZkeyDownloading: IsZkeyDownloading
+  zkeyDownloadProgress: {
+    [key: string]: number
+  }
   showWarningModal: ShowWarningModalProps
   hideData: boolean
   toast: ReturnType<typeof useToastController>
@@ -24,6 +27,10 @@ const useNavigationStore = create<NavigationState>((set, get) => ({
   isZkeyDownloading: {
     register_sha256WithRSAEncryption_65537: false,
     disclose: false,
+  },
+  zkeyDownloadProgress: {
+    register_sha256WithRSAEncryption_65537: 0,
+    disclose: 0,
   },
   showWarningModal: {
     show: false,
