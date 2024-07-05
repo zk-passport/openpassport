@@ -152,7 +152,7 @@ class ZKPTools(val context: Context) {
 
   init {
       System.loadLibrary("rapidsnark");
-      System.loadLibrary("proofofpassport")
+      System.loadLibrary("proofofpassportapp")
   }
 
   fun openRawResourceAsByteArray(resourceName: Int): ByteArray {
