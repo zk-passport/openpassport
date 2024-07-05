@@ -1,5 +1,5 @@
 import React from 'react';
-import { YStack, Button, Image, Text } from 'tamagui';
+import { YStack, Button, Image, Text, ScrollView } from 'tamagui';
 import { Camera, SquarePen } from '@tamagui/lucide-icons';
 import { bgColor, borderColor, textColor1, textColor2 } from '../utils/colors';
 import SCANHelp from '../images/scan_help.png'
@@ -11,7 +11,6 @@ interface CameraScreenProps {
 }
 
 const CameraScreen: React.FC<CameraScreenProps> = ({ sheetIsOpen, setSheetIsOpen }) => {
-
   return (
     <YStack f={1} p="$3">
       <YStack f={1} jc="center">
@@ -20,9 +19,9 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ sheetIsOpen, setSheetIsOpen
           h="$13"
           source={{ uri: SCANHelp }}
         />
-        <YStack  gap="$0.5" mt="$3.5">
+        <YStack gap="$0.5" mt="$3.5">
           <Text textAlign='center' fontSize="$8" mt="$1" color={textColor1}>Scan or type your passport ID</Text>
-          <Text textAlign='center' fontSize="$5" color={textColor2} mt="$2">This information never leaves your device</Text>
+          <Text textAlign='center' fontSize="$5" color={textColor2} mt="$2">This information never leaves your device.</Text>
         </YStack>
 
         <YStack gap="$2" my="$6">
@@ -30,7 +29,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({ sheetIsOpen, setSheetIsOpen
           <Button bg={textColor2} borderColor={borderColor} borderRadius="$10" onPress={() => setSheetIsOpen(true)}><SquarePen /></Button>
         </YStack>
       </YStack>
-    </YStack >
+    </YStack>
   );
 };
 
