@@ -20,7 +20,7 @@ const RegisterScreen: React.FC = () => {
   }
 
   const buttonTextColor = (registering || isZkeyDownloading.register_sha256WithRSAEncryption_65537)
-    ? '#3185FC'  // Use the button's background color for contrast
+    ? '#3185FC'
     : textColor1;
 
   return (

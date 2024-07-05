@@ -30,7 +30,7 @@ interface UserState {
   localProof: Proof | null
   dscSecret: string | null
   sivUserID: string | null
-  initUserStore: () => void
+  initUserStore: () => Promise<void>
   registerPassportData: (passportData: PassportData) => void
   doProof: (passportData?: PassportData) => void
   clearPassportDataFromStorage: () => void
@@ -76,8 +76,8 @@ const useUserStore = create<UserState>((set, get) => ({
     //   return;
     // }
 
-    const secret = await loadSecretOrCreateIt();
-    set({ secret });
+    // const secret = await loadSecretOrCreateIt();
+    // set({ secret });
 
     const passportData = await loadPassportData();
     if (!passportData) {
@@ -124,7 +124,7 @@ const useUserStore = create<UserState>((set, get) => ({
       setStep,
       update: updateNavigationStore,
     } = useNavigationStore.getState();
-    const secret = get().secret;
+    // const secret = get().secret;
     let passportData = get().passportData
     if (mockPassportData) {
       passportData = mockPassportData
@@ -133,9 +133,9 @@ const useUserStore = create<UserState>((set, get) => ({
     try {
       const SIV = get().sivUserID as string
       const inputs = generateCircuitInputsRegister(
-        secret,
         "000",
-        PASSPORT_ATTESTATION_ID,
+        "000",
+        "000",
         passportData,
         SIV ?? "00", // THIS IS THE SIV USER ID
         121,
