@@ -45,8 +45,8 @@ export const startCameraScan = async () => {
 
           setStep(Steps.MRZ_SCAN_COMPLETED);
           amplitude.track('Camera scan successful');
-          toast.show("Scan successful", {
-            message: 'Nice to meet you!',
+          toast.show("✅", {
+            message: 'Scan successful',
             customData: {
               type: "success",
             },

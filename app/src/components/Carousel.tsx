@@ -53,9 +53,10 @@ export function Carousel({ images, height = 300, width = "100%", onSlideChange }
     const isLastImage = imageIndex === images.length - 1
     const slideTexts = [
         { header: "Follow this guide carefully", subtitle: "" },
-        { header: "1. Open your passport", subtitle: "Open your passport on the photo page." },
-        { header: "2. Put your phone on the passport", subtitle: "Press the top half of your phone against the top page, as in the image." },
-        { header: "3. Start scanning", subtitle: "When the device vibrates, hold still until scanning is complete." },
+        { header: "1. Remove your phone case", subtitle: "If your phone does not have a case, you can skip this step." },
+        { header: "2. Open your passport", subtitle: "Open your passport on the photo page." },
+        { header: "3. Put your phone on the passport", subtitle: "Press the top half of your phone against the top page, as in the image." },
+        { header: "4. Start scanning", subtitle: "Press Start scanning and follow the on-screen instructions." },
         // { header: "4. In case phone doesn't vibrates", subtitle: "If scanning fails to start, slowly move your phone around the open passport, keeping them pressed close together, until it vibrates and scanning starts. You may need to remove your case." },
         // Add more objects as needed
     ]
@@ -107,8 +108,8 @@ export function Carousel({ images, height = 300, width = "100%", onSlideChange }
                 )}
             </XStack>
             <YStack mt="$2" ai="center">
-                <Text color={textColor1} fontSize="$8" fontWeight="bold" mt="$1" textAlign='center'>{currentSlide.header}</Text>
-                <Text color={textColor2} fontSize="$6" mt="$3" textAlign='center'>{currentSlide.subtitle}</Text>
+                <Text color={textColor1} fontSize="$8" fontWeight="bold" mt="$0" textAlign='center'>{currentSlide.header}</Text>
+                <Text color={textColor2} fontSize="$6" mt="$1" textAlign='center'>{currentSlide.subtitle}</Text>
             </YStack>
 
         </YStack>

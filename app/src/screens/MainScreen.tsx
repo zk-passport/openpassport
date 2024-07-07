@@ -391,7 +391,7 @@ const MainScreen: React.FC = () => {
                   />
                 )}
                 <Text textAlign='center' px="$5">
-                  Hold your device near the NFC tag and stop moving when it vibrates. This will take a few seconds.
+                  Move your phone slowly around your passport and stop moving when it vibrates. This will take a few seconds.
                 </Text>
               </YStack>
             </Sheet.Frame>
