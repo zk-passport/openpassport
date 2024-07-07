@@ -1,5 +1,6 @@
 import { groth16 } from "snarkjs";
 import path from 'path';
+import { numberToString } from "./common/src/utils/siv";
 
 const path_register_vkey = path.join(__dirname, '..', '..', 'circuits', 'register_sha256WithRSAEncryption_65537_vkey.json');
 const vkey_register = require(path_register_vkey);
@@ -31,7 +32,7 @@ export const getDSCModulus = (proof: Proof) => {
 
 export const getSIV = (proof: Proof) => {
     const formatted_public_signals = parsePublicSignals(proof.publicSignals);
-    return formatted_public_signals.SIV;
+    return numberToString(BigInt(formatted_public_signals.SIV));
 }
 
 export class Proof {

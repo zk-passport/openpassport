@@ -7,6 +7,7 @@ import { mockPassportData_sha256WithRSAEncryption_65537 } from "../../common/src
 import { generateCircuitInputsRegister } from '../../common/src/utils/generateInputs';
 import { getLeaf } from '../../common/src/utils/pubkeyTree';
 import { packBytes } from '../../common/src/utils/utils';
+import { numberToString } from '../../common/src/utils/siv';
 
 describe("Circuits - sha256WithRSAEncryption_65537 Register flow", function () {
     this.timeout(0);
@@ -43,7 +44,7 @@ describe("Circuits - sha256WithRSAEncryption_65537 Register flow", function () {
             BigInt(0).toString(),
             attestation_id,
             passportData,
-            "010101",
+            "hello123",
             n_dsc,
             k_dsc,
             [mockPassportData_sha256WithRSAEncryption_65537]
@@ -58,7 +59,8 @@ describe("Circuits - sha256WithRSAEncryption_65537 Register flow", function () {
         const w = await circuit.calculateWitness(inputs);
         await circuit.checkConstraints(w);
 
-        console.log("nullifier", (await circuit.getOutput(w, ["nullifier"])).nullifier);
+        console.log("nullifier:", (await circuit.getOutput(w, ["nullifier"])).nullifier);
+        console.log("siv:", numberToString(BigInt((await circuit.getOutput(w, ["SIV"])).SIV)));
 
         //const commitment_circom = (await circuit.getOutput(w, ["commitment"])).commitment;
         //console.log("commitment_circom", commitment_circom)

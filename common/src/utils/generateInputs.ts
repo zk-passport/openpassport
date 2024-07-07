@@ -15,6 +15,7 @@ import { getCSCAModulusMerkleTree } from "./csca";
 import {
   mockPassportDatas,
 } from "./mockPassportData";
+import { stringToNumber } from "../utils/siv";
 
 export function generateCircuitInputsRegister(
   secret: string,
@@ -106,7 +107,7 @@ export function generateCircuitInputsRegister(
     ),
     // attestation_id: [attestation_id],
     // dsc_secret: [dscSecret],
-    SIV: [SIV]
+    SIV: [stringToNumber(SIV).toString()]
   };
 }
 

@@ -73,7 +73,7 @@ describe("Testing the register flow", function () {
             BigInt(0).toString(),
             attestation_id,
             mockPassportData_sha256WithRSAEncryption_65537,
-            "0101010",
+            "heyXYZ019aA",
             n_dsc,
             k_dsc,
             [mockPassportData_sha256WithRSAEncryption_65537]
