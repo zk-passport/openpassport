@@ -9,8 +9,6 @@ import forge from "node-forge";
 const path_register_vkey = path.join(__dirname, '..', '..', 'circuits', 'register_sha256WithRSAEncryption_65537_vkey.json');
 const vkey_register = require(path_register_vkey);
 
-
-
 export async function verifyProofs(proof: Proof, dscCertificate_stringified: any, dev_mode: boolean = false) {
     const verified_register = await groth16.verify(
         vkey_register,
@@ -25,9 +23,7 @@ export async function verifyProofs(proof: Proof, dscCertificate_stringified: any
     // @ts-ignore
     const dsc_modulus = BigInt(dscCertificate.publicKey.n);
     const dsc_modulus_words = splitToWords(dsc_modulus, BigInt(n_dsc), BigInt(k_dsc));
-    console.log("dsc_modulus_words", dsc_modulus_words);
     const modulus_from_proof = getDSCModulus(proof);
-    console.log("modulus_from_proof", modulus_from_proof);
 
     const areArraysEqual = (arr1: string[], arr2: string[]) =>
         arr1.length === arr2.length &&
