@@ -65,24 +65,37 @@ function processCertificate(certificate: jsrsasign.X509, filePath: string) {
 async function buildCscaMerkleTree() {
     const tree = new IMT(poseidon2, CSCA_TREE_DEPTH, 0, 2);
     const path_to_pem_files = "outputs/unique_pem";
+    const processedModuli = new Map<string, boolean>();
+
     for (const file of fs.readdirSync(path_to_pem_files)) {
         const file_path = path.join(path_to_pem_files, file);
         try {
             const { certificate, issuerCountry } = readCertificate(file_path);
             if (issuerCountry !== "US") {
-                console.log(`Skipping file ${file_path}: Not from the US`);
                 tree.insert("0");
                 continue;
             }
-            else {
-                const leafValue = processCertificate(certificate, file_path);
-                console.log(`US cert: Leaf Value: ${leafValue}`);
-                if (leafValue) {
-                    tree.insert(leafValue);
-                }
-                else {
-                    console.log(`Skipping file ${file_path}: Not a valid certificate`);
-                }
+
+            const publicKey = getPublicKey(certificate);
+            if (!isRsaPublicKey(publicKey)) {
+                console.log(`Skipping file ${file_path}: Not an RSA or RSA-PSS key`);
+                continue;
+            }
+
+            const modulus = publicKey.n.toString(16);
+
+            if (processedModuli.has(modulus)) {
+                // console.log(`Skipping file ${file_path}: Modulus already processed`);
+                continue;
+            }
+
+            const leafValue = processCertificate(certificate, file_path);
+            //console.log(`US cert: Leaf Value: ${leafValue}`);
+            if (leafValue) {
+                tree.insert(leafValue);
+                processedModuli.set(modulus, true);
+            } else {
+                console.log(`Skipping file ${file_path}: Not a valid certificate`);
             }
 
         } catch (error) {

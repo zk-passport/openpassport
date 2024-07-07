@@ -1,0 +1,99 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1311952902 (0x4e32d006)
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=US, O=U.S. Government, OU=Department of State, OU=MRTD, OU=Certification Authorities, OU=U.S. Department of State MRTD CA
+        Validity
+            Not Before: Nov 14 16:37:12 2019 GMT
+            Not After : May 14 17:07:12 2040 GMT
+        Subject: C=US, O=U.S. Government, OU=Department of State, OU=MRTD, OU=Certification Authorities, OU=U.S. Department of State MRTD CA
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (4096 bit)
+                Modulus:
+                    00:a3:32:0e:36:16:2a:5d:e2:d6:4e:2d:ab:84:39:
+                    be:5f:66:57:d4:e3:14:af:f8:fb:0d:98:1c:eb:35:
+                    d9:ed:5c:ec:61:50:7e:e8:04:62:21:ba:24:ef:b4:
+                    b1:3e:d9:3d:65:e5:08:aa:e8:e3:5b:9f:49:c9:bf:
+                    84:52:22:3a:82:22:19:3a:ef:73:63:b0:40:f8:d4:
+                    1f:85:97:b2:c3:3a:f5:5c:a5:e1:7d:13:9d:e6:69:
+                    94:8a:fd:cd:cf:9b:a4:30:11:70:06:80:9a:38:75:
+                    1c:86:8a:b0:9a:5d:f9:94:29:3e:5f:b2:b7:34:e4:
+                    be:f8:75:9b:9f:1b:d1:40:5a:8e:22:db:13:71:a3:
+                    20:da:3a:7d:04:5f:af:98:7a:f4:9d:bb:9c:b2:2e:
+                    33:03:70:73:50:a5:ac:ad:bb:dc:57:4e:4c:e0:7f:
+                    f2:a3:2a:ee:ff:9b:aa:f0:99:2d:4b:16:f1:0b:32:
+                    b7:88:a5:d5:ca:2e:92:c1:19:0e:88:97:a4:6f:3b:
+                    55:2a:8b:84:2d:09:55:86:58:46:69:c5:0e:43:cb:
+                    9b:f8:f4:da:e2:04:56:29:51:ed:87:af:18:99:85:
+                    b9:93:5d:bf:d8:1e:76:0a:bc:c0:9d:dc:42:19:ec:
+                    1f:37:92:af:0f:2e:70:a1:01:03:5c:77:09:f8:ef:
+                    6c:e7:79:62:62:36:45:35:4e:5c:78:bf:91:e3:c8:
+                    d4:a1:72:d5:3e:e0:a6:5c:54:0a:aa:8d:4d:fe:df:
+                    be:95:64:7a:89:c5:b2:f2:d9:65:1d:91:ac:af:51:
+                    83:55:7d:3e:11:8f:b4:80:95:14:2d:1f:92:3f:3b:
+                    00:aa:de:48:80:2a:b4:06:54:3f:8b:3e:22:2d:44:
+                    bc:7c:0a:07:b3:8e:80:53:7b:bf:c8:73:51:6a:90:
+                    6e:dd:73:aa:2b:00:a6:40:7d:87:35:4b:9f:51:9c:
+                    83:e7:a7:15:68:80:73:13:42:0b:58:ac:18:ec:76:
+                    84:70:fd:bc:cb:40:ff:fb:e3:a9:a8:fc:f8:e1:cf:
+                    18:87:02:dc:49:da:08:60:92:0e:6f:71:73:05:5b:
+                    2a:fb:50:76:dd:57:aa:4d:9f:08:c6:90:e4:23:8c:
+                    2e:98:12:f0:25:2f:9e:27:5d:fa:5c:15:1e:80:bd:
+                    61:41:0b:f9:05:1a:dc:37:f5:e0:27:dc:32:0b:8d:
+                    d0:37:e7:7c:2d:f0:56:51:94:28:77:2e:e4:29:70:
+                    b4:2a:da:da:b6:01:f0:c1:ac:c2:77:19:7c:3d:1d:
+                    e9:d1:a7:97:6e:f7:94:05:b2:66:c9:14:12:db:b8:
+                    c3:ca:49:dc:ad:85:2b:ce:41:bc:59:15:a1:ad:6d:
+                    2d:51:1d
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Issuer Alternative Name: 
+                email:mrtdops@state.gov
+            X509v3 Subject Alternative Name: 
+                email:mrtdops@state.gov
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+            X509v3 Basic Constraints: critical
+                CA:TRUE, pathlen:0
+            X509v3 CRL Distribution Points: 
+                Full Name:
+                  URI:https://pkddownload1.icao.int/CRLs/USA.crl
+                  URI:https://pkddownload2.icao.int/CRLs/USA.crl
+                  URI:http://crls.pki.state.gov/crls/USMRTDCA.crl
+            X509v3 Private Key Usage Period: 
+                Not Before: Nov 14 16:37:12 2019 GMT, Not After: May 15 10:09:09 2025 GMT
+            X509v3 Subject Key Identifier: 
+                F1:8A:8B:FB:6A:44:A3:46:83:34:D2:D5:92:15:81:58:82:4A:4C:FB
+    Signature Algorithm: sha256WithRSAEncryption
+    Signature Value:
+        11:a1:82:c2:47:57:62:fa:25:06:aa:b7:01:8b:f0:01:48:5c:
+        78:a0:79:b6:70:9c:cc:01:3e:dc:b3:a7:14:01:bc:de:1a:11:
+        44:2d:81:02:27:38:db:c1:bf:77:95:08:20:f0:8a:45:97:c9:
+        9c:04:f4:f8:ca:83:25:64:36:4a:2b:30:e2:ce:d2:3d:85:3c:
+        0b:27:0d:39:e2:7e:68:46:4e:98:26:6f:f8:e6:0d:d0:d4:75:
+        1b:fb:4c:2f:e8:7c:d7:7d:19:42:c7:57:e3:3e:c3:d0:14:ea:
+        5c:28:82:a0:74:d7:35:41:aa:c4:6b:19:d4:48:71:b6:f6:27:
+        bd:13:65:91:dd:d0:fc:c8:21:56:91:b7:46:be:69:5f:e0:53:
+        be:3f:53:be:81:f5:30:49:b7:cb:ba:e5:20:e5:10:e2:7f:d6:
+        d4:f8:3e:d5:07:3b:82:fb:a4:31:b9:e2:91:a3:ac:bd:f5:96:
+        5c:98:74:c9:e9:db:1a:c3:fa:0a:00:13:81:f8:57:d2:69:dd:
+        91:18:bb:e9:23:29:e9:2a:3a:4f:36:9a:05:c3:c1:fc:15:c4:
+        a9:3a:2c:29:76:d4:a9:e6:d7:60:2c:02:95:c1:1f:fa:85:53:
+        06:86:ec:2c:4b:19:b1:92:76:cb:a2:96:8a:48:10:b5:b2:1a:
+        78:b9:93:4e:95:23:63:87:f7:76:b2:c6:1f:18:f2:eb:5a:e4:
+        c0:45:bf:dd:0f:d1:fd:49:08:e0:7a:a5:99:57:c0:89:f1:c3:
+        40:4a:c8:1e:9c:8c:1b:ca:09:87:ef:42:76:a7:7f:aa:96:60:
+        38:58:ba:bc:ea:aa:4e:ce:b0:94:39:96:94:1d:8b:95:4a:34:
+        c4:6f:c7:f2:08:65:23:02:96:ab:9f:25:67:3c:45:30:a9:e5:
+        56:38:2f:6d:6d:9b:6c:71:5f:56:13:80:3d:73:4b:bc:82:bd:
+        43:3d:55:56:21:d5:eb:85:da:57:78:e6:50:c0:90:e6:b0:a2:
+        f2:4e:8f:f2:a7:b1:98:2c:c0:6f:35:97:0c:cf:ea:2b:72:cc:
+        93:5e:8c:e7:1a:4f:d7:bb:fe:e9:89:3a:4a:41:9f:84:3d:3f:
+        32:06:9d:f3:6f:6c:cd:b3:40:a9:88:d4:c3:fa:cc:dd:9b:f5:
+        19:13:85:a5:d2:47:f3:08:f0:33:d1:f4:8a:a6:b6:5a:ee:27:
+        e8:89:a6:59:cc:ec:33:92:99:e4:a5:4d:92:b9:87:0a:42:ac:
+        93:c3:41:3e:52:9e:d9:da:a8:63:d8:d8:e4:c5:a8:a4:16:34:
+        e3:9b:87:74:dd:dc:27:53:ea:23:00:bc:2e:7c:91:b5:2c:88:
+        fd:55:28:40:55:01:b4:65

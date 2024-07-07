@@ -17,7 +17,7 @@ const dsc = fs.readFileSync('../common/src/mock_certificates/sha256_rsa_4096/moc
 const csca = fs.readFileSync('../common/src/mock_certificates/sha256_rsa_4096/mock_csca.pem', 'utf8');
 const dscCert = forge.pki.certificateFromPem(dsc);
 const cscaCert = forge.pki.certificateFromPem(csca);
-const inputs_csca = getCSCAInputs(BigInt(0).toString(), dscCert, cscaCert, n_dsc, k_dsc, n_csca, k_csca, max_cert_bytes, true);
+//const inputs_csca = getCSCAInputs(BigInt(0).toString(), dscCert, cscaCert, n_dsc, k_dsc, n_csca, k_csca, max_cert_bytes, true);
 import { mockPassportData_sha256WithRSAEncryption_65537 } from "../../common/src/utils/mockPassportData";
 async function requestCSCAProof(inputs) {
     try {
@@ -52,6 +52,8 @@ import { getDSCModulus, getNullifier, getSIV, verifyProofs } from "../ProofOfPas
 let proof: any;
 let publicSignals: any;
 let cscaProof: any;
+const mock_dsc_path = "../common/src/mock_certificates/sha256_rsa_4096/mock_dsc.pem";
+
 describe("Testing the register flow", function () {
     this.timeout(0);
     before(async () => {
@@ -106,13 +108,13 @@ describe("Testing the register flow", function () {
             proof: proof,
             publicSignals: publicSignals
         }
-        // const proof_csca = {
-        //     proof: cscaProof.proof,
-        //     publicSignals: cscaProof.pub_signals
-        // }
         console.log("proof :", JSON.stringify(proof_register, null, 2));
-        //console.log("proof_csca :", JSON.stringify(proof_csca, null, 2));
-        const result = await verifyProofs(proof_register);
+
+        // Read the mock DSC certificate as a PEM string
+        const mock_dsc_pem = fs.readFileSync(mock_dsc_path, 'utf8');
+
+        // Pass the PEM string directly to verifyProofs
+        const result = await verifyProofs(proof_register, mock_dsc_pem, true);
         console.log('Verification result:', result);
         const dsc_modulus = await getDSCModulus(proof_register);
         console.log('dsc_modulus:', dsc_modulus);
@@ -120,7 +122,5 @@ describe("Testing the register flow", function () {
         console.log('nullifier:', nullifier);
         const SIV = await getSIV(proof_register);
         console.log('SIV:', SIV);
-
     });
 });
-
