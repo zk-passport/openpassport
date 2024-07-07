@@ -193,7 +193,7 @@ const handleResponseIOS = async (
     // );
 
     // sendCSCARequest(inputs_csca, setModalProofStep);
-    useUserStore.getState().update({dscCertificate: certificate});
+    useUserStore.getState().update({ dscCertificate: pem });
     useNavigationStore.getState().setStep(Steps.NEXT_SCREEN);
   } catch (e: any) {
     console.log('error during parsing:', e);
@@ -278,8 +278,8 @@ const handleResponseAndroid = async (
   useUserStore.getState().registerPassportData(passportData)
 
   // Finally request the Modal server to verify the DSC certificate
-  const certificate = forge.pki.certificateFromPem(documentSigningCertificate);
-  useUserStore.getState().update({dscCertificate: certificate});
+  //const certificate = forge.pki.certificateFromPem(documentSigningCertificate);
+  useUserStore.getState().update({ dscCertificate: documentSigningCertificate });
 
   // if (secret === null) {
   //   // Finally, generate CSCA Inputs and request modal server
