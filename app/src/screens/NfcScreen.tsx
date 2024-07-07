@@ -81,7 +81,7 @@ const NfcScreen: React.FC<NfcScreenProps> = ({ handleNFCScan }) => {
               gap="$1"
             >
               <Nfc color={textColor1} rotate="180deg" />
-              <Text fontSize="$6" color={textColor1}>Start scanning</Text>
+              <Text fontSize="$6" color={textColor1}>Start NFC Scan</Text>
               <Nfc color={textColor1} />
 
             </Button>
