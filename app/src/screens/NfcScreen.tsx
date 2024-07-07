@@ -1,30 +1,47 @@
-import React from 'react';
-import { YStack, Text, XStack, Button, Image, ScrollView } from 'tamagui';
+import React, { useState } from 'react';
+import { YStack, Text, XStack, Button, ScrollView } from 'tamagui';
 import { Nfc } from '@tamagui/lucide-icons';
 import { blueColorDark, blueColorLight, borderColor, componentBgColor2, greenColorDark, greenColorLight, redColorDark, redColorLight, textColor1, textColor2 } from '../utils/colors';
-import NFCHelp from '../images/nfc_help.png'
 import { Platform } from 'react-native';
+import { Carousel } from '../components/Carousel';
+import NFCHelp from '../images/nfc_help.png'
+import PASSPORT from '../images/passportphotopage.png'
+import BLACK_SQUARE from '../images/blacksquarepng.png'
+import PHONE_ON_PASSPORT from '../images/passportphotopage2_2.png'
+import PHONE_ON_PASSPORT_2 from '../images/passportphotopage3.png'
+import US_PASSPORT from '../images/us-passport.png'
 
 interface NfcScreenProps {
   handleNFCScan: () => void;
 }
 
 const NfcScreen: React.FC<NfcScreenProps> = ({ handleNFCScan }) => {
+  const [isLastSlideReached, setIsLastSlideReached] = useState(false);
+  const carouselImages = [US_PASSPORT, PASSPORT, PHONE_ON_PASSPORT, PHONE_ON_PASSPORT_2,]; // Add actual images as needed
+
+  const handleSlideChange = (index: number) => {
+    if (index === carouselImages.length - 1) {
+      setIsLastSlideReached(true);
+    }
+  };
+
   return (
     <ScrollView flex={1} contentContainerStyle={{ flexGrow: 1 }}>
       <YStack f={1} p="$3" space="$4">
-        <Image borderRadius="$5"
-          alignSelf='center'
-          resizeMode="contain"
-          w="$12"
-          h="$14"
-          source={{ uri: NFCHelp }}
+        <Text fontSize="$8" fow="bold" mt="$1.5" mb="$1" color={textColor1} textAlign='center'>Verify your passport using NFC</Text>
+
+        <Carousel
+          images={carouselImages}
+          height={300}
+          width="100%"
+          onSlideChange={handleSlideChange}
         />
 
-        <YStack f={1} gap="$2">
+        <XStack f={1} />
+
+        {/* <YStack f={1} gap="$2">
           <YStack mt="$2">
-            <Text fontSize="$7" fow="bold" mt="$1" color={textColor1}>Scan the NFC chip in your passport</Text>
-            <Text fontSize="$6" color={textColor1} mt="$2">How do I find and scan the NFC chip?</Text>
+
             <YStack ml="$3" gap="$2" mt="$3">
               <XStack gap="$1">
                 <Text fontSize="$5" color={textColor2}>1.</Text>
@@ -51,14 +68,28 @@ const NfcScreen: React.FC<NfcScreenProps> = ({ handleNFCScan }) => {
 
           </YStack>
 
-        </YStack>
+        </YStack> */}
 
-        <YStack gap="$2" mb="$6">
-          <Button borderWidth={1.3} borderColor={borderColor} borderRadius="$10" bg="#3185FC" onPress={handleNFCScan}><Nfc color={textColor1} /></Button>
+        <YStack mb="$6">
+          {isLastSlideReached && (
+            <Button
+              borderWidth={1.3}
+              borderColor={borderColor}
+              borderRadius="$10"
+              bg="#3185FC"
+              onPress={handleNFCScan}
+              gap="$1"
+            >
+              <Nfc color={textColor1} rotate="180deg" />
+              <Text fontSize="$6" color={textColor1}>Start scanning</Text>
+              <Nfc color={textColor1} />
+
+            </Button>
+          )}
         </YStack>
 
       </YStack>
-    </ScrollView>
+    </ScrollView >
   );
 };
 

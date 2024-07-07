@@ -661,6 +661,7 @@ const MainScreen: React.FC = () => {
           <ToastMessage />
           <Tabs.Content value="intro" f={1}>
             <IntroScreen />
+            {/* <NfcScreen handleNFCScan={handleNFCScan} /> */}
           </Tabs.Content>
           <Tabs.Content value="scan" f={1}>
             <CameraScreen
