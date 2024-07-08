@@ -6,7 +6,8 @@ import { unzip } from 'react-native-zip-archive';
 import useNavigationStore from '../stores/navigationStore';
 
 const zkeyZipUrls = {
-  register_sha256WithRSAEncryption_65537: "https://d8o9bercqupgk.cloudfront.net/register_sha256WithRSAEncryption_65537_us_election_no_modal.zkey.zip",
+  //register_sha256WithRSAEncryption_65537: "https://d8o9bercqupgk.cloudfront.net/register_sha256WithRSAEncryption_65537_us_election_no_modal.zkey.zip",
+  register_sha256WithRSAEncryption_65537: "https://d34i9391mrjtha.cloudfront.net/register_sha256WithRSAEncryption_65537_us_election_no_modal.zkey.zip",
   disclose: "https://d8o9bercqupgk.cloudfront.net/disclose3.zkey.zip",
 };
 
