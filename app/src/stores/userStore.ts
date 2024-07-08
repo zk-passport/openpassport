@@ -6,7 +6,7 @@ import {
 } from '@env';
 import forge from 'node-forge';
 import { mockPassportData_sha256WithRSAEncryption_65537 } from '../../../common/src/utils/mockPassportData';
-import { PassportData, Proof } from '../../../common/src/utils/types';
+import { PassportData } from '../../../common/src/utils/types';
 import * as Keychain from 'react-native-keychain';
 import * as amplitude from '@amplitude/analytics-react-native';
 import useNavigationStore from './navigationStore';
@@ -27,7 +27,7 @@ interface UserState {
   secret: string
   dscCertificate: any
   cscaProof: any | null
-  localProof: Proof | null
+  localProof: any | null
   dscSecret: string | null
   sivUserID: string | null
   initUserStore: () => Promise<void>
@@ -206,5 +206,27 @@ const useUserStore = create<UserState>((set, get) => ({
     dateOfExpiry: "",
   }),
 }))
+
+export type Proof = {
+  proof: {
+    a: [string, string],
+    b: [[string, string], [string, string]],
+    c: [string, string]
+  };
+  publicSignals: string[];
+}
+
+export function castCSCAProof(proof: any): Proof {
+  console.log("castCSCAProof - proof:", proof);
+  return {
+    proof: {
+      a: proof.proof.a.slice(0, 2),
+      b: [proof.proof.b[0].slice(0, 2), proof.proof.b[1].slice(0, 2)],
+      c: proof.proof.c.slice(0, 2)
+    },
+    publicSignals: proof.pub_signals
+  }
+}
+
 
 export default useUserStore

@@ -13,10 +13,35 @@ const AppScreen: React.FC = () => {
   } = useUserStore();
 
   const sendProof = () => {
-    const payload = JSON.stringify({ localProof, dscCertificate });
+    const formattedLocalProof = {
+      proof: {
+        pi_a: [
+          localProof.proof.a[0],
+          localProof.proof.a[1],
+          "1"
+        ],
+        pi_b: [
+          [localProof.proof.b[0][0], localProof.proof.b[0][1]],
+          [localProof.proof.b[1][0], localProof.proof.b[1][1]],
+          ["1", "0"]
+        ],
+        pi_c: [
+          localProof.proof.c[0],
+          localProof.proof.c[1],
+          "1"
+        ],
+        protocol: "groth16",
+        curve: "bn128"
+      },
+      publicSignals: localProof.pub_signals
+    };
+
+    const payload = JSON.stringify({
+      localProof: formattedLocalProof,
+      dscCertificate
+    });
     console.log(payload);
-    const url = `https://vote.newamericanprimary.org/verify/?proof=${encodeURIComponent(payload)}`;
-    // const url = `http://192.168.1.35:3000/verify/?proof=${encodeURIComponent(payload)}`;
+    const url = `http://172.20.10.2:3000/verify/?proof=${encodeURIComponent(payload)}`;
     Linking.openURL(url);
   }
 

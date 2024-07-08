@@ -27,9 +27,9 @@ export function numberToString(num: bigint): string {
     return String.fromCharCode(...bytes.map(byte => parseInt(byte)));
 }
 
-// Example usage:
-const str = "aAHello, World!";
-const num = stringToNumber(str);
-console.log(num); // 97065072101108108111044032087111114108100033n
-const reconstructed = numberToString(num);
-console.log("reconstructed: ", reconstructed); // Should log: "aAHello, World!"
+// // Example usage:
+// const str = "aAHello, World!";
+// const num = stringToNumber(str);
+// console.log(num); // 97065072101108108111044032087111114108100033n
+// const reconstructed = numberToString(num);
+// console.log("reconstructed: ", reconstructed); // Should log: "aAHello, World!"
