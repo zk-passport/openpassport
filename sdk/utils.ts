@@ -3,7 +3,7 @@ import { getCurrentDateYYMMDD } from "../common/src/utils/utils";
 import { REGISTER_ABI, REGISTER_CONTRACT_ADDRESS } from "../common/src/constants/constants";
 import { derToBytes } from "./common/src/utils/csca";
 import forge from 'node-forge'
-import fs from 'fs';
+import { pem1, pem2, pem3, pem4, mock_csca } from './certificates';
 
 export const attributeToGetter = {
     "nationality": "getNationalityOf",
@@ -53,17 +53,15 @@ export function verifyDSCValidity(dscCertificate: any, dev_mode: boolean = false
     const authorityKeyIdentifierExt = dscCertificate.extensions.find(
         (ext) => ext.name === 'authorityKeyIdentifier'
     );
-    //console.log('authorityKeyIdentifierExt', authorityKeyIdentifierExt);
     const value = authorityKeyIdentifierExt.value;
-    //console.log('value', value);
     const byteArray = derToBytes(value);
-    //console.log('Authority Key Identifier (byte array):', byteArray);
     const formattedValue = byteArray.map(byte => byte.toString(16).padStart(2, '0').toUpperCase()).join(':');
-    //console.log('Formatted Authority Key Identifier:', formattedValue);
     const formattedValueAdjusted = formattedValue.substring(12); // Remove the first '30:16:80:14:' from the formatted string
-    const csca_file_path = "./unique_pem_us/" + (dev_mode ? AKI_FILENAME_DEV : AKI_FILENAME_PROD)[formattedValueAdjusted as keyof typeof AKI_FILENAME_PROD];
-    console.log("csca_file_path", csca_file_path);
-    const csca_certificate = forge.pki.certificateFromPem(fs.readFileSync(csca_file_path, 'utf8'));
+
+    const csca_pem = getCscaPem(formattedValueAdjusted, dev_mode);
+    console.log("CSCA PEM used:", csca_pem.substring(0, 50) + "..."); // Log the first 50 characters of the PEM
+
+    const csca_certificate = forge.pki.certificateFromPem(csca_pem);
     try {
         // Create a CAStore containing the CSCA certificate
         const caStore = forge.pki.createCaStore([csca_certificate]);
@@ -88,19 +86,33 @@ export function verifyDSCValidity(dscCertificate: any, dev_mode: boolean = false
     }
 }
 
+function getCscaPem(formattedValueAdjusted: string, dev_mode: boolean): string {
+    const pemMap = dev_mode ? AKI_PEM_DEV : AKI_PEM_PROD;
+    const pemKey = pemMap[formattedValueAdjusted as keyof typeof AKI_PEM_PROD];
 
-export const AKI_FILENAME_DEV = {
-    "54:68:60:4C:5D:07:08:9B:D2:C4:AB:44:D0:1B:D5:B5:03:4C:B7:47": "mock_csca.pem",
-    "F1:8A:8B:FB:6A:44:A3:46:83:34:D2:D5:92:15:81:58:82:4A:4C:FB": "4.pem",
-    "E6:2D:65:16:F6:15:A8:6A:E7:89:EE:81:3C:BF:3E:1D:C2:A0:80:F4": "3.pem",
-    "BA:A6:B6:2F:13:7B:13:31:C9:C8:81:31:9E:55:21:86:3D:7B:8F:3A": "2.pem",
-    "B1:1A:1D:F8:23:A2:96:94:8E:E7:EA:49:A8:CC:87:72:C6:FA:DE:9A": "1.pem"
+    switch (pemKey) {
+        case "pem1": return pem1;
+        case "pem2": return pem2;
+        case "pem3": return pem3;
+        case "pem4": return pem4;
+        case "mock_csca.pem": return mock_csca;
+        default:
+            throw new Error(`No matching PEM found for key: ${formattedValueAdjusted}`);
+    }
 }
-export const AKI_FILENAME_PROD = {
-    "F1:8A:8B:FB:6A:44:A3:46:83:34:D2:D5:92:15:81:58:82:4A:4C:FB": "4.pem",
-    "E6:2D:65:16:F6:15:A8:6A:E7:89:EE:81:3C:BF:3E:1D:C2:A0:80:F4": "3.pem",
-    "BA:A6:B6:2F:13:7B:13:31:C9:C8:81:31:9E:55:21:86:3D:7B:8F:3A": "2.pem",
-    "B1:1A:1D:F8:23:A2:96:94:8E:E7:EA:49:A8:CC:87:72:C6:FA:DE:9A": "1.pem"
+
+export const AKI_PEM_DEV = {
+    "54:68:60:4C:5D:07:08:9B:D2:C4:AB:44:D0:1B:D5:B5:03:4C:B7:47": "mock_csca.pem",
+    "F1:8A:8B:FB:6A:44:A3:46:83:34:D2:D5:92:15:81:58:82:4A:4C:FB": "pem4",
+    "E6:2D:65:16:F6:15:A8:6A:E7:89:EE:81:3C:BF:3E:1D:C2:A0:80:F4": "pem3",
+    "BA:A6:B6:2F:13:7B:13:31:C9:C8:81:31:9E:55:21:86:3D:7B:8F:3A": "pem2",
+    "B1:1A:1D:F8:23:A2:96:94:8E:E7:EA:49:A8:CC:87:72:C6:FA:DE:9A": "pem1"
+}
+export const AKI_PEM_PROD = {
+    "F1:8A:8B:FB:6A:44:A3:46:83:34:D2:D5:92:15:81:58:82:4A:4C:FB": "pem4",
+    "E6:2D:65:16:F6:15:A8:6A:E7:89:EE:81:3C:BF:3E:1D:C2:A0:80:F4": "pem3",
+    "BA:A6:B6:2F:13:7B:13:31:C9:C8:81:31:9E:55:21:86:3D:7B:8F:3A": "pem2",
+    "B1:1A:1D:F8:23:A2:96:94:8E:E7:EA:49:A8:CC:87:72:C6:FA:DE:9A": "pem1"
 }
 
 

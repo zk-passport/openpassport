@@ -108,13 +108,14 @@ describe("Testing the register flow", function () {
             proof: proof,
             publicSignals: publicSignals
         }
-        console.log("proof :", JSON.stringify(proof_register, null, 2));
+        console.log(JSON.stringify(proof_register, null, 2));
 
         // Read the mock DSC certificate as a PEM string
         const mock_dsc_pem = fs.readFileSync(mock_dsc_path, 'utf8');
+        console.log(mock_dsc_pem)
 
         // Pass the PEM string directly to verifyProofs
-        const result = await verifyProofs(proof_register, mock_dsc_pem, true);
+        const result = await verifyProofs(proof_register, mock_dsc_pem, false);
         console.log('Verification result:', result);
         const dsc_modulus = await getDSCModulus(proof_register);
         console.log('dsc_modulus:', dsc_modulus);
