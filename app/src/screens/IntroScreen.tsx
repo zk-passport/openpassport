@@ -79,14 +79,14 @@ const IntroScreen = () => {
             alignSelf='center'
             mb="$4"
             onPress={() => {
-              if (isNaN(Number(input))) {
-                toast.show('Please enter a valid number', {
-                  customData: {
-                    type: "error",
-                  },
-                });
-                return;
-              }
+              // if (isNaN(Number(input))) {
+              //   toast.show('Please enter a valid number', {
+              //     customData: {
+              //       type: "error",
+              //     },
+              //   });
+              //   return;
+              // }
 
               update({ sivUserID: input })
             }}
