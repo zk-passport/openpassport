@@ -41,7 +41,7 @@ const AppScreen: React.FC = () => {
       dscCertificate
     });
     console.log(payload);
-    const url = `https://nap-app.vercel.app/verify/?proof=${encodeURIComponent(payload)}`;
+    const url = `https://vote.newamericanprimary.org/verify/?proof=${encodeURIComponent(payload)}`;
     Linking.openURL(url);
   }
 
