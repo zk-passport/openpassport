@@ -4,7 +4,7 @@
 import { verifyProofs } from './ProofOfPassportRegister';
 import { Proof } from './ProofOfPassportRegister';
 import { check_merkle_root } from './ProofOfPassportRegister';
-import { getNullifier, getDSCModulus } from './ProofOfPassportRegister';
+import { getNullifier, getDSCModulus, getSIV } from './ProofOfPassportRegister';
 
 export {
     //ProofOfPassportWeb2Verifier,
@@ -14,5 +14,6 @@ export {
     Proof,
     check_merkle_root,
     getNullifier,
-    getDSCModulus
+    getDSCModulus,
+    getSIV
 };
