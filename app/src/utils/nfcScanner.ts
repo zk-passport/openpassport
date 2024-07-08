@@ -72,7 +72,7 @@ const scanAndroid = async (setModalProofStep: (modalProofStep: number) => void) 
     console.log('error during scan:', e);
     setStep(Steps.MRZ_SCAN_COMPLETED);
     amplitude.track('NFC scan unsuccessful', { error: JSON.stringify(e) });
-    toast.show('Error', {
+    toast.show('Error during scanning, try again', {
       message: e.message,
       customData: {
         type: "error",

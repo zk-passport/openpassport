@@ -80,7 +80,7 @@ class PassportReader: NSObject{
     let customMessageHandler : (NFCViewDisplayMessage)->String? = { (displayMessage) in
       switch displayMessage {
         case .requestPresentPassport:
-          return "Hold your iPhone against the passport. Slowly move it up and down until you see 'Reading DG1...' appear."
+          return "Hold your iPhone against the passport. Slowly move it up and down until you see 'Authentificating with passport' appear."
         default:
           // Return nil for all other messages so we use the provided default
           return nil

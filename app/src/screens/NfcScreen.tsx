@@ -5,9 +5,11 @@ import { borderColor, textColor1 } from '../utils/colors';
 import { Carousel } from '../components/Carousel';
 import US_PASSPORT from '../images/us-passport.png'
 import REMOVE_CASE from '../images/remove_case.png'
-import PASSPORT from '../images/passportphotopage.png'
-import PHONE_ON_PASSPORT from '../images/passportphotopage2_2.png'
-import PHONE_ON_PASSPORT_2 from '../images/passportphotopage3.png'
+import US_PASSPORT_LASTPAGE from '../images/passport_lastpage_graybg.png'
+import US_PASSPORT_LASTPAGE_IOS from '../images/passport_lastpage_iphone.png'
+import US_PASSPORT_LASTPAGE_ANDROID from '../images/passport_lastpage_android.png'
+import PHONE_SCANBUTTON from "../images/phone_scanbutton.png"
+
 import Dialog from "react-native-dialog";
 import NfcManager from 'react-native-nfc-manager';
 import { Platform, Linking, Dimensions } from 'react-native';
@@ -21,7 +23,7 @@ const NfcScreen: React.FC<NfcScreenProps> = ({ handleNFCScan }) => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [dialogMessage, setDialogMessage] = useState('');
   const [isNfcSupported, setIsNfcSupported] = useState(true);
-  const carouselImages = [US_PASSPORT, REMOVE_CASE, PASSPORT, PHONE_ON_PASSPORT, PHONE_ON_PASSPORT_2,];
+  const carouselImages = [US_PASSPORT, REMOVE_CASE, US_PASSPORT_LASTPAGE, Platform.OS === 'ios' ? US_PASSPORT_LASTPAGE_IOS : US_PASSPORT_LASTPAGE_ANDROID, PHONE_SCANBUTTON,];
   const windowHeight = Dimensions.get('window').height;
 
   const handleSlideChange = (index: number) => {

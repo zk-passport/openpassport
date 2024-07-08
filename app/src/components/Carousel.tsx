@@ -54,9 +54,9 @@ export function Carousel({ images, height = 300, width = "100%", onSlideChange }
     const slideTexts = [
         { header: "Follow this guide carefully", subtitle: "" },
         { header: "1. Remove your phone case", subtitle: "If your phone does not have a case, you can skip this step." },
-        { header: "2. Open your passport", subtitle: "Open your passport on the photo page." },
-        { header: "3. Put your phone on the passport", subtitle: "Press the top half of your phone against the top page, as in the image." },
-        { header: "4. Start scanning", subtitle: "Press Start scanning and follow the on-screen instructions." },
+        { header: "2. Open your passport on the last page", subtitle: "" },
+        { header: "3. Put your phone on the passport", subtitle: "Press the top half of your phone against the last page of the passport, as in the image." },
+        { header: "4. Start scanning", subtitle: "Press Start NFC Scan and follow the on-screen instructions." },
         // { header: "4. In case phone doesn't vibrates", subtitle: "If scanning fails to start, slowly move your phone around the open passport, keeping them pressed close together, until it vibrates and scanning starts. You may need to remove your case." },
         // Add more objects as needed
     ]
