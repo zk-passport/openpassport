@@ -4,6 +4,7 @@ import { REGISTER_ABI, REGISTER_CONTRACT_ADDRESS } from "../common/src/constants
 import { derToBytes } from "./common/src/utils/csca";
 import forge from 'node-forge'
 import { pem1, pem2, pem3, pem4, mock_csca } from './certificates';
+import { fr1pem, fr2pem, fr3pem, fr4pem } from './certificates';
 
 export const attributeToGetter = {
     "nationality": "getNationalityOf",
@@ -91,6 +92,10 @@ function getCscaPem(formattedValueAdjusted: string, dev_mode: boolean): string {
     const pemKey = pemMap[formattedValueAdjusted as keyof typeof AKI_PEM_PROD];
 
     switch (pemKey) {
+        case "fr1pem": return fr1pem;
+        case "fr2pem": return fr2pem;
+        case "fr3pem": return fr3pem;
+        case "fr4pem": return fr4pem;
         case "pem1": return pem1;
         case "pem2": return pem2;
         case "pem3": return pem3;
@@ -102,11 +107,10 @@ function getCscaPem(formattedValueAdjusted: string, dev_mode: boolean): string {
 }
 
 export const AKI_PEM_DEV = {
-    "54:68:60:4C:5D:07:08:9B:D2:C4:AB:44:D0:1B:D5:B5:03:4C:B7:47": "mock_csca.pem",
-    "F1:8A:8B:FB:6A:44:A3:46:83:34:D2:D5:92:15:81:58:82:4A:4C:FB": "pem4",
-    "E6:2D:65:16:F6:15:A8:6A:E7:89:EE:81:3C:BF:3E:1D:C2:A0:80:F4": "pem3",
-    "BA:A6:B6:2F:13:7B:13:31:C9:C8:81:31:9E:55:21:86:3D:7B:8F:3A": "pem2",
-    "B1:1A:1D:F8:23:A2:96:94:8E:E7:EA:49:A8:CC:87:72:C6:FA:DE:9A": "pem1"
+    "22:F3:83:20:A5:73:42:2C:AF:46:AB:8C:3D:EE:76:4D:BB:E5:C5:02": "fr2pem",
+    "0F:CC:32:51:E4:E9:2A:50:65:8C:AF:6A:68:71:BC:9E:8F:C8:6D:59": "fr3pem",
+    "BE:8A:2E:D6:C9:F9:20:4E:3A:27:03:08:97:4D:EC:FD:D9:7D:C5:E6": "fr1pem",
+    "66:36:B0:9B:26:D2:F2:80:54:5E:DA:C7:66:C8:F0:12:4D:B5:3B:B4": "fr4pem"
 }
 export const AKI_PEM_PROD = {
     "F1:8A:8B:FB:6A:44:A3:46:83:34:D2:D5:92:15:81:58:82:4A:4C:FB": "pem4",

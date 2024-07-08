@@ -71,7 +71,7 @@ async function buildCscaMerkleTree() {
         const file_path = path.join(path_to_pem_files, file);
         try {
             const { certificate, issuerCountry } = readCertificate(file_path);
-            if (issuerCountry !== "US") {
+            if (issuerCountry !== "FR") {
                 tree.insert("0");
                 continue;
             }

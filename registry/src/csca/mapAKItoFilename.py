@@ -4,8 +4,8 @@ import re
 
 
 # Paths
-path_to_plain_text_csca_certificates = "outputs/unique_txt_us"
-path_to_json_output = "outputs/csca_aki_filename_us.json"
+path_to_plain_text_csca_certificates = "outputs/unique_txt_fr"
+path_to_json_output = "outputs/csca_aki_filename_fr.json"
 
 development_mode = False
     

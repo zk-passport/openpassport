@@ -1,0 +1,96 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            11:20:a2:b8:2f:3a:6e:2b:53:4f:f5:58:15:fc:28:a3:2f:21
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=FR, O=Gouv, CN=CSCA-FRANCE
+        Validity
+            Not Before: Mar 31 00:00:00 2006 GMT
+            Not After : Jun 30 00:00:00 2021 GMT
+        Subject: C=FR, O=Gouv, CN=CSCA-FRANCE
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (4096 bit)
+                Modulus:
+                    00:be:24:0e:4f:94:25:d3:0b:71:11:08:bd:25:d6:
+                    05:de:b6:ae:d7:30:6e:2f:36:39:81:e7:9d:7f:a1:
+                    71:a0:46:75:a6:bf:b2:d4:96:6f:f2:d8:86:b8:73:
+                    14:00:7b:05:47:5c:d5:7b:74:40:6e:f9:aa:67:65:
+                    af:b5:04:f2:94:55:87:34:ea:46:5c:24:48:96:9b:
+                    a7:95:2b:a1:30:8c:4e:05:7d:a6:97:93:76:0d:f4:
+                    d1:4d:e1:d5:ee:7d:af:c9:56:ec:74:98:47:b2:91:
+                    4e:b0:c5:60:d9:ac:23:53:2f:7d:dc:a9:fb:de:26:
+                    2a:6a:9b:12:4b:ad:06:2d:87:68:fe:5a:ff:28:c7:
+                    1a:ba:37:05:6e:31:0d:aa:a7:31:da:4e:aa:1c:3b:
+                    94:74:3d:bd:cc:3a:d6:57:0d:33:22:5c:f6:ae:bb:
+                    2c:43:36:3d:52:a9:7e:4b:90:02:d6:d4:0b:f5:1a:
+                    e3:20:cf:a8:82:90:68:22:61:3a:7b:e8:85:b3:2f:
+                    53:a8:db:f6:a6:d7:ff:2d:f2:20:fb:12:97:0d:b0:
+                    a5:15:a0:97:3b:80:13:37:dc:50:c6:ba:76:94:f7:
+                    29:cb:ab:85:9a:13:d1:57:87:7a:a8:ad:56:1c:1d:
+                    55:2e:c0:08:4b:7e:18:66:9f:5e:e2:9f:37:4f:c3:
+                    87:04:65:50:3c:e0:fb:87:59:d5:59:62:87:ab:8f:
+                    ab:1d:11:20:c2:c6:fc:37:88:0d:a3:56:a0:b4:4a:
+                    d4:e4:e7:58:9f:e0:b5:10:23:f7:4d:fc:9c:a9:ca:
+                    f5:ee:82:cf:95:04:92:e2:b3:aa:5e:12:43:a4:78:
+                    db:8c:1b:ec:bd:51:91:93:d9:81:28:65:01:ed:17:
+                    62:ff:ea:80:27:c6:47:f1:cd:8a:e2:45:4b:0e:14:
+                    b2:e4:cd:65:53:32:fb:a3:8c:a4:54:4d:37:c4:6d:
+                    33:01:a1:b5:f7:01:c0:7f:96:ca:15:49:c1:59:3b:
+                    ab:da:4b:1d:41:17:4a:e1:9d:8b:12:80:e3:87:06:
+                    37:16:07:81:14:9a:37:b3:ea:63:3e:d8:09:a9:55:
+                    4b:7b:95:03:42:d4:dd:55:a5:ce:bd:3a:b2:3f:0b:
+                    cc:bf:70:d1:00:25:21:34:ae:66:3f:bf:5d:00:a2:
+                    ed:c8:f3:ca:7d:1e:8a:90:40:e9:44:30:8e:86:75:
+                    bb:12:f5:48:40:43:f0:e0:04:c1:0c:44:f2:f8:d6:
+                    4e:6f:a2:23:23:ba:bd:27:79:fb:42:94:49:f3:e5:
+                    db:25:49:ec:45:bd:08:13:23:c4:0a:20:a3:8f:36:
+                    83:91:57:27:f2:1d:b3:33:73:49:8b:5f:36:d8:08:
+                    70:53:ff
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: critical
+                CA:TRUE, pathlen:0
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+            X509v3 Certificate Policies: 
+                Policy: 1.2.250.1.159.1.1.1.1
+                  CPS: http://interieur.gouv.fr/csca
+            X509v3 Private Key Usage Period: 
+                Not Before: Mar 31 00:00:00 2006 GMT, Not After: Mar 31 00:00:00 2011 GMT
+            X509v3 Subject Key Identifier: 
+                66:36:B0:9B:26:D2:F2:80:54:5E:DA:C7:66:C8:F0:12:4D:B5:3B:B4
+            X509v3 Authority Key Identifier: 
+                66:36:B0:9B:26:D2:F2:80:54:5E:DA:C7:66:C8:F0:12:4D:B5:3B:B4
+    Signature Algorithm: sha1WithRSAEncryption
+    Signature Value:
+        b2:25:c1:cb:4d:ab:c1:69:b7:e8:0c:69:81:73:8f:a1:ef:f6:
+        c2:0c:8a:5b:85:b4:9b:7c:22:3d:84:71:e1:ca:de:6f:5a:70:
+        a5:6f:f6:32:e0:33:b2:a4:2a:b1:15:d9:70:53:02:97:56:d9:
+        ab:32:0e:08:b7:02:66:9b:1b:0a:2a:55:10:c1:f2:eb:35:6e:
+        05:70:d7:21:64:cc:69:9e:d3:7d:ff:74:26:b7:b6:0c:2c:7a:
+        37:8e:18:de:3c:1a:ae:2b:c5:43:03:24:f1:14:81:9a:97:f3:
+        15:24:9a:7d:e9:bd:62:0b:82:21:99:da:d1:bb:5f:16:d9:d9:
+        59:e0:c2:77:1a:c8:12:61:36:1e:bb:83:b9:50:70:3d:47:b8:
+        6b:68:77:d7:a8:a5:99:dd:f5:87:4e:10:a9:bd:d6:49:c9:3a:
+        b6:53:4a:12:db:b9:56:8e:0f:d8:08:6f:84:1f:11:93:9a:50:
+        59:b9:2a:ca:a8:a5:a4:66:7c:85:82:7d:53:20:65:e4:e5:8b:
+        8c:39:f8:9b:60:9d:51:8e:05:b8:12:b9:7b:05:4d:7c:c1:9f:
+        f0:89:6c:b3:52:17:e3:33:46:d1:ca:19:79:31:b1:6c:ad:a7:
+        d4:8c:ab:5b:d2:fe:42:a8:43:93:75:42:9f:4b:e8:42:0a:fe:
+        cb:cf:71:1b:c2:11:21:ae:8d:14:a9:91:44:8a:85:95:b1:dc:
+        4f:89:44:51:81:b6:25:91:7e:e9:2f:34:00:f3:3b:40:34:44:
+        b2:e6:34:22:91:4a:d7:a8:1f:58:3a:f3:c1:bf:5a:ec:87:b6:
+        7e:c3:db:82:9f:74:cd:3c:b7:6f:3e:36:ff:be:42:8a:62:d6:
+        1f:36:bd:1e:eb:c0:0e:50:9e:68:4e:6f:8f:4e:9e:82:cb:95:
+        0c:45:84:54:19:66:67:9c:59:0d:f5:e0:ec:af:54:08:bf:f2:
+        11:01:b7:d1:6d:b4:6d:9c:3a:cd:a1:c8:2c:15:89:48:3d:ca:
+        35:5d:8d:0c:e0:aa:7b:cc:8c:28:b3:a1:f2:67:ac:53:9d:6e:
+        8b:0a:a2:a5:ff:2a:60:df:d9:c2:e6:96:7c:29:a3:95:07:15:
+        48:6f:97:53:ba:73:35:df:a2:4e:36:70:bb:8b:47:5f:03:1f:
+        06:71:10:a6:1d:96:de:68:0b:1a:b2:2a:22:88:f4:5a:d6:3a:
+        4c:69:2c:13:cc:e2:6b:8a:0e:ef:69:3b:b5:73:27:ed:ed:00:
+        e7:54:a7:c5:ce:6f:88:a8:f4:df:03:0b:f8:00:9b:35:6a:e2:
+        2b:df:e6:e3:db:6d:43:f2:4c:ca:ad:b4:ee:04:51:1d:07:8b:
+        33:29:49:3f:7b:de:e4:ff

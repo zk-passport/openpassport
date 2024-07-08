@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { execSync } from 'child_process';
 
-const pathToPemFiles = "outputs/unique_pem_us";
-const pathToTextOutput = "outputs/unique_txt_us";
+const pathToPemFiles = "outputs/unique_pem_fr";
+const pathToTextOutput = "outputs/unique_txt_fr";
 
 // Function to convert PEM to human-readable text using openssl
 function convertPemToText(pemFilePath: string, outputFilePath: string) {
