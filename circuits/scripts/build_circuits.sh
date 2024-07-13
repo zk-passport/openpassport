@@ -10,7 +10,7 @@ build_circuit() {
     circom circuits/${CIRCUIT_NAME}.circom -l node_modules -l ./node_modules/@zk-kit/binary-merkle-root.circom/src -l ./node_modules/circomlib/circuits --r1cs --O1 --wasm -c --output build
 
     echo "building zkey"
-    yarn snarkjs groth16 setup build/${CIRCUIT_NAME}.r1cs build/powersOfTau28_hez_final_20.ptau build/${CIRCUIT_NAME}.zkey
+    yarn snarkjs groth16 setup build/${CIRCUIT_NAME}.r1cs build/powersOfTau28_hez_final_19.ptau build/${CIRCUIT_NAME}.zkey
 
     echo "building vkey"
     yarn snarkjs zkey contribute build/${CIRCUIT_NAME}.zkey build/${CIRCUIT_NAME}_final.zkey -e="random text"
