@@ -70,16 +70,15 @@ const NfcScreen: React.FC<NfcScreenProps> = ({ handleNFCScan }) => {
   return (
     <ScrollView flex={1} contentContainerStyle={{ flexGrow: 1 }}>
       <YStack f={1} p="$3" >
-        <Text fontSize="$8" fow="bold" mt="$1.5" mb="$3" color={textColor1} textAlign='center'>Verify your passport using NFC</Text>
+        {/* <Text fontSize="$8" fow="bold" mt="$1.5" mb="$3" color={textColor1} textAlign='center'>Verify your passport using NFC</Text> */}
 
         <Carousel
           images={carouselImages}
-          height={windowHeight > 700 ? 300 : 270}
-          width="100%"
+          height={300}
           onSlideChange={handleSlideChange}
+          handleNfcScan={handleNfcScan}
         />
 
-        <XStack f={1} />
 
         {/* <YStack f={1} gap="$2">
           <YStack mt="$2">
@@ -111,7 +110,7 @@ const NfcScreen: React.FC<NfcScreenProps> = ({ handleNFCScan }) => {
           </YStack>
 
         </YStack> */}
-
+        {/* 
         <YStack mb="$6">
           {isLastSlideReached && (
             <Button
@@ -127,7 +126,7 @@ const NfcScreen: React.FC<NfcScreenProps> = ({ handleNFCScan }) => {
               <Nfc color={textColor1} />
             </Button>
           )}
-        </YStack>
+        </YStack> */}
 
         <Dialog.Container visible={dialogVisible}>
           <Dialog.Title>NFC Status</Dialog.Title>
