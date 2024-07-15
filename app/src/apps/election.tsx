@@ -121,7 +121,11 @@ export const electionApp: AppType = {
 
       const end = Date.now();
       console.log('Total proof time from frontend:', end - start);
-      amplitude.track('Proof generation successful, took ' + ((end - start) / 1000) + ' seconds');
+      amplitude.track('Proof generated', {
+        status: 'success',
+        duration_seconds: (end - start) / 1000
+      });
+      //amplitude.track('Proof generation successful, took ' + ((end - start) / 1000) + ' seconds');
       update({
         proof: proof,
         proofTime: end - start,
@@ -136,7 +140,10 @@ export const electionApp: AppType = {
         },
       })
       setStep(Steps.NEXT_SCREEN);
-      amplitude.track(error.message);
+      //amplitude.track(error.message);
+      amplitude.track('Proof generation failed', {
+        status: 'failure',
+      });
     }
   },
 

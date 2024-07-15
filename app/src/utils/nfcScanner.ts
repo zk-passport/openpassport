@@ -16,6 +16,9 @@ import { sendCSCARequest } from './cscaRequest';
 
 
 export const scan = async (setModalProofStep: (modalProofStep: number) => void) => {
+  amplitude.track('Start NFC scan', {
+    os: Platform.OS,
+  });
   const {
     passportNumber,
     dateOfBirth,
@@ -58,6 +61,7 @@ const scanAndroid = async (setModalProofStep: (modalProofStep: number) => void) 
     dscCertificate
   } = useUserStore.getState()
   const { toast, setStep } = useNavigationStore.getState();
+  const start = Date.now();
 
   try {
     const response = await PassportReader.scan({
@@ -66,12 +70,21 @@ const scanAndroid = async (setModalProofStep: (modalProofStep: number) => void) 
       dateOfExpiry: dateOfExpiry
     });
     console.log('scanned');
-    amplitude.track('NFC scan successful');
+    amplitude.track('NFC scan successful', {
+      status: 'success',
+      duration_seconds: (Date.now() - start) / 1000,
+      os: Platform.OS,
+    });
     handleResponseAndroid(response, setModalProofStep);
   } catch (e: any) {
     console.log('error during scan:', e);
     setStep(Steps.MRZ_SCAN_COMPLETED);
-    amplitude.track('NFC scan unsuccessful', { error: JSON.stringify(e) });
+    amplitude.track('NFC scan failure', {
+      status: 'failure',
+      duration_seconds: (Date.now() - start) / 1000,
+      os: Platform.OS,
+      error: JSON.stringify(e.message)
+    });
     toast.show('Error during scanning, try again', {
       message: e.message,
       customData: {
@@ -89,7 +102,7 @@ const scanIOS = async (setModalProofStep: (modalProofStep: number) => void) => {
     dateOfExpiry
   } = useUserStore.getState()
   const { toast, setStep } = useNavigationStore.getState();
-
+  const start = Date.now();
   try {
     const response = await NativeModules.PassportReader.scanPassport(
       passportNumber,
@@ -97,12 +110,22 @@ const scanIOS = async (setModalProofStep: (modalProofStep: number) => void) => {
       dateOfExpiry
     );
     console.log('scanned');
+    amplitude.track('NFC scan successful', {
+      status: 'success',
+      duration_seconds: (Date.now() - start) / 1000,
+      os: Platform.OS,
+    });
     handleResponseIOS(response, setModalProofStep);
-    amplitude.track('NFC scan successful');
+    //amplitude.track('NFC scan successful');
   } catch (e: any) {
     console.log('error during scan:', e);
     setStep(Steps.MRZ_SCAN_COMPLETED);
-    amplitude.track(`NFC scan unsuccessful, error ${e.message}`);
+    amplitude.track('NFC scan failure', {
+      status: 'failure',
+      duration_seconds: (Date.now() - start) / 1000,
+      os: Platform.OS,
+      error: JSON.stringify(e.message)
+    });
     if (!e.message.includes("UserCanceled")) {
       toast.show('Failed to read passport', {
         message: e.message,
@@ -154,7 +177,11 @@ const handleResponseIOS = async (
 
     const encryptedDigestArray = Array.from(Buffer.from(signatureBase64, 'base64')).map(byte => byte > 127 ? byte - 256 : byte);
 
-    amplitude.track('Sig alg before conversion: ' + signatureAlgorithm);
+    amplitude.track('Track signature algorithm', {
+      signature_algorithm: signatureAlgorithm,
+      os: Platform.OS,
+    });
+
     console.log('signatureAlgorithm before conversion', signatureAlgorithm);
     const passportData = {
       mrz,
@@ -198,7 +225,11 @@ const handleResponseIOS = async (
   } catch (e: any) {
     console.log('error during parsing:', e);
     useNavigationStore.getState().setStep(Steps.MRZ_SCAN_COMPLETED);
-    amplitude.track('Signature algorithm unsupported (ecdsa not parsed)', { error: JSON.stringify(e) });
+    amplitude.track('Signature algorithm unsupported (ecdsa not parsed)', {
+      status: 'failure',
+      os: Platform.OS,
+      error: JSON.stringify(e.message)
+    });
     toast.show('Error', {
       message: "Your signature algorithm or country is not supported for this vote.",
       customData: {
@@ -230,7 +261,10 @@ const handleResponseAndroid = async (
     documentSigningCertificate
   } = response;
 
-  amplitude.track('Sig alg before conversion: ' + signatureAlgorithm);
+  amplitude.track('Track signature algorithm', {
+    signature_algorithm: signatureAlgorithm,
+    os: Platform.OS,
+  });
 
   const pem = "-----BEGIN CERTIFICATE-----" + documentSigningCertificate + "-----END CERTIFICATE-----"
 
@@ -254,7 +288,7 @@ const handleResponseAndroid = async (
     encryptedDigest: JSON.parse(encryptedDigest),
     photoBase64: photo.base64,
   };
-  amplitude.track('Sig alg after conversion: ' + passportData.signatureAlgorithm);
+  //amplitude.track('Sig alg after conversion: ' + passportData.signatureAlgorithm);
 
   console.log('passportData', JSON.stringify({
     ...passportData,

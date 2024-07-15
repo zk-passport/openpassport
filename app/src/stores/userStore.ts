@@ -17,6 +17,7 @@ import { PASSPORT_ATTESTATION_ID } from '../../../common/src/constants/constants
 import { generateProof } from '../utils/prover';
 import { formatSigAlgNameForCircuit } from '../../../common/src/utils/utils';
 import { loadPassportData, loadSecretOrCreateIt, storePassportData } from '../utils/keychain';
+import { Platform } from 'react-native';
 
 interface UserState {
   passportNumber: string
@@ -142,7 +143,7 @@ const useUserStore = create<UserState>((set, get) => ({
         17
       );
 
-      amplitude.track(`Sig alg supported: ${passportData.signatureAlgorithm}`);
+      //amplitude.track(`Sig alg supported: ${passportData.signatureAlgorithm}`);
       console.log("userStore - inputs - Object.keys(inputs).forEach((key) => {...")
       Object.keys(inputs).forEach((key) => {
         if (Array.isArray(inputs[key as keyof typeof inputs])) {
@@ -165,7 +166,11 @@ const useUserStore = create<UserState>((set, get) => ({
 
       const end = Date.now();
       console.log('Total proof time from frontend:', end - start);
-      amplitude.track('Proof generation successful, took ' + ((end - start) / 1000) + ' seconds');
+      amplitude.track('Proof generated', {
+        status: 'success',
+        duration_seconds: (end - start) / 1000,
+        os: Platform.OS,
+      });
 
       setStep(Steps.REGISTERED);
     } catch (error: any) {
@@ -175,7 +180,10 @@ const useUserStore = create<UserState>((set, get) => ({
         registrationErrorMessage: error.message,
       })
       setStep(Steps.NEXT_SCREEN);
-      amplitude.track(error.message);
+      amplitude.track('Proof generation failed', {
+        status: 'failure',
+        error: JSON.stringify(error.message)
+      });
     }
   },
 
