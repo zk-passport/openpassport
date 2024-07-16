@@ -156,7 +156,7 @@ const handleResponseIOS = async (
   console.log('isPACESupported', parsed.isPACESupported)
   console.log('isChipAuthenticationSupported', parsed.isChipAuthenticationSupported)
   console.log('residenceAddress', parsed.residenceAddress)
-  console.log('passportPhoto', parsed.passportPhoto.substring(0, 100) + '...')
+  // console.log('passportPhoto', parsed.passportPhoto.substring(0, 100) + '...')
   console.log('signatureAlgorithm', signatureAlgorithm)
   console.log('parsed.documentSigningCertificate', parsed.documentSigningCertificate)
   const pem = JSON.parse(parsed.documentSigningCertificate).PEM.replace(/\n/g, '');
@@ -194,7 +194,7 @@ const handleResponseIOS = async (
       dataGroupHashes: concatenatedDataHashesArraySigned,
       eContent: signedEContentArray,
       encryptedDigest: encryptedDigestArray,
-      photoBase64: "data:image/jpeg;base64," + parsed.passportPhoto,
+      photoBase64: "data:image/jpeg;base64," + parsed?.passportPhoto ?? "",
     };
     useUserStore.getState().registerPassportData(passportData)
 
