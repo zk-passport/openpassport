@@ -8,7 +8,7 @@ export function stringToNumber(str: string): bigint {
     if (str.length > 30) {
         throw new Error("Input string must not exceed 30 characters");
     }
-    return BigInt('1' + Array.from(str)
+    return BigInt(Array.from(str)
         .map(char => char.charCodeAt(0).toString().padStart(3, '0'))
         .join(''));
 }
@@ -19,15 +19,26 @@ export function stringToNumber(str: string): bigint {
  * @returns The reconstructed string
  */
 export function numberToString(num: bigint): string {
-    const str = num.toString().slice(1); // Remove leading '1'
-    const charCodes = str.match(/.{1,3}/g) || [];
-    return String.fromCharCode(...charCodes.map(code => parseInt(code, 10)));
+    const str = num.toString().padStart(90, '0'); // Ensure padding at the start
+    if (str.length > 90) { // 30 characters * 3 digits per character
+        throw new Error("Input number represents more than 30 characters");
+    }
+    const bytes = str.match(/.{3}/g) || [];
+    return String.fromCharCode(...bytes.map(byte => parseInt(byte)));
 }
 
-// // Example usage:
-// const str = "1H12H3J§éè§2H3";
-// const num = stringToNumber(str);
-// console.log(num); // 97065072101108108111044032087111114108100033n
-// const reconstructed = numberToString(num);
-// console.log(reconstructed === str);
-// console.log("reconstructed:", reconstructed); // Should log: "aAHello, World!"
+// // // Example usage:
+// let successCount = 0;
+// const k = 100000;
+// for (let i = 0; i < k; i++) {
+//     const randomHex = Array.from({ length: 10 }, () => String.fromCharCode(Math.floor(Math.random() * 95) + 32)).join('');
+//     console.log(randomHex);
+//     const num = stringToNumber(randomHex);
+//     const reconstructed = numberToString(num);
+//     const last10 = reconstructed.slice(-10);
+//     if (last10 === randomHex) {
+//         successCount++;
+//     }
+// }
+// const successPercentage = (successCount / k) * 100;
+// console.log(`Success rate: ${successPercentage}%`);
