@@ -1,5 +1,5 @@
 cd build
-wget "https://d8o9bercqupgk.cloudfront.net/register_sha256WithRSAEncryption_65537_us_election_no_modal.zkey.zip"
+wget "https://d34i9391mrjtha.cloudfront.net/register_sha256WithRSAEncryption_65537_us_election_no_modal.zkey.zip"
 unzip register_sha256WithRSAEncryption_65537_us_election_no_modal.zkey.zip
 cd ..
 yarn snarkjs zkey export verificationkey build/register_sha256WithRSAEncryption_65537.zkey build/register_sha256WithRSAEncryption_65537_vkey.json

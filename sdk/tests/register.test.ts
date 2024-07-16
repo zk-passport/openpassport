@@ -115,7 +115,7 @@ describe("Testing the register flow", function () {
         console.log(mock_dsc_pem)
 
         // Pass the PEM string directly to verifyProofs
-        const result = await verifyProofs(proof_register, mock_dsc_pem, false);
+        const result = await verifyProofs(proof_register, mock_dsc_pem, true);
         console.log('Verification result:', result);
         const dsc_modulus = await getDSCModulus(proof_register);
         console.log('dsc_modulus:', dsc_modulus);
