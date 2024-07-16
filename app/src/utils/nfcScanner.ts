@@ -286,14 +286,14 @@ const handleResponseAndroid = async (
     dataGroupHashes: JSON.parse(encapContent),
     eContent: JSON.parse(eContent),
     encryptedDigest: JSON.parse(encryptedDigest),
-    photoBase64: photo.base64,
+    photoBase64: photo?.base64 ?? "",
   };
   //amplitude.track('Sig alg after conversion: ' + passportData.signatureAlgorithm);
 
-  console.log('passportData', JSON.stringify({
-    ...passportData,
-    photoBase64: passportData.photoBase64.substring(0, 100) + '...'
-  }, null, 2));
+  // console.log('passportData', JSON.stringify({
+  //   ...passportData,
+  //   photoBase64: passportData.photoBase64.substring(0, 100) + '...'
+  // }, null, 2));
 
   console.log('mrz', passportData.mrz);
   console.log('signatureAlgorithm', passportData.signatureAlgorithm);
@@ -301,7 +301,7 @@ const handleResponseAndroid = async (
   console.log('dataGroupHashes', passportData.dataGroupHashes);
   console.log('eContent', passportData.eContent);
   console.log('encryptedDigest', passportData.encryptedDigest);
-  console.log("photoBase64", passportData.photoBase64.substring(0, 100) + '...')
+  // console.log("photoBase64", passportData.photoBase64.substring(0, 100) + '...')
   console.log("digestAlgorithm", digestAlgorithm)
   console.log("signerInfoDigestAlgorithm", signerInfoDigestAlgorithm)
   console.log("digestEncryptionAlgorithm", digestEncryptionAlgorithm)
