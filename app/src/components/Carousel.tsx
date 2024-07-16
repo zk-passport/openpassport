@@ -53,7 +53,7 @@ export function Carousel({ images, height = 300, onSlideChange, handleNfcScan }:
     const slideTexts = [
         { header: "Verify your passport using NFC", subtitle: "Follow this guide carefully", acknowledgment: "I'm ready to start" },
         { header: "1. Remove your phone case", subtitle: "If your phone does not have a case, you can skip this step.", acknowledgment: "I have removed my phone case" },
-        { header: "2. Open your passport on the last page", subtitle: "", acknowledgment: "I have opened my passport on the last page" },
+        { header: "2. Open your passport to the last page", subtitle: "", acknowledgment: "I have opened my passport to the last page" },
         { header: "3. Put your phone on the passport", subtitle: "Press your phone against the last page of the passport as in the image.", acknowledgment: "I have placed my phone on the passport" },
         { header: "4. Start scanning", subtitle: "Press Start NFC Scan and follow the on-screen instructions.", acknowledgment: "Start scanning" },
     ]
