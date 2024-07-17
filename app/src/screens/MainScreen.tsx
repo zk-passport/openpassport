@@ -4,7 +4,7 @@ import forge from 'node-forge';
 import Dialog from "react-native-dialog";
 import { ethers } from 'ethers';
 // import ressources
-import { YStack, XStack, Text, Button, Tabs, Sheet, Label, Fieldset, Input, Switch, H2, Image, useWindowDimensions, H4, H3 } from 'tamagui'
+import { YStack, XStack, Text, Button, Tabs, Sheet, Label, Fieldset, Input, Switch, H2, Image, useWindowDimensions, H4, H3, Portal } from 'tamagui'
 import { HelpCircle, IterationCw, VenetianMask, Cog, CheckCircle2, ChevronLeft, Share, Eraser, CalendarSearch } from '@tamagui/lucide-icons';
 import X from '../images/x.png'
 import Telegram from '../images/telegram.png'
@@ -272,6 +272,13 @@ const MainScreen: React.FC = () => {
 
   useEffect(() => {
     if (passportNumber?.length === 9 && (dateOfBirth?.length === 6 && dateOfExpiry?.length === 6)) {
+      toast.show("✅", {
+
+        message: 'Valid passport data entered',
+        customData: {
+          type: "success"
+        },
+      })
       setStep(Steps.MRZ_SCAN_COMPLETED);
     }
   }, [passportNumber, dateOfBirth, dateOfExpiry]);
@@ -760,7 +767,9 @@ const MainScreen: React.FC = () => {
           value={selectedTab}
           onValueChange={(value) => updateNavigationStore({ selectedTab: value })}
         >
-          <ToastViewport flexDirection="column-reverse" top={15} right={0} left={0} />
+          <Portal zIndex={999999999999999}>
+            <ToastViewport flexDirection="column-reverse" top={75} right={0} left={0} />
+          </Portal>
           <ToastMessage />
           <Tabs.Content value="intro" f={1}>
             <IntroScreen />
