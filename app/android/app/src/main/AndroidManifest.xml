@@ -39,7 +39,7 @@
           <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https" />
             <data android:scheme="proofofpassportapp" />
-            <data android:host="vote.newamericanprimary.org" />
+            <data android:host="vote.newdemocraticprimary.org" />
         </intent-filter>
 
       <meta-data
