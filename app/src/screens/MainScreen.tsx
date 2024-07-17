@@ -5,7 +5,7 @@ import Dialog from "react-native-dialog";
 import { ethers } from 'ethers';
 // import ressources
 import { YStack, XStack, Text, Button, Tabs, Sheet, Label, Fieldset, Input, Switch, H2, Image, useWindowDimensions, H4, H3 } from 'tamagui'
-import { HelpCircle, IterationCw, VenetianMask, Cog, CheckCircle2, ChevronLeft, Share, Eraser } from '@tamagui/lucide-icons';
+import { HelpCircle, IterationCw, VenetianMask, Cog, CheckCircle2, ChevronLeft, Share, Eraser, CalendarSearch } from '@tamagui/lucide-icons';
 import X from '../images/x.png'
 import Telegram from '../images/telegram.png'
 import Github from '../images/github.png'
@@ -17,7 +17,7 @@ import { ToastMessage } from '../components/ToastMessage';
 import useUserStore from '../stores/userStore';
 import useNavigationStore from '../stores/navigationStore';
 // import utils
-import { bgColor, borderColor, componentBgColor, textColor1, textColor2 } from '../utils/colors';
+import { bgColor, borderColor, componentBgColor, componentBgColor2, textColor1, textColor2 } from '../utils/colors';
 import { Steps } from '../utils/utils';
 import { scan } from '../utils/nfcScanner';
 import { CircuitName, fetchZkey } from '../utils/zkeyDownload';
@@ -33,6 +33,8 @@ import RegisterScreen from './RegisterScreen';
 import SendProofScreen from './SendProofScreen';
 import AppScreen from './AppScreen';
 import IntroScreen from './IntroScreen';
+
+import DatePicker from 'react-native-date-picker'
 
 const DeepLinkHandler = ({ onSIVReceived }:
   { onSIVReceived: (sivUserID: string) => void }
@@ -97,6 +99,10 @@ const MainScreen: React.FC = () => {
   const [HelpIsOpen, setHelpIsOpen] = useState(false);
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
   const [modalProofStep, setModalProofStep] = useState(0);
+  const [dateOfBirthDatePicker, setDateOfBirthDatePicker] = useState(new Date())
+  const [dateOfExpiryDatePicker, setDateOfExpiryDatePicker] = useState(new Date())
+  const [dateOfBirthDatePickerIsOpen, setDateOfBirthDatePickerIsOpen] = useState(false)
+  const [dateOfExpiryDatePickerIsOpen, setDateOfExpiryDatePickerIsOpen] = useState(false)
 
   const {
     passportNumber,
@@ -181,6 +187,10 @@ const MainScreen: React.FC = () => {
     // );
     // sendCSCARequest(inputs_csca, setModalProofStep);
     toast.show("Using mock passport data!", { type: "info" })
+  }
+
+  const castDate = (date: Date) => {
+    return (date.toISOString().slice(2, 4) + date.toISOString().slice(5, 7) + date.toISOString().slice(8, 10)).toString();
   }
 
   const decrementStep = () => {
@@ -590,11 +600,37 @@ const MainScreen: React.FC = () => {
                     keyboardType="default"
                   />
                 </Fieldset>
+
+
                 <Fieldset gap="$4" horizontal>
                   <Text color={textColor1} width={160} justifyContent="flex-end" fontSize="$4">
-                    Date of birth (yymmdd)
+                    Date of birth
                   </Text>
-                  <Input
+                  <Text color={textColor1}>
+                    {dateOfBirthDatePicker.toISOString().slice(0, 10)}
+                  </Text>
+                  <Button bg="white" onPress={() => setDateOfBirthDatePickerIsOpen(true)}
+                    pressStyle={{
+                      bg: componentBgColor2,
+                      borderColor: componentBgColor2,
+                    }}>
+                    <CalendarSearch />
+                  </Button>
+                  <DatePicker
+                    modal
+                    mode='date'
+                    open={dateOfBirthDatePickerIsOpen}
+                    date={dateOfBirthDatePicker}
+                    onConfirm={(date) => {
+                      setDateOfBirthDatePickerIsOpen(false)
+                      setDateOfBirthDatePicker(date)
+                      update({ dateOfBirth: castDate(date) })
+                    }}
+                    onCancel={() => {
+                      setDateOfBirthDatePickerIsOpen(false)
+                    }}
+                  />
+                  {/* <Input
                     bg={componentBgColor}
                     color={textColor1}
                     h="$3.5"
@@ -606,13 +642,37 @@ const MainScreen: React.FC = () => {
                     }}
                     value={dateOfBirth}
                     keyboardType={Platform.OS === "ios" ? "default" : "number-pad"}
-                  />
+                  /> */}
                 </Fieldset>
                 <Fieldset gap="$4" horizontal>
                   <Text color={textColor1} width={160} justifyContent="flex-end" fontSize="$4">
-                    Date of expiry (yymmdd)
+                    Date of expiry
                   </Text>
-                  <Input
+                  <Text color={textColor1}>
+                    {dateOfExpiryDatePicker.toISOString().slice(0, 10)}
+                  </Text>
+                  <Button bg="white" onPress={() => setDateOfExpiryDatePickerIsOpen(true)}
+                    pressStyle={{
+                      bg: componentBgColor2,
+                      borderColor: componentBgColor2,
+                    }}>
+                    <CalendarSearch />
+                  </Button>
+                  <DatePicker
+                    modal
+                    mode='date'
+                    open={dateOfExpiryDatePickerIsOpen}
+                    date={dateOfExpiryDatePicker}
+                    onConfirm={(date) => {
+                      setDateOfExpiryDatePickerIsOpen(false)
+                      setDateOfExpiryDatePicker(date)
+                      update({ dateOfExpiry: castDate(date) })
+                    }}
+                    onCancel={() => {
+                      setDateOfExpiryDatePickerIsOpen(false)
+                    }}
+                  />
+                  {/* <Input
                     bg={componentBgColor}
                     color={textColor1}
                     h="$3.5"
@@ -624,8 +684,24 @@ const MainScreen: React.FC = () => {
                     }}
                     value={dateOfExpiry}
                     keyboardType={Platform.OS === "ios" ? "default" : "number-pad"}
-                  />
+                  /> */}
                 </Fieldset>
+                <XStack f={1} />
+                <Button mb="$4"
+                  bg={textColor1}
+                  pressStyle={{
+                    bg: componentBgColor2,
+                    borderColor: componentBgColor2,
+                  }}
+                  onPress={() => {
+                    setSheetIsOpen(false)
+                  }}
+                >
+                  <Text
+                    fontSize="$6"
+                    color={bgColor}
+                  >Submit</Text>
+                </Button>
               </YStack>
             </Sheet.Frame>
           </Sheet>
@@ -698,7 +774,7 @@ const MainScreen: React.FC = () => {
             <SendProofScreen />
           </Tabs.Content>
         </Tabs>
-      </YStack>
+      </YStack >
       <Modal visible={showWarningModal.show} animationType="slide" transparent={true}>
         <YStack bc="#161616" p={20} ai="center" jc="center" position="absolute" top={0} bottom={0} left={0} right={0}>
           <YStack bc="#343434" p={20} borderRadius={10} ai="center" jc="center">
