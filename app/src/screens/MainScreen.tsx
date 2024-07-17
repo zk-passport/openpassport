@@ -687,21 +687,40 @@ const MainScreen: React.FC = () => {
                   /> */}
                 </Fieldset>
                 <XStack f={1} />
-                <Button mb="$4"
-                  bg={textColor1}
-                  pressStyle={{
-                    bg: componentBgColor2,
-                    borderColor: componentBgColor2,
-                  }}
-                  onPress={() => {
-                    setSheetIsOpen(false)
-                  }}
-                >
-                  <Text
-                    fontSize="$6"
-                    color={bgColor}
-                  >Submit</Text>
-                </Button>
+                <YStack mb="$6" gap="$2">
+                  <Button
+                    bg={textColor1}
+                    pressStyle={{
+                      bg: componentBgColor2,
+                      borderColor: componentBgColor2,
+                    }}
+                    onPress={() => {
+                      setSheetIsOpen(false)
+                      setStep(Steps.MRZ_SCAN_COMPLETED)
+                    }}
+                  >
+                    <Text
+                      fontSize="$6"
+                      color={bgColor}
+                    >Submit</Text>
+                  </Button>
+                  <Button
+                    bg="gray"
+                    pressStyle={{
+                      bg: componentBgColor2,
+                      borderColor: componentBgColor2,
+                    }}
+                    onPress={() => {
+                      setSheetIsOpen(false)
+                    }}
+                  >
+                    <Text
+                      fontSize="$6"
+                      color={bgColor}
+                    >Cancel</Text>
+                  </Button>
+                </YStack>
+
               </YStack>
             </Sheet.Frame>
           </Sheet>
