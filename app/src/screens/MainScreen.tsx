@@ -571,14 +571,14 @@ const MainScreen: React.FC = () => {
                     <H3 color={textColor1}>About ZK Proofs</H3>
                     <Text color={textColor2} fontSize={16} mt="$1">Zero-knowledge proofs are an advanced mathematical technique to prove you know something without revealing what that something is. They allow you to convince someone that a statement is true without sharing any details about why it's true, protecting your privacy while still verifying the information.</Text>
                   </YStack>
-                  <Fieldset gap="$4" mt="$1" horizontal>
+                  {/* <Fieldset gap="$4" mt="$1" horizontal>
                     <Label color={textColor1} width={200} justifyContent="flex-end" htmlFor="skip" >
                       Use mock passport data
                     </Label>
                     <Button bg={componentBgColor} jc="center" borderColor={borderColor} borderWidth={1.2} size="$3.5" ml="$2" onPress={handleSkip}>
                       <VenetianMask color={textColor1} />
                     </Button>
-                  </Fieldset>
+                  </Fieldset> */}
                 </YStack>
               </YStack>
             </Sheet.Frame>
