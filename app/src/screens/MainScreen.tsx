@@ -767,9 +767,8 @@ const MainScreen: React.FC = () => {
           value={selectedTab}
           onValueChange={(value) => updateNavigationStore({ selectedTab: value })}
         >
-          <Portal zIndex={999999999999999}>
-            <ToastViewport flexDirection="column-reverse" top={75} right={0} left={0} />
-          </Portal>
+
+          <ToastViewport flexDirection="column-reverse" top={75} right={0} left={0} />
           <ToastMessage />
           <Tabs.Content value="intro" f={1}>
             <IntroScreen />
