@@ -3,16 +3,17 @@ import { assert, expect } from 'chai';
 import path from 'path';
 const wasm_tester = require('circom_tester').wasm;
 import { poseidon1, poseidon6 } from 'poseidon-lite';
-import { mockPassportData_sha256_rsapss_65537 } from '../../../common/src/constants/mockPassportData';
+import { mockPassportData_sha256_rsapss_65537, mockPassportData_sha256_rsapss_65537_2 } from '../../../common/src/constants/mockPassportData';
 import { generateCircuitInputsRegister } from '../../../common/src/utils/generateInputs';
 import { getLeaf } from '../../../common/src/utils/pubkeyTree';
 import { packBytes } from '../../../common/src/utils/utils';
+import fs from 'fs';
 
 describe('Register - SHA256 RSASSAPSS', function () {
   this.timeout(0);
   let inputs: any;
   let circuit: any;
-  let passportData = mockPassportData_sha256_rsapss_65537;
+  let passportData = mockPassportData_sha256_rsapss_65537_2;
   const attestation_name = 'E-PASSPORT';
   let attestation_id: string;
   const n_dsc = 64;
@@ -52,6 +53,11 @@ describe('Register - SHA256 RSASSAPSS', function () {
   it('should calculate the witness with correct inputs', async function () {
     console.time('calculateWitness');
     const w = await circuit.calculateWitness(inputs);
+
+    const outputFilePath = path.join(__dirname, 'witness_2.json');
+    fs.writeFileSync(outputFilePath, JSON.stringify(w, null, 2));
+    console.log(`Witness written to ${outputFilePath}`);
+
     console.timeEnd('calculateWitness');
     await circuit.checkConstraints(w);
 

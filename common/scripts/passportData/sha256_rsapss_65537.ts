@@ -17,18 +17,6 @@ const sampleDataHashes = [
     [0, -62, 104, 108, -19, -10, 97, -26, 116, -58, 69, 110, 26, 87, 17, 89, 110, -57, 108, -6, 36, 21, 39, 87, 110, 102, -6, -43, -82, -125, -85, -82]
   ],
   [
-    11,
-    [-120, -101, 87, -112, 111, 15, -104, 127, 85, 25, -102, 81, 20, 58, 51, 75, -63, 116, -22, 0, 60, 30, 29, 30, -73, -115, 72, -9, -1, -53, 100, 124]
-  ],
-  [
-    12,
-    [41, -22, 106, 78, 31, 11, 114, -119, -19, 17, 92, 71, -122, 47, 62, 78, -67, -23, -55, -42, 53, 4, 47, -67, -55, -123, 6, 121, 34, -125, 64, -114]
-  ],
-  [
-    13,
-    [91, -34, -46, -63, 62, -34, 104, 82, 36, 41, -118, -3, 70, 15, -108, -48, -100, 45, 105, -85, -15, -61, -71, 43, -39, -94, -110, -55, -34, 89, -18, 38]
-  ],
-  [
     14,
     [76, 123, -40, 13, 51, -29, 72, -11, 59, -63, -18, -90, 103, 49, 23, -92, -85, -68, -62, -59, -100, -69, -7, 28, -58, 95, 69, 15, -74, 56, 54, 38]
   ]
@@ -37,11 +25,13 @@ const signatureAlgorithm = 'sha256WithRSASSAPSS'
 const hashLen = 32
 
 export function genMockPassportData_sha256WithRSASSAPSS_65537(): PassportData {
-  const privateKeyPem = forge.pki.privateKeyFromPem(mock_dsc_key_sha256_rsapss_2048);
-  const privateKeyPemString = forge.pki.privateKeyToPem(privateKeyPem);
-  const certificate = forge.pki.certificateFromPem(mock_dsc_sha256_rsapss_2048);
-
+  // const privateKeyPem = forge.pki.privateKeyFromPem(mock_dsc_key_sha256_rsapss_2048);
+  const rsa = forge.pki.rsa;
+  const certificate = rsa.generateKeyPair({ bits: 2048 })
+  
   const publicKey = certificate.publicKey as forge.pki.rsa.PublicKey;
+  const privateKeyPem = certificate.privateKey;
+  const privateKeyPemString = forge.pki.privateKeyToPem(privateKeyPem);
 
   const modulus = (publicKey as any).n.toString(10);
   const exponent = (publicKey as any).e.toString(10);
