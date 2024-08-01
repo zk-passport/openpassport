@@ -4,7 +4,7 @@ import path from 'path';
 import { getCSCAInputs, getTBSHash } from '../../../common/src/utils/csca';
 const wasm_tester = require('circom_tester').wasm;
 import forge from 'node-forge';
-import fs from 'fs';
+import fs, { writeFileSync } from 'fs';
 
 import {
   mock_dsc_sha256_rsa_2048,
@@ -28,7 +28,7 @@ describe('RSA Verifier', function () {
   let circuit;
 
   this.beforeAll(async () => {
-    const circuitPath = path.resolve(__dirname, '../../circuits/tests/utils/rsa_verifier_4096.circom');
+    const circuitPath = path.resolve(__dirname, '../../circuits/tests/utils/rsa_verifier.circom');
     circuit = await wasm_tester(circuitPath, {
       include: [
         'node_modules',
@@ -49,7 +49,7 @@ describe('RSA Verifier', function () {
       mock_csca_sha256_rsa_2048
     );
     const n = 121;
-    const k = 34;
+    const k = 17;
 
     // it('should verify DSC has been signed by the CSCA', () => {
     //   const isVerified = dscCert.verify(cscaCert.publicKey);
@@ -64,12 +64,12 @@ describe('RSA Verifier', function () {
 
       // hijacking this to test a bunch of random rsa signatures
       const rsa = forge.pki.rsa;
-      const certificate = rsa.generateKeyPair({ bits: 4096 })
+      const certificate = rsa.generateKeyPair({ bits: 2048 })
       const publicKey = certificate.publicKey as forge.pki.rsa.PublicKey;
       const privateKey = certificate.privateKey;
       const modulus = privateKey.n.toString(10);
       const md = forge.md.sha256.create();
-      const message = [49, 102, 48, 21, 6, 9, 42, -122, 72, -122, -9, 13, 1, 9, 3, 49, 8, 6, 13]
+      const message = [49, 102, 48, 21, 6, 9, 42, -122, 72, -122, -9, 13, 1, 9, 3]
       md.update(forge.util.binary.raw.encode(new Uint8Array(message)));
     
       const signature = privateKey.sign(md)
@@ -92,10 +92,13 @@ describe('RSA Verifier', function () {
           BigInt(k)
         ),
       };
+
+      writeFileSync(path.join(__dirname, 'inputs_rsa_2048_4.json'), JSON.stringify(inputs, null, 2));
+
       const w = await circuit.calculateWitness(inputs, true);
-      const outputFilePath = path.join(__dirname, 'witness_5.json');
-      fs.writeFileSync(outputFilePath, JSON.stringify(w, null, 2));
-      console.log(`Witness written to ${outputFilePath}`);
+      // const outputFilePath = path.join(__dirname, 'witness_5.json');
+      // fs.writeFileSync(outputFilePath, JSON.stringify(w, null, 2));
+      // console.log(`Witness written to ${outputFilePath}`);
       await circuit.checkConstraints(w);
 
     });

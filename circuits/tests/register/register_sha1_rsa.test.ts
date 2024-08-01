@@ -7,7 +7,7 @@ import { mockPassportData_sha1_rsa_65537, mockPassportData_sha1_rsa_65537_2 } fr
 import { generateCircuitInputsRegister } from '../../../common/src/utils/generateInputs';
 import { getLeaf } from '../../../common/src/utils/pubkeyTree';
 import { packBytes } from '../../../common/src/utils/utils';
-import fs from 'fs';
+import fs, { writeFileSync } from 'fs';
 
 describe('Register - SHA1 RSA', function () {
   this.timeout(0);
@@ -45,6 +45,8 @@ describe('Register - SHA1 RSA', function () {
       n_dsc,
       k_dsc
     );
+
+    writeFileSync(path.join(__dirname, 'inputs_sha1_rsa_2.json'), JSON.stringify(inputs, null, 2));
   });
 
   it('should compile and load the circuit', async function () {
@@ -54,9 +56,9 @@ describe('Register - SHA1 RSA', function () {
   it('should calculate the witness with correct inputs', async function () {
     const w = await circuit.calculateWitness(inputs);
 
-    const outputFilePath = path.join(__dirname, 'witness_2.json');
-    fs.writeFileSync(outputFilePath, JSON.stringify(w, null, 2));
-    console.log(`Witness written to ${outputFilePath}`);
+    // const outputFilePath = path.join(__dirname, 'witness_2.json');
+    // fs.writeFileSync(outputFilePath, JSON.stringify(w, null, 2));
+    // console.log(`Witness written to ${outputFilePath}`);
 
     await circuit.checkConstraints(w);
 

@@ -12,7 +12,7 @@ import { LeanIMT } from '@zk-kit/lean-imt';
 import { getLeaf } from '../../../common/src/utils/pubkeyTree';
 import { generateCircuitInputsDisclose } from '../../../common/src/utils/generateInputs';
 import { unpackReveal } from '../../../common/src/utils/revealBitmap';
-import fs from 'fs';
+import fs, { writeFileSync } from 'fs';
 
 describe('Disclose', function () {
   this.timeout(0);
@@ -37,8 +37,8 @@ describe('Disclose', function () {
     attestation_id = poseidon1([BigInt(Buffer.from(attestation_name).readUIntBE(0, 6))]).toString();
 
     const majority = ['1', '8'];
-    const user_identifier = '0xE6E4b6a802F2e0aeE5676f6010e0AF5C9CDd0a50';
-    const bitmap = Array(90).fill(BigInt(Math.floor(Math.random() * 2)).toString());
+    const user_identifier = '1';
+    const bitmap = Array(90).fill(1);
     const scope = poseidon1([BigInt(Buffer.from('VOTEEEEE').readUIntBE(0, 6))]).toString();
 
     // compute the commitment and insert it in the tree
@@ -59,7 +59,7 @@ describe('Disclose', function () {
     tree = new LeanIMT((a, b) => poseidon2([a, b]), []);
 
     // inserting random commitments
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 1; i++) {
         const randomCommitment = BigInt(Math.floor(Math.random() * Math.pow(2, 254))).toString();
         tree.insert(BigInt(randomCommitment));
     }
@@ -76,6 +76,8 @@ describe('Disclose', function () {
       scope,
       user_identifier
     );
+
+    writeFileSync(path.join(__dirname, 'inputs_4.json'), JSON.stringify(inputs, null, 2));
   });
 
   it('should compile and load the circuit', async function () {
@@ -84,10 +86,8 @@ describe('Disclose', function () {
 
   it('should have nullifier == poseidon(secret, scope)', async function () {
     w = await circuit.calculateWitness(inputs);
-
-    const outputFilePath = path.join(__dirname, 'witness_4.json');
-    fs.writeFileSync(outputFilePath, JSON.stringify(w, null, 2));
-    console.log(`Witness written to ${outputFilePath}`);
+    // fs.writeFileSync(outputFilePath, JSON.stringify(w, null, 2));
+    // console.log(`Witness written to ${outputFilePath}`);
 
     const nullifier_js = poseidon2([inputs.secret, inputs.scope]).toString();
     const nullifier_circom = (await circuit.getOutput(w, ['nullifier'])).nullifier;

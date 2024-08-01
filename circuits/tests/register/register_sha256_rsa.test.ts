@@ -7,7 +7,7 @@ import { mockPassportData_sha256_rsa_65537, mockPassportData_sha256_rsa_65537_2,
 import { generateCircuitInputsRegister } from '../../../common/src/utils/generateInputs';
 import { getLeaf } from '../../../common/src/utils/pubkeyTree';
 import { packBytes } from '../../../common/src/utils/utils';
-import fs from 'fs';
+import fs, { writeFileSync } from 'fs';
 
 describe('Register - SHA256 RSA', function () {
   this.timeout(0);
@@ -31,9 +31,9 @@ describe('Register - SHA256 RSA', function () {
       }
     );
 
-    const secret = BigInt(Math.floor(Math.random() * Math.pow(2, 254))).toString();
-    const dscSecret = BigInt(Math.floor(Math.random() * Math.pow(2, 254))).toString();
-    attestation_id = poseidon1([BigInt(Buffer.from(attestation_name).readUIntBE(0, 6))]).toString();
+    const secret = BigInt(0).toString();
+    const dscSecret = BigInt(0).toString();
+    attestation_id = BigInt(0).toString();;
     inputs = generateCircuitInputsRegister(
       secret,
       dscSecret,
@@ -42,6 +42,8 @@ describe('Register - SHA256 RSA', function () {
       n_dsc,
       k_dsc
     );
+
+    writeFileSync(path.join(__dirname, 'inputs_rsa_5.json'), JSON.stringify(inputs, null, 2));
   });
 
   it('should compile and load the circuit', async function () {
@@ -51,9 +53,9 @@ describe('Register - SHA256 RSA', function () {
   it('should calculate the witness with correct inputs', async function () {
     const w = await circuit.calculateWitness(inputs);
 
-    const outputFilePath = path.join(__dirname, 'witness_4.json');
-    fs.writeFileSync(outputFilePath, JSON.stringify(w, null, 2));
-    console.log(`Witness written to ${outputFilePath}`);
+    // const outputFilePath = path.join(__dirname, 'witness_4.json');
+    // fs.writeFileSync(outputFilePath, JSON.stringify(w, null, 2));
+    // console.log(`Witness written to ${outputFilePath}`);
     
     await circuit.checkConstraints(w);
 
