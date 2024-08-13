@@ -1,25 +1,26 @@
-import { MAX_DATAHASHES_LEN, PUBKEY_TREE_DEPTH, DEVELOPMENT_MODE } from '../constants/constants';
+import { LeanIMT } from '@zk-kit/lean-imt';
+import { poseidon6 } from 'poseidon-lite';
+import { MAX_DATAHASHES_LEN, PUBKEY_TREE_DEPTH } from '../constants/constants';
+import { mockPassportDatas } from '../constants/mockPassportData';
+import { packBytes } from '../utils/utils';
+import { getLeaf } from './pubkeyTree';
 import { assert, shaPad } from './shaPad';
 import { PassportData } from './types';
 import {
   arraysAreEqual,
+  BigintToArray,
   bytesToBigDecimal,
+  extractRSFromSignature,
+  findSubarrayIndex,
   formatMrz,
+  generateMerkleProof,
+  getCurrentDateYYMMDD,
+  getHashLen,
   hash,
+  hexToDecimal,
   splitToWords,
   toUnsignedByte,
-  getHashLen,
-  getCurrentDateYYMMDD,
-  generateMerkleProof,
-  findSubarrayIndex,
-  hexToDecimal,
 } from './utils';
-import { LeanIMT } from '@zk-kit/lean-imt';
-import { getLeaf } from './pubkeyTree';
-import { poseidon6 } from 'poseidon-lite';
-import { packBytes } from '../utils/utils';
-import { getCSCAModulusMerkleTree } from './csca';
-import { mockPassportDatas } from '../constants/mockPassportData';
 
 export function generateCircuitInputsRegister(
   secret: string,
@@ -99,42 +100,76 @@ export function generateCircuitInputsRegister(
     MAX_DATAHASHES_LEN
   );
 
-  let dsc_modulus: any;
-  let signature: any;
+  const { dsc_modulus, signature, signature_r, signature_s } = generateDscModulusAndSignature(
+    signatureAlgorithm,
+    pubKey,
+    passportData,
+    n_dsc,
+    k_dsc
+  );
 
+  const inputs: any = {
+    secret: [secret],
+    mrz: formattedMrz.map((byte) => String(byte)),
+    dg1_hash_offset: [dg1HashOffset.toString()],
+    econtent: Array.from(messagePadded).map((x) => x.toString()),
+    datahashes_padded_length: [messagePaddedLen.toString()],
+    signed_attributes: eContent.map(toUnsignedByte).map((byte) => String(byte)),
+    dsc_modulus: dsc_modulus,
+    attestation_id: [attestation_id],
+    dsc_secret: [dscSecret],
+  };
+
+  if (signature_r && signature_s) {
+    inputs.signature_r = signature_r;
+    inputs.signature_s = signature_s;
+  } else {
+    inputs.signature = signature;
+  }
+
+  return inputs;
+}
+
+function generateDscModulusAndSignature(
+  signatureAlgorithm: string,
+  pubKey: any,
+  passportData: PassportData,
+  n_dsc: number,
+  k_dsc: number
+): { dsc_modulus: any; signature?: any; signature_r?: any; signature_s?: any } {
   if (
+    // ! TODO DIDN'T TESTED THIS WITH REAL DATA
     signatureAlgorithm === 'ecdsa-with-SHA1' ||
     signatureAlgorithm === 'ecdsa-with-SHA256' ||
     signatureAlgorithm === 'ecdsa-with-SHA512' ||
     signatureAlgorithm === 'ecdsa-with-SHA384'
   ) {
     const curve_params = pubKey.publicKeyQ.replace(/[()]/g, '').split(',');
-    dsc_modulus = [curve_params[0], curve_params[1]]; // ! TODO REFACTOR SPLIT HERE WHAT IF WORKS
-    signature = passportData.encryptedDigest;
+    let qx = BigInt(hexToDecimal(curve_params[0]));
+    let qy = BigInt(hexToDecimal(curve_params[1]));
+
+    let signature = passportData.encryptedDigest;
+    let { r, s } = extractRSFromSignature(signature);
+
+    return {
+      dsc_modulus: [BigintToArray(43, 6, qx), BigintToArray(43, 6, qy)],
+      signature_r: BigintToArray(43, 6, BigInt(hexToDecimal(r))),
+      signature_s: BigintToArray(43, 6, BigInt(hexToDecimal(s))),
+    };
   } else {
-    dsc_modulus = splitToWords(
-      BigInt(passportData.pubKey.modulus as string),
-      BigInt(n_dsc),
-      BigInt(k_dsc)
-    );
-    signature = splitToWords(
-      BigInt(bytesToBigDecimal(passportData.encryptedDigest)),
-      BigInt(n_dsc),
-      BigInt(k_dsc)
-    );
+    return {
+      dsc_modulus: splitToWords(
+        BigInt(passportData.pubKey.modulus as string),
+        BigInt(n_dsc),
+        BigInt(k_dsc)
+      ),
+      signature: splitToWords(
+        BigInt(bytesToBigDecimal(passportData.encryptedDigest)),
+        BigInt(n_dsc),
+        BigInt(k_dsc)
+      ),
+    };
   }
-  return {
-    secret: [secret],
-    mrz: formattedMrz.map((byte) => String(byte)),
-    dg1_hash_offset: [dg1HashOffset.toString()], // uncomment when adding new circuits
-    econtent: Array.from(messagePadded).map((x) => x.toString()),
-    datahashes_padded_length: [messagePaddedLen.toString()],
-    signed_attributes: eContent.map(toUnsignedByte).map((byte) => String(byte)),
-    signature: signature,
-    dsc_modulus: dsc_modulus,
-    attestation_id: [attestation_id],
-    dsc_secret: [dscSecret],
-  };
 }
 
 export function generateCircuitInputsDisclose(
@@ -176,7 +211,6 @@ export function generateCircuitInputsDisclose(
 
   // format majority to bigints
 
-
   return {
     secret: [secret],
     attestation_id: [attestation_id],
@@ -188,8 +222,8 @@ export function generateCircuitInputsDisclose(
     siblings: merkleProofSiblings.map((index) => BigInt(index).toString()),
     bitmap: bitmap,
     scope: [BigInt(scope).toString()],
-    current_date: getCurrentDateYYMMDD().map(datePart => BigInt(datePart).toString()),
-    majority: majority.split('').map(char => BigInt(char.charCodeAt(0)).toString()),
+    current_date: getCurrentDateYYMMDD().map((datePart) => BigInt(datePart).toString()),
+    majority: majority.split('').map((char) => BigInt(char.charCodeAt(0)).toString()),
     user_identifier: [user_identifier],
   };
 }

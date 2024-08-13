@@ -1,16 +1,11 @@
+import { expect } from 'chai';
 import { describe } from 'mocha';
 import path from 'path';
 import { poseidon1, poseidon6 } from 'poseidon-lite';
 import { mockPassportData_sha256_ecdsa } from '../../../common/src/constants/mockPassportData';
 import { generateCircuitInputsRegister } from '../../../common/src/utils/generateInputs';
-import {
-  BigintToArray,
-  extractRSFromSignature,
-  hexToDecimal,
-  packBytes,
-} from '../../../common/src/utils/utils';
-import { expect } from 'chai';
 import { getLeaf } from '../../../common/src/utils/pubkeyTree';
+import { packBytes } from '../../../common/src/utils/utils';
 const wasm_tester = require('circom_tester').wasm;
 
 describe('Register - SHA256 WITH ECDSA', function () {
@@ -36,15 +31,6 @@ describe('Register - SHA256 WITH ECDSA', function () {
     k_dsc
   );
 
-  let qx = BigInt(hexToDecimal(inputs.dsc_modulus[0]));
-  let qy = BigInt(hexToDecimal(inputs.dsc_modulus[1]));
-  let dsc_modulus = [BigintToArray(43, 6, qx), BigintToArray(43, 6, qy)];
-
-  let signature = inputs.signature;
-  let { r, s } = extractRSFromSignature(signature);
-  let signature_r = BigintToArray(43, 6, BigInt(hexToDecimal(r)));
-  let signature_s = BigintToArray(43, 6, BigInt(hexToDecimal(s)));
-
   before(async () => {
     circuit = await wasm_tester(
       path.join(__dirname, '../../circuits/register/register_ecdsaWithSHA256Encryption.circom'),
@@ -63,29 +49,7 @@ describe('Register - SHA256 WITH ECDSA', function () {
   });
 
   it('should calculate the witness with correct inputs', async function () {
-    let qx = BigInt(hexToDecimal(inputs.dsc_modulus[0]));
-    let qy = BigInt(hexToDecimal(inputs.dsc_modulus[1]));
-    let dsc_modulus = [BigintToArray(43, 6, qx), BigintToArray(43, 6, qy)];
-
-    let signature = inputs.signature;
-    let { r, s } = extractRSFromSignature(signature);
-    let signature_r = BigintToArray(43, 6, BigInt(hexToDecimal(r)));
-    let signature_s = BigintToArray(43, 6, BigInt(hexToDecimal(s)));
-
-    const w = await circuit.calculateWitness({
-      secret: inputs.secret,
-      mrz: inputs.mrz,
-      dg1_hash_offset: inputs.dg1_hash_offset[0],
-      econtent: inputs.econtent,
-      datahashes_padded_length: inputs.datahashes_padded_length[0],
-      signed_attributes: inputs.signed_attributes,
-      signature_r: signature_r,
-      signature_s: signature_s,
-      dsc_modulus: dsc_modulus,
-      dsc_secret: inputs.dsc_secret,
-      attestation_id: inputs.attestation_id,
-    });
-
+    const w = await circuit.calculateWitness(inputs);
     await circuit.checkConstraints(w);
 
     const nullifier = (await circuit.getOutput(w, ['nullifier'])).nullifier;
@@ -117,17 +81,8 @@ describe('Register - SHA256 WITH ECDSA', function () {
   it('should fail to calculate witness with invalid econtent', async function () {
     try {
       const invalidInputs = {
-        secret: inputs.secret,
-        mrz: inputs.mrz,
-        dg1_hash_offset: inputs.dg1_hash_offset[0],
         econtent: inputs.econtent.map((byte: string) => String((parseInt(byte, 10) + 1) % 256)),
-        datahashes_padded_length: inputs.datahashes_padded_length[0],
-        signed_attributes: inputs.signed_attributes,
-        signature_r: signature_r,
-        signature_s: signature_s,
-        dsc_modulus: dsc_modulus,
-        dsc_secret: inputs.dsc_secret,
-        attestation_id: inputs.attestation_id,
+        ...inputs,
       };
       await circuit.calculateWitness(invalidInputs);
       expect.fail('Expected an error but none was thrown.');
@@ -139,19 +94,10 @@ describe('Register - SHA256 WITH ECDSA', function () {
   it('should fail to calculate witness with invalid mrz', async function () {
     try {
       const invalidInputs = {
-        secret: inputs.secret,
         mrz: Array(93)
           .fill(0)
           .map((byte) => BigInt(byte).toString()),
-        dg1_hash_offset: inputs.dg1_hash_offset[0],
-        econtent: inputs.econtent,
-        datahashes_padded_length: inputs.datahashes_padded_length[0],
-        signed_attributes: inputs.signed_attributes,
-        signature_r: signature_r,
-        signature_s: signature_s,
-        dsc_modulus: dsc_modulus,
-        dsc_secret: inputs.dsc_secret,
-        attestation_id: inputs.attestation_id,
+        ...inputs,
       };
       await circuit.calculateWitness(invalidInputs);
       expect.fail('Expected an error but none was thrown.');
@@ -161,20 +107,13 @@ describe('Register - SHA256 WITH ECDSA', function () {
   });
 
   it('should fail to calculate witness with invalid signature', async function () {
-    let wrong_signature_s = BigintToArray(43, 6, BigInt(hexToDecimal(s) + 1));
+    let wrong_signature_s = inputs.signature_s.map((byte: string) =>
+      String((parseInt(byte, 10) + 1) % 256)
+    );
     try {
       const invalidInputs = {
-        secret: inputs.secret,
-        mrz: inputs.mrz,
-        dg1_hash_offset: inputs.dg1_hash_offset[0],
-        econtent: inputs.econtent,
-        datahashes_padded_length: inputs.datahashes_padded_length[0],
-        signed_attributes: inputs.signed_attributes,
-        signature_r: signature_r,
         signature_s: wrong_signature_s,
-        dsc_modulus: dsc_modulus,
-        dsc_secret: inputs.dsc_secret,
-        attestation_id: inputs.attestation_id,
+        ...inputs,
       };
       await circuit.calculateWitness(invalidInputs);
       expect.fail('Expected an error but none was thrown.');
