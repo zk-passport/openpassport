@@ -2,7 +2,8 @@ import { LeanIMT } from '@zk-kit/lean-imt';
 import { poseidon6 } from 'poseidon-lite';
 import { MAX_DATAHASHES_LEN, PUBKEY_TREE_DEPTH } from '../constants/constants';
 import { mockPassportDatas } from '../constants/mockPassportData';
-import { packBytes } from '../utils/utils';
+import { generateSMTProof, packBytes } from '../utils/utils';
+import { getNameDobLeaf, getNameLeaf, getPassportNumberLeaf } from './ofacTree';
 import { getLeaf } from './pubkeyTree';
 import { assert, shaPad } from './shaPad';
 import { PassportData } from './types';
@@ -21,7 +22,7 @@ import {
   splitToWords,
   toUnsignedByte,
 } from './utils';
-
+import { SMT } from '@ashpect/smt';
 
 export function generateCircuitInputsRegister(
   secret: string,
@@ -239,33 +240,41 @@ export function generateCircuitInputsOfac(
   scope: string,
   user_identifier: string,
   sparsemerkletree: SMT,
-  proofLevel : number,
+  proofLevel: number
 ) {
-
-  const result = generateCircuitInputsDisclose(secret,attestation_id,passportData,merkletree,majority,bitmap,scope,user_identifier);
+  const result = generateCircuitInputsDisclose(
+    secret,
+    attestation_id,
+    passportData,
+    merkletree,
+    majority,
+    bitmap,
+    scope,
+    user_identifier
+  );
   const { majority: _, scope: __, bitmap: ___, user_identifier: ____, ...finalResult } = result;
 
   const mrz_bytes = formatMrz(passportData.mrz);
-  const passport_leaf = getPassportNumberLeaf(mrz_bytes.slice(49,58))
-  const namedob_leaf = getNameDobLeaf(mrz_bytes.slice(10,49), mrz_bytes.slice(62, 68)) // [57-62] + 5 shift
-  const name_leaf = getNameLeaf(mrz_bytes.slice(10,49)) // [6-44] + 5 shift
-  
-  let root,closestleaf,siblings;  
-  if(proofLevel == 3){
-    ({root, closestleaf, siblings} = generateSMTProof(sparsemerkletree, passport_leaf));
-  } else if(proofLevel == 2){
-    ({root, closestleaf, siblings} = generateSMTProof(sparsemerkletree, namedob_leaf));
-  } else if (proofLevel == 1){
-    ({root, closestleaf, siblings} = generateSMTProof(sparsemerkletree, name_leaf));
+  const passport_leaf = getPassportNumberLeaf(mrz_bytes.slice(49, 58));
+  const namedob_leaf = getNameDobLeaf(mrz_bytes.slice(10, 49), mrz_bytes.slice(62, 68)); // [57-62] + 5 shift
+  const name_leaf = getNameLeaf(mrz_bytes.slice(10, 49)); // [6-44] + 5 shift
+
+  let root, closestleaf, siblings;
+  if (proofLevel == 3) {
+    ({ root, closestleaf, siblings } = generateSMTProof(sparsemerkletree, passport_leaf));
+  } else if (proofLevel == 2) {
+    ({ root, closestleaf, siblings } = generateSMTProof(sparsemerkletree, namedob_leaf));
+  } else if (proofLevel == 1) {
+    ({ root, closestleaf, siblings } = generateSMTProof(sparsemerkletree, name_leaf));
   } else {
-    throw new Error("Invalid proof level")
+    throw new Error('Invalid proof level');
   }
 
   return {
     ...finalResult,
     closest_leaf: [BigInt(closestleaf).toString()],
     smt_root: [BigInt(root).toString()],
-    smt_siblings: siblings.map(index => BigInt(index).toString()),
+    smt_siblings: siblings.map((index) => BigInt(index).toString()),
   };
 }
 
