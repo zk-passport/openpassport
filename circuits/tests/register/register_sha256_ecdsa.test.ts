@@ -81,8 +81,8 @@ describe('Register - SHA256 WITH ECDSA', function () {
   it('should fail to calculate witness with invalid econtent', async function () {
     try {
       const invalidInputs = {
-        econtent: inputs.econtent.map((byte: string) => String((parseInt(byte, 10) + 1) % 256)),
         ...inputs,
+        econtent: inputs.econtent.map((byte: string) => String((parseInt(byte, 10) + 1) % 256)),
       };
       await circuit.calculateWitness(invalidInputs);
       expect.fail('Expected an error but none was thrown.');
@@ -94,10 +94,10 @@ describe('Register - SHA256 WITH ECDSA', function () {
   it('should fail to calculate witness with invalid mrz', async function () {
     try {
       const invalidInputs = {
+        ...inputs,
         mrz: Array(93)
           .fill(0)
           .map((byte) => BigInt(byte).toString()),
-        ...inputs,
       };
       await circuit.calculateWitness(invalidInputs);
       expect.fail('Expected an error but none was thrown.');
@@ -112,8 +112,8 @@ describe('Register - SHA256 WITH ECDSA', function () {
     );
     try {
       const invalidInputs = {
-        signature_s: wrong_signature_s,
         ...inputs,
+        signature_s: wrong_signature_s,
       };
       await circuit.calculateWitness(invalidInputs);
       expect.fail('Expected an error but none was thrown.');
