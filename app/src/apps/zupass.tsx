@@ -1,7 +1,7 @@
 import { AppType } from "../../../common/src/utils/appType";
 import { Text, YStack } from 'tamagui';
 import { Ticket } from '@tamagui/lucide-icons';
-import ZUPASS from '../images/zupass.png';
+// import ZUPASS from '../images/zupass.png';
 
 const comingSoon = () => (
   <YStack ml="$2" p="$2" px="$3" bc="#282828" borderRadius="$10">
@@ -14,7 +14,7 @@ export const zupassApp: AppType = {
 
   title: 'Zupass',
   description: 'Connect to prove your identity at in person events',
-  background: ZUPASS,
+  // background: ZUPASS,
   colorOfTheText: 'white',
   selectable: false,
   icon: Ticket,
