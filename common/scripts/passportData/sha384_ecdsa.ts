@@ -36,7 +36,7 @@ const sampleDataHashes = [
 const signatureAlgorithm = 'SHA384withECDSA'
 const hashLen = 46
 
-export function genMockPassportData_SHA384withECDSA(): PassportData {
+export function genMockPassportData_sha384_ecdsa(): PassportData {
   const mrzHash = hash(signatureAlgorithm, formatMrz(sampleMRZ));
   sampleDataHashes.unshift([1, mrzHash]);
   const concatenatedDataHashes = formatAndConcatenateDataHashes(
@@ -106,7 +106,7 @@ function verify(passportData: PassportData): boolean {
 }
 
 
-const mockPassportData = genMockPassportData_SHA384withECDSA();
+const mockPassportData = genMockPassportData_sha384_ecdsa();
 console.log("Passport Data:", JSON.stringify(mockPassportData, null, 2));
 console.log("Signature valid:", verify(mockPassportData));
 

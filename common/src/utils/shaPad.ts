@@ -1,7 +1,7 @@
 // Copied from zk-email cuz it uses crypto so can't import it here.
 
-export function shaPad(signatureAlgorithm: string, prehash_prepad_m: Uint8Array, maxShaBytes: number): [Uint8Array, number] {
-  if (signatureAlgorithm == 'sha1WithRSAEncryption') {
+export function shaPad(hashFunction: string, prehash_prepad_m: Uint8Array, maxShaBytes: number): [Uint8Array, number] {
+  if (hashFunction == 'sha1') {
     return sha1Pad(prehash_prepad_m, maxShaBytes);
   } else {
     return sha256Pad(prehash_prepad_m, maxShaBytes);

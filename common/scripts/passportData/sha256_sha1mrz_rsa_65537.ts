@@ -35,7 +35,7 @@ const sampleDataHashes = [
 const signatureAlgorithm = 'sha256WithRSAEncryption'
 const hashLen = 32
 
-export function genMockPassportData_sha256WithRSAEncryption_sha1MRZ_65537(): PassportData {
+export function genMockPassportData_sha256_sha1mrz_rsa_65537(): PassportData {
   const mrzHash = hash("sha1WithRSAEncryption", formatMrz(sampleMRZ));
   const concatenatedDataHashes = formatAndConcatenateDataHashes(
     [[1, mrzHash], ...sampleDataHashes],
@@ -99,7 +99,7 @@ function verify(passportData: PassportData): boolean {
   return rsaPublicKey.verify(md.digest().bytes(), signature);
 }
 
-const mockPassportData = genMockPassportData_sha256WithRSAEncryption_sha1MRZ_65537();
+const mockPassportData = genMockPassportData_sha256_sha1mrz_rsa_65537();
 console.log("Passport Data:", JSON.stringify(mockPassportData, null, 2));
 console.log("Signature valid:", verify(mockPassportData));
 

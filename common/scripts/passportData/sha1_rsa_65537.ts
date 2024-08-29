@@ -1,40 +1,25 @@
-import { readFileSync, writeFileSync } from "fs";
 import { PassportData } from "../../src/utils/types";
-import { hash, assembleEContent, formatAndConcatenateDataHashes, formatMrz, hexToDecimal, arraysAreEqual, findSubarrayIndex } from "../../src/utils/utils";
+import { hash, assembleEContent, formatAndConcatenateDataHashes, formatMrz, arraysAreEqual, findSubarrayIndex, getHashLen } from "../../src/utils/utils";
 import * as forge from 'node-forge';
-import { assert } from "console";
-import { mock_dsc_key_sha1_rsa_4096 } from "../../src/constants/mockCertificates";
+import { mock_dsc_key_sha1_rsa_4096, mock_dsc_sha1_rsa_4096 } from "../../src/constants/mockCertificates";
+import { sampleDataHashes_small } from "../../sampleDataHashes";
+import { getSignatureAlgorithm } from "../../src/utils/handleCertificate";
+import { assert } from "../../src/utils/shaPad";
 
-const sampleMRZ = "P<FRADUPONT<<ALPHONSE<HUGUES<ALBERT<<<<<<<<<24HB818324FRA0402111M3111115<<<<<<<<<<<<<<02"
-const sampleDataHashes = [
-  [
-    2,
-    [-66, 82, -76, -21, -34, 33, 79, 50, -104, -120, -114, 35, 116, -32, 6, -14, -100, -115, -128, -8]
-  ],
-  [
-    3,
-    [0, -62, 104, 108, -19, -10, 97, -26, 116, -58, 69, 110, 26, 87, 17, 89, 110, -57, 108, -6]
-  ],
-  [
-    14,
-    [76, 123, -40, 13, 51, -29, 72, -11, 59, -63, -18, -90, 103, 49, 23, -92, -85, -68, -62, -59]
-  ]
-] as [number, number[]][]
-const signatureAlgorithm = 'sha1WithRSAEncryption'
-const hashLen = 20
+export function genMockPassportData_sha1_rsa_65537(mrz: string): PassportData {
+  const { hashFunction } = getSignatureAlgorithm(mock_dsc_sha1_rsa_4096);
+  const hashLen = getHashLen(hashFunction);
 
-export function genMockPassportData_sha1WithRSAEncryption_65537(): PassportData {
-  const mrzHash = hash(signatureAlgorithm, formatMrz(sampleMRZ));
+  const mrzHash = hash(hashFunction, formatMrz(mrz));
   const concatenatedDataHashes = formatAndConcatenateDataHashes(
-    [[1, mrzHash], ...sampleDataHashes],
+    [[1, mrzHash], ...sampleDataHashes_small],
     hashLen,
-    31 // could have been different
+    31
   );
 
-  const eContent = assembleEContent(hash(signatureAlgorithm, concatenatedDataHashes));
+  const eContent = assembleEContent(hash(hashFunction, concatenatedDataHashes));
 
   const privKey = forge.pki.privateKeyFromPem(mock_dsc_key_sha1_rsa_4096);
-  const modulus = privKey.n.toString(16);
 
   const md = forge.md.sha1.create();
   md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
@@ -43,12 +28,8 @@ export function genMockPassportData_sha1WithRSAEncryption_65537(): PassportData 
   const signatureBytes = Array.from(signature, (c: string) => c.charCodeAt(0));
 
   return {
-    mrz: sampleMRZ,
-    signatureAlgorithm: signatureAlgorithm,
-    pubKey: {
-      modulus: hexToDecimal(modulus),
-      exponent: '65537',
-    },
+    mrz: mrz,
+    dsc: mock_dsc_sha1_rsa_4096,
     dataGroupHashes: concatenatedDataHashes,
     eContent: eContent,
     encryptedDigest: signatureBytes,
@@ -56,15 +37,16 @@ export function genMockPassportData_sha1WithRSAEncryption_65537(): PassportData 
   }
 }
 
-function verify(passportData: PassportData): boolean {
-  const { mrz, signatureAlgorithm, pubKey, dataGroupHashes, eContent, encryptedDigest } = passportData;
-  const formattedMrz = formatMrz(mrz);
-  const mrzHash = hash(signatureAlgorithm, formattedMrz);
+export function verify_sha1_rsa_65537(passportData: PassportData): boolean {
+  const { mrz, dsc, dataGroupHashes, eContent, encryptedDigest } = passportData;
+  const { hashFunction } = getSignatureAlgorithm(dsc);
+
+  const mrzHash = hash(hashFunction, formatMrz(mrz));
   const dg1HashOffset = findSubarrayIndex(dataGroupHashes, mrzHash)
   console.log('dg1HashOffset', dg1HashOffset);
   assert(dg1HashOffset !== -1, 'MRZ hash index not found in dataGroupHashes');
 
-  const concatHash = hash(signatureAlgorithm, dataGroupHashes)
+  const concatHash = hash(hashFunction, dataGroupHashes)
   assert(
     arraysAreEqual(
       concatHash,
@@ -73,9 +55,8 @@ function verify(passportData: PassportData): boolean {
     'concatHash is not at the right place in eContent'
   );
 
-  const modulus = new forge.jsbn.BigInteger(pubKey.modulus, 10);
-  const exponent = new forge.jsbn.BigInteger(pubKey.exponent, 10);
-  const rsaPublicKey = forge.pki.rsa.setPublicKey(modulus, exponent);
+  const publicKey = forge.pki.certificateFromPem(dsc).publicKey as {n: forge.jsbn.BigInteger, e: forge.jsbn.BigInteger};
+  const rsaPublicKey = forge.pki.rsa.setPublicKey(publicKey.n, publicKey.e);
 
   const md = forge.md.sha1.create();
   md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
@@ -86,9 +67,3 @@ function verify(passportData: PassportData): boolean {
 
   return rsaPublicKey.verify(md.digest().bytes(), signature);
 }
-
-const mockPassportData = genMockPassportData_sha1WithRSAEncryption_65537();
-console.log("Passport Data:", JSON.stringify(mockPassportData, null, 2));
-console.log("Signature valid:", verify(mockPassportData));
-
-writeFileSync(__dirname + '/passportData.json', JSON.stringify(mockPassportData, null, 2));
