@@ -75,4 +75,4 @@ We are actively looking for contributors. Please check the [open issues](https:/
 
 Contact me [@FlorentTavernier](https://t.me/FlorentTavernier) on telegram for any feedback or questions.
 
-Thanks [Rémi](https://github.com/remicolin), [Youssef](https://github.com/yssf-io), [Aayush](https://twitter.com/yush_g), [Andy](https://twitter.com/AndyGuzmanEth), [Vivek](https://twitter.com/viv_boop) and [Andrew](https://github.com/AndrewCLu) for contributing ideas and helping build this technology, and [PSE](https://pse.dev/) for supporting this work through grants!
+Thanks [Rémi](https://github.com/remicolin), [Youssef](https://github.com/yssf-io), [Aayush](https://x.com/yush_g), [Andy](https://x.com/AndyGuzmanEth), [Vivek](https://x.com/viv_boop) and [Andrew](https://github.com/AndrewCLu) for contributing ideas and helping build this technology, and [PSE](https://pse.dev/) for supporting this work through grants!
