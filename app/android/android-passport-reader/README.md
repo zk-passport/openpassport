@@ -2,14 +2,14 @@
 
 Sample project to read Passports using MRZ or manual entry. Currently I am using ML KIT for the OCR.
 
-I don't read the the whole MRZ as ML KIT for now it's unable to read it (it's struggling with "<<<"), but I use it to read the second line and after that use a regular expression to match the rigth format.
+I don't read the the whole MRZ as ML KIT for now it's unable to read it (it's struggling with "<<<"), but I use it to read the second line and after that use a regular expression to match the right format.
 
 You can use the example images stored under `examples` to test the application or download any sample passport document from https://www.consilium.europa.eu/prado/EN/prado-start-page.html
 
 ![alt text](https://github.com/jllarraz/AndroidPassportReader/blob/master/examples/passport_ireland.jpg)
 
 
-This project is based in the information and tutorials found in
+This project is based on the information and tutorials found in
 
 - https://developer.android.com/reference/android/hardware/camera2/package-summary
 - https://github.com/tananaev/passport-reader/blob/master/app/build.gradle
@@ -32,7 +32,7 @@ This project is based in the information and tutorials found in
 
 ## OCR
 
-You must put your phone horizontal when you try to read the passports MRZ.
+You must put your phone horizontally when you try to read the passports MRZ.
 
 This is are examples of how the app performs.
 https://youtu.be/ZmRl_-3RH2U (Full read)
