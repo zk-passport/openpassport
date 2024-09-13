@@ -11,7 +11,7 @@ Use cases unlocked include:
 - **Social media**: Add humanity checks to user's profiles
 - **Quadratic funding**: Prevent farmers from skewing rewards
 - **Wallet recovery**: Safeguard assets using IDs as recovery sources
-- **Compliance**: Check a user is not part of a sanctioned entity list
+- **Compliance**: Check that a user is not part of a sanctioned entity list
 
 ## FAQ
 
@@ -69,7 +69,7 @@ Everything we write is MIT licensed. Circom and circomlib are GPL tho.
 
 ## Contributing
 
-We are actively looking for contributors. Please check the [open issues](https://github.com/zk-passport/proof-of-passport/issues) if you don't know were to start! We will offer bounties from $100 to $1000 for any significant progress on these, depending on difficulty.
+We are actively looking for contributors. Please check the [open issues](https://github.com/zk-passport/proof-of-passport/issues) if you don't know where to start! We will offer bounties from $100 to $1000 for any significant progress on these, depending on difficulty.
 
 ## Contact us
 
