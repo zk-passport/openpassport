@@ -12,6 +12,7 @@ const zkeyZipUrls = {
   register_rsa_65537_sha256: "https://d8o9bercqupgk.cloudfront.net/register_rsa_65537_sha256.zkey.zip",
   register_rsa_65537_sha1: "https://d8o9bercqupgk.cloudfront.net/register_rsa_65537_sha1.zkey.zip",
   register_rsapss_65537_sha256: "https://d8o9bercqupgk.cloudfront.net/register_rsapss_65537_sha256.zkey.zip",
+  register_ecdsa_sha256: "https://d8o9bercqupgk.cloudfront.net/register_ecdsa_sha256_final.zkey.zip",
   // register_sha256WithRSAEncryption_65537: "https://d8o9bercqupgk.cloudfront.net/register_sha256WithRSAEncryption_65537_csca2.zkey.zip",
   // disclose: "https://d8o9bercqupgk.cloudfront.net/disclose3.zkey.zip",
 };
@@ -23,6 +24,7 @@ const datZipUrls = {
   register_rsa_65537_sha256: "https://d8o9bercqupgk.cloudfront.net/register_rsa_65537_sha256.dat.zip",
   register_rsa_65537_sha1: "https://d8o9bercqupgk.cloudfront.net/register_rsa_65537_sha1.dat.zip",
   register_rsapss_65537_sha256: "https://d8o9bercqupgk.cloudfront.net/register_rsapss_65537_sha256.dat.zip",
+  register_ecdsa_sha256: "https://d8o9bercqupgk.cloudfront.net/register_ecdsa_sha256.dat.zip",
 };
 
 export type CircuitName = keyof typeof zkeyZipUrls;

@@ -25,7 +25,7 @@ namespace CIRCUIT_NAME {" ${file}.cpp
 
 # Array of circuit files
 # declare -a CIRCUITS=("prove_rsa_65537_sha256" "prove_rsa_65537_sha1" "prove_rsapss_65537_sha256" "register_rsa_65537_sha256")
-declare -a CIRCUITS=("register_rsa_65537_sha256")
+declare -a CIRCUITS=("register_ecdsa_sha256")
 
 # Main execution
 for circuit in "${CIRCUITS[@]}"; do

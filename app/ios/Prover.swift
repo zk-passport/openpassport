@@ -41,6 +41,10 @@ import witnesscalc_register_rsa_65537_sha1
 import witnesscalc_register_rsapss_65537_sha256
 #endif
 
+#if canImport(witnesscalc_register_ecdsa_sha256)
+import witnesscalc_register_ecdsa_sha256
+#endif
+
 #if canImport(groth16_prover)
 import groth16_prover
 #endif
@@ -116,12 +120,15 @@ private func _calcWtns(witness_calculator: String, dat: Data, jsonData: Data) th
     let datSize = UInt(dat.count)
     let jsonDataSize = UInt(jsonData.count)
 
+    print("dat size: \(datSize) bytes")
+    print("json data size: \(jsonDataSize) bytes")
+
     let errorSize = UInt(256);
     
     let wtnsSize = UnsafeMutablePointer<UInt>.allocate(capacity: Int(1));
-    wtnsSize.initialize(to: UInt(100 * 1024 * 1024 ))
+    wtnsSize.initialize(to: UInt(500 * 1024 * 1024 ))
     
-    let wtnsBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: (100 * 1024 * 1024))
+    let wtnsBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: (500 * 1024 * 1024))
     let errorBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(errorSize))
     
     let result: Int32
@@ -183,7 +190,14 @@ private func _calcWtns(witness_calculator: String, dat: Data, jsonData: Data) th
             wtnsBuffer, wtnsSize,
             errorBuffer, errorSize
         )
-    } 
+    } else if witness_calculator == "register_ecdsa_sha256" {
+        result = witnesscalc_register_ecdsa_sha256(
+            (dat as NSData).bytes, datSize,
+            (jsonData as NSData).bytes, jsonDataSize,
+            wtnsBuffer, wtnsSize,
+            errorBuffer, errorSize
+        )
+    }
     
     else {
         fatalError("Invalid witness calculator name")
