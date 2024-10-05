@@ -6,10 +6,10 @@ import {IRegister} from "./interfaces/IRegister.sol";
 import {Registry} from "./Registry.sol";
 import {Base64} from "./libraries/Base64.sol";
 import {IVerifier} from "./interfaces/IVerifier.sol";
-import {IVerifierCSCA} from "./interfeces/IVerifierCSCA.sol";
+import {IVerifierCSCA} from "./interfaces/IVerifierCSCA.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@zk-kit/imt.sol/internal/InternalLeanIMT.sol";
+import "@zk-kit/lean-imt/contracts/InternalLeanIMT.sol";
 
 /*** 
                                                                           ,--"""",--.__,---[],-------._                             

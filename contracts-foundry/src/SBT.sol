@@ -4,12 +4,11 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import {Verifier_disclose} from "./Verifier_disclose.sol";
+import {Verifier_disclose} from "./verifiers/Verifier_disclose.sol";
 import {Base64} from "./libraries/Base64.sol";
 import {Formatter} from "./Formatter.sol";
 import {Registry} from "./Registry.sol";
 import {IRegister} from "./interfaces/IRegister.sol";
-import "hardhat/console.sol";
 
 contract SBT is ERC721Enumerable, Ownable {
     using Strings for uint256;
@@ -134,8 +133,6 @@ contract SBT is ERC721Enumerable, Ownable {
         bytes memory charcodes = fieldElementsToBytes(
             proof.revealedData_packed
         );
-        // console.logBytes1(charcodes[21]);
-
         Attributes storage attributes = tokenAttributes[newTokenId];
 
         for (uint i = 0; i < attributePositions.length; i++) {
@@ -148,7 +145,6 @@ contract SBT is ERC721Enumerable, Ownable {
             }
             string memory attributeValue = string(attributeBytes);
             attributes.values[i] = attributeValue;
-            // console.log(attribute.name, attributes.values[i]);
         }
     }
 

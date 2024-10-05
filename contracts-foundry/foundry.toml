@@ -1,6 +1,17 @@
 [profile.default]
 src = "src"
 out = "out"
+test="test"
 libs = ["lib"]
+solc = "0.8.26"
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+[rpc_endpoints]
+etherum = "${MAINNET_RPC_URL}"
+sepolia = "${SEPOLIA_RPC_URL}"
+optimism = "${OPTIMISM_RPC_URL}"
+optimism-sepolia = "${OPTIMISM_SEPOLIA_RPC_URL}"
+
+# Etherscan config in .env file
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}", chain = "sepolia" }
+optimism-sepolia = { key = "${OPTIMISMSCAN_API_KEY}", chain = "optimism-sepolia" }

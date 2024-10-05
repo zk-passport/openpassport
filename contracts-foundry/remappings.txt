@@ -1,1 +1,2 @@
 @openzeppelin/=lib/openzeppelin-contracts/
+@zk-kit/=lib/zk-kit.solidity/packages/
