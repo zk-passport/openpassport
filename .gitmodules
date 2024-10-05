@@ -10,3 +10,6 @@
 [submodule "contracts-foundry/lib/zk-kit.solidity"]
 	path = contracts-foundry/lib/zk-kit.solidity
 	url = https://github.com/privacy-scaling-explorations/zk-kit.solidity
+[submodule "contracts-foundry/lib/poseidon-solidity"]
+	path = contracts-foundry/lib/poseidon-solidity
+	url = https://github.com/chancehudson/poseidon-solidity
