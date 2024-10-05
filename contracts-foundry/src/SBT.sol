@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import {Verifier_disclose} from "./verifiers/Verifier_disclose.sol";
@@ -50,11 +51,16 @@ contract SBT is ERC721Enumerable, Ownable {
 
     mapping(uint256 => Attributes) private tokenAttributes;
 
+    error CANNOT_TRANSFER_SBT();
+
     constructor(
         Verifier_disclose v,
         Formatter f,
         IRegister r
-    ) ERC721("OpenPassport", "OpenPassport") {
+    ) 
+        ERC721("OpenPassport", "OpenPassport") 
+        Ownable(msg.sender)
+    {
         verifier = v;
         formatter = f;
         register = r;
@@ -178,18 +184,26 @@ contract SBT is ERC721Enumerable, Ownable {
         return sliced;
     }
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId,
-        uint256 batchSize
-    ) internal virtual override {
-        super._beforeTokenTransfer(from, to, tokenId, batchSize);
-        require(
-            from == address(0),
-            "Cannot transfer - SBT is soulbound"
-        );
+    // function _beforeTokenTransfer(
+    //     address from,
+    //     address to,
+    //     uint256 tokenId,
+    //     uint256 batchSize
+    // ) internal virtual {
+    //     super._beforeTokenTransfer(from, to, tokenId, batchSize);
+    //     require(
+    //         from == address(0),
+    //         "Cannot transfer - SBT is soulbound"
+    //     );
+    // }
+
+    function transferFrom(address from, address to, uint256 tokenId) public override(ERC721, IERC721) {
+        revert CANNOT_TRANSFER_SBT();
     }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public override(ERC721, IERC721) {
+        revert CANNOT_TRANSFER_SBT();
+    } 
 
     function isExpired(string memory date) public view returns (bool) {
         if (isAttributeEmpty(date)) {
@@ -336,10 +350,7 @@ contract SBT is ERC721Enumerable, Ownable {
     function tokenURI(
         uint256 _tokenId
     ) public view virtual override returns (string memory) {
-        require(
-            _exists(_tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
+        ownerOf(_tokenId);
         Attributes memory attributes = tokenAttributes[_tokenId];
 
         bytes memory baseURI = abi.encodePacked('{ "attributes": [');

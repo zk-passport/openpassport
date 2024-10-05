@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Formatter is Ownable {
     mapping(string => string) private countryCodes;
 
-    constructor() {
+    constructor() Ownable(msg.sender) {
         transferOwnership(msg.sender);
     }
 

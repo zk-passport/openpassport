@@ -1,3 +1,3 @@
 build:
-	forge update
+	forge install
 	forge build

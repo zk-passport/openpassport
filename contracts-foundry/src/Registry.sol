@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Registry is Ownable {
     bytes32 public merkleRoot;
 
-    constructor(bytes32 _merkleRoot) {
+    constructor(bytes32 _merkleRoot) Ownable(msg.sender) {
         merkleRoot = _merkleRoot;
         transferOwnership(msg.sender);
     }

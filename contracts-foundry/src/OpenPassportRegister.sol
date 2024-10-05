@@ -72,7 +72,7 @@ contract OpenPassportRegister is IRegister, Ownable {
     mapping(uint256 => address) public verifiers;
     mapping(uint256 => address) public cscaVerifier;
 
-    constructor(Registry r) {
+    constructor(Registry r) Ownable(msg.sender) {
         registry = r;
         transferOwnership(msg.sender);
     }
