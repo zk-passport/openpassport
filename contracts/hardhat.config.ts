@@ -60,7 +60,7 @@ const config: HardhatUserConfig = {
     },
     optimism: {
       url: process.env.OPTIMISM_RPC_URL || "https://mainnet.optimism.io",
-      accounts: [process.env.PKEYS as string],
+      accounts: [process.env.PKEY as string],
     }
   },
   etherscan: {
