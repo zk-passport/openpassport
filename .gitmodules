@@ -10,3 +10,6 @@
 [submodule "contracts-foundry/lib/zk-kit"]
 	path = contracts-foundry/lib/zk-kit
 	url = https://github.com/privacy-scaling-explorations/zk-kit
+[submodule "contracts-foundry/lib/zk-kit.solidity"]
+	path = contracts-foundry/lib/zk-kit.solidity
+	url = https://github.com/privacy-scaling-explorations/zk-kit.solidity
