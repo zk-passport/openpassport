@@ -4,8 +4,6 @@ require("dotenv").config();
 import "hardhat-contract-sizer";
 import "@nomicfoundation/hardhat-ignition-ethers";
 
-const { PKEY, OPTIMISM_SEPOLIA_RPC_URL } = process.env;
-
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.18",

@@ -1,18 +1,18 @@
 import { expect, assert } from "chai";
 import { ethers } from "hardhat";
 // import { describe } from "mocha";
-import { mockPassportData_sha256_rsa_65537, mockPassportData_sha1_rsa_65537, } from "../../common/src/constants/mockPassportData";
+import { genMockPassportData } from "../../common/src/utils/genMockPassportData";
 import { countryCodes, PASSPORT_ATTESTATION_ID, SignatureAlgorithmIndex } from "../../common/src/constants/constants";
 import { formatRoot } from "../../common/src/utils/utils";
 import { groth16 } from 'snarkjs'
 import { time } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { generateCircuitInputsRegister, generateCircuitInputsDisclose } from "../../common/src/utils/generateInputs";
+import { generateCircuitInputsProve, generateCircuitInputsDisclose } from "../../common/src/utils/generateInputs";
 import { formatCallData_disclose, formatCallData_dsc, formatCallData_register } from "../../common/src/utils/formatCallData";
 import fs from 'fs';
 import { LeanIMT } from "@zk-kit/lean-imt";
 import { poseidon2 } from "poseidon-lite";
 import { Signer } from "ethers";
-import { getCSCAInputs, getCSCAModulusMerkleTree } from "../../common/src/utils/csca";
+import { generateCircuitInputsDSC, getCSCAModulusMerkleTree } from "../../common/src/utils/csca";
 import forge from "node-forge";
 import { mock_csca_sha256_rsa_4096, mock_dsc_sha256_rsa_4096, mock_dsc_sha1_rsa_4096, mock_csca_sha1_rsa_4096 } from '../../common/src/constants/mockCertificates';
 
@@ -34,22 +34,50 @@ describe("OpenPassport - Contracts - Register & Disclose flow", function () {
     let proof, publicSignals;
     let proof_dsc
 
-    const register_circuits: CircuitArtifacts = {
-        sha256WithRSAEncryption_65537: {
-            wasm: "../circuits/build/register_sha256WithRSAEncryption_65537_js/register_sha256WithRSAEncryption_65537.wasm",
-            zkey: "../circuits/build/register_sha256WithRSAEncryption_65537_final.zkey",
-            vkey: "../circuits/build/register_sha256WithRSAEncryption_65537_vkey.json"
+    // const register_circuits: CircuitArtifacts = {
+    //     sha256WithRSAEncryption_65537: {
+    //         wasm: "../circuits/build/register_sha256WithRSAEncryption_65537_js/register_sha256WithRSAEncryption_65537.wasm",
+    //         zkey: "../circuits/build/register_sha256WithRSAEncryption_65537_final.zkey",
+    //         vkey: "../circuits/build/register_sha256WithRSAEncryption_65537_vkey.json"
+    //     },
+    //     sha1WithRSAEncryption_65537: {
+    //         wasm: "../circuits/build/register_sha1WithRSAEncryption_65537_js/register_sha1WithRSAEncryption_65537.wasm",
+    //         zkey: "../circuits/build/register_sha1WithRSAEncryption_65537_final.zkey",
+    //         vkey: "../circuits/build/register_sha1WithRSAEncryption_65537_vkey.json"
+    //     },
+    //     // sha256WithRSASSAPSS_65537: {
+    //     //     wasm: "../circuits/build/register_sha256WithRSASSAPSS_65537_js/register_sha256WithRSASSAPSS_65537.wasm",
+    //     //     zkey: "../circuits/build/register_sha256WithRSASSAPSS_65537_final.zkey",
+    //     //     vkey: "../circuits/build/register_sha256WithRSASSAPSS_65537_vkey.json"
+    //     // }
+    // }
+
+    const prove_circuits: CircuitArtifacts = {
+        rsa_65537_sha256: {
+            wasm: "../circuits/build/prove_rsa_65537_sha256_js/prove_rsa_65537_sha256.wasm",
+            zkey: "../circuits/build/prove_rsa_65537_sha256_final.zkey",
+            vkey:"../circuits/build/prove_rsa_65537_sha256_vkey.json",
         },
-        sha1WithRSAEncryption_65537: {
-            wasm: "../circuits/build/register_sha1WithRSAEncryption_65537_js/register_sha1WithRSAEncryption_65537.wasm",
-            zkey: "../circuits/build/register_sha1WithRSAEncryption_65537_final.zkey",
-            vkey: "../circuits/build/register_sha1WithRSAEncryption_65537_vkey.json"
+        rsa_65537_sha1: {
+            wasm: "../circuits/build/prove_rsa_65537_sha1_js/prove_rsa_65537_sha1.wasm",
+            zkey: "../circuits/build/prove_rsa_65537_sha1_final.zkey",
+            vkey:"../circuits/build/prove_rsa_65537_sha1_vkey.json",
         },
-        // sha256WithRSASSAPSS_65537: {
-        //     wasm: "../circuits/build/register_sha256WithRSASSAPSS_65537_js/register_sha256WithRSASSAPSS_65537.wasm",
-        //     zkey: "../circuits/build/register_sha256WithRSASSAPSS_65537_final.zkey",
-        //     vkey: "../circuits/build/register_sha256WithRSASSAPSS_65537_vkey.json"
-        // }
+        rsapss_65537_sha256: {
+            wasm: "../circuits/build/prove_rsapss_65537_sha256_js/prove_rsapss_65537_sha256.wasm",
+            zkey: "../circuits/build/prove_rsapss_65537_sha256_final.zkey",
+            vkey:"../circuits/build/prove_rsapss_65537_sha256_vkey.json",
+        },
+        ecdsa_secp256r1_sha256: {
+            wasm: "../circuits/build/prove_ecdsa_secp256r1_sha256_js/prove_ecdsa_secp256r1_sha256.wasm",
+            zkey: "../circuits/build/prove_ecdsa_secp256r1_sha256_final.zkey",
+            vkey:"../circuits/build/prove_ecdsa_secp256r1_sha256_vkey.json",
+        },
+        ecdsa_secp256r1_sha1: {
+            wasm: "../circuits/build/prove_ecdsa_secp256r1_sha1_js/prove_ecdsa_secp256r1_sha1.wasm",
+            zkey: "../circuits/build/prove_ecdsa_secp256r1_sha1_final.zkey",
+            vkey:"../circuits/build/prove_ecdsa_secp256r1_sha1_vkey.json",
+        }
     }
 
     const dsc_circuits: CircuitArtifacts = {
@@ -65,9 +93,9 @@ describe("OpenPassport - Contracts - Register & Disclose flow", function () {
         }
     }
 
-    const path_disclose_wasm = "../circuits/build/disclose_js/disclose.wasm";
-    const path_disclose_zkey = "../circuits/build/disclose_final.zkey";
-    const path_disclose_vkey = "../circuits/build/disclose_vkey.json";
+    const path_disclose_wasm = "../circuits/build/disclose/vc_and_disclose/vc_and_disclose_js/vc_and_disclose.wasm";
+    const path_disclose_zkey = "../circuits/build/disclose/vc_and_disclose/vc_and_disclose_final.zkey";
+    const path_disclose_vkey = "../circuits/build/disclose/vc_and_disclose/vc_and_disclose_vkey.json";
 
     const n_dsc = 121;
     const k_dsc = 17;
@@ -87,7 +115,10 @@ describe("OpenPassport - Contracts - Register & Disclose flow", function () {
     let selector_dg1, scope, user_address, majority, input_disclose: any;
     let proof_disclose, publicSignals_disclose, proof_result_disclose, vkey_disclose, verified_disclose: any, rawCallData_disclose, parsedCallData_disclose: any[], formattedCallData_disclose: any;
     //let proof_csca, publicSignals_csca: any;
+    let selector_mode: number[] = [1, 0];
     let secret: string = BigInt(0).toString();
+    // let selector_dg1 = ["1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"];
+    let selector_older_than = "1";
     let attestation_id: string = PASSPORT_ATTESTATION_ID;
 
     before(
@@ -98,19 +129,44 @@ describe("OpenPassport - Contracts - Register & Disclose flow", function () {
             await ethers.provider.send('evm_setNextBlockTimestamp', [currentTimestamp]);
             await ethers.provider.send('evm_mine', []); // Mine a new block for the timestamp to take effect
 
-            register_circuits.sha256WithRSAEncryption_65537.inputs = generateCircuitInputsRegister(
+            prove_circuits.rsa_65537_sha256.inputs = generateCircuitInputsProve(
+                selector_mode,
+                secret,
+                secret,
+                genMockPassportData('rsa_sha256', "FRA", "081031", "401010"),
+                scope,
+                selector_dg1,
+                selector_older_than
+            );
+            prove_circuits.rsa_65537_sha1.inputs = generateCircuitInputsProve(
                 secret,
                 secret,
                 attestation_id,
-                mockPassportData_sha256_rsa_65537,
+                genMockPassportData('rsa_sha256', "FRA", "081031", "401010"),
                 n_dsc,
                 k_dsc
             );
-            register_circuits.sha1WithRSAEncryption_65537.inputs = generateCircuitInputsRegister(
+            prove_circuits.rsapss_65537_sha256.inputs = generateCircuitInputsProve(
                 secret,
                 secret,
                 attestation_id,
-                mockPassportData_sha1_rsa_65537,
+                genMockPassportData('rsa_sha256', "FRA", "081031", "401010"),
+                n_dsc,
+                k_dsc
+            );
+            prove_circuits.ecdsa_secp256r1_sha256.inputs = generateCircuitInputsProve(
+                secret,
+                secret,
+                attestation_id,
+                genMockPassportData('rsa_sha256', "FRA", "081031", "401010"),
+                n_dsc,
+                k_dsc
+            );
+            prove_circuits.ecdsa_secp256r1_sha1.inputs = generateCircuitInputsProve(
+                secret,
+                secret,
+                attestation_id,
+                genMockPassportData('rsa_sha256', "FRA", "081031", "401010"),
                 n_dsc,
                 k_dsc
             );

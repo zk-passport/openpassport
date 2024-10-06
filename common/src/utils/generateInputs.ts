@@ -38,7 +38,8 @@ export function generateCircuitInputsDisclose(
   selector_dg1: string[],
   selector_older_than: string,
   scope: string,
-  user_identifier: string
+  user_identifier: string,
+  user_identifier_type: 'uuid' | 'hex' | 'ascii' = DEFAULT_USER_ID_TYPE
 ) {
 
   const pubkey_leaf = getLeaf(passportData.dsc);
@@ -71,7 +72,7 @@ export function generateCircuitInputsDisclose(
     scope: [castFromScope(scope)],
     current_date: getCurrentDateYYMMDD().map(datePart => BigInt(datePart).toString()),
     majority: majority.split('').map(char => BigInt(char.charCodeAt(0)).toString()),
-    user_identifier: [castFromUUID(user_identifier)],
+    user_identifier: [formatInput(parseUIDToBigInt(user_identifier, user_identifier_type))],
   };
 }
 

@@ -24,7 +24,7 @@ describe("Test SBT Contract", function () {
 
     let merkleTree: IMT;
 
-    this.beforeEach(async function () {
+    before(async function () {
         // TODO: I need to figure out what is deploy options
 
         [owner, addr1, addr2] = await ethers.getSigners();
@@ -58,7 +58,9 @@ describe("Test SBT Contract", function () {
     });
 
     describe("Test mint and attr functions in SBT", function () {
-        this.beforeEach(async function () {
+        let mockedSbt: any;
+
+        before(async function () {
             console.log('\x1b[36m%s\x1b[0m', `Deploy sbt with mock verifier again`);
             const verifierDiscloseFactory = await ethers.getContractFactory("MockVerifier_disclose");
             verifier_disclose = await verifierDiscloseFactory.deploy();
@@ -71,109 +73,64 @@ describe("Test SBT Contract", function () {
             console.log('\x1b[34m%s\x1b[0m', `registry deployed to ${registry.target}`);
 
             const sbtFactory = await ethers.getContractFactory("SBT");
-            sbt = await sbtFactory.deploy(
+            mockedSbt = await sbtFactory.deploy(
                 verifier_disclose,
                 formatter,
                 registry
             );
-            await sbt.waitForDeployment();
+            await mockedSbt.waitForDeployment();
             console.log('\x1b[34m%s\x1b[0m', `sbt deployed to ${sbt.target}`);
         });
 
         it("Test: mint, should be reverted if register.checkRoot returns false", async function() {
-            let mockSBTProof: SBTProof = {
-                nullifier: "0",
-                revealedData_packed: ["31", "32", "33"],
-                attestation_id: "0",
-                merkle_root: "1",
-                scope: "1",
-                current_date: getDateNum(),
-                user_identifier: addr1.address,
-                a: ["1", "1"],
-                b: [["1", "1"], ["1", "1"]],
-                c: ["1", "1"],
-            };
-
-            await expect(sbt.mint(mockSBTProof)).to.be.revertedWith("Invalid merkle root");
+            let mockSBTProof: SBTProof = createMockSBTProof({ merkle_root: "1" });
+            await expect(mockedSbt.mint(mockSBTProof)).to.be.revertedWith("Invalid merkle root");
         });
 
         it("Test:mint, should be reverted if currentTimestamp is not within a +1 day range", async function() {
             let passedTwoDays = new Date();
             passedTwoDays.setUTCDate(passedTwoDays.getUTCDate() + 2);
             
-            let mockSBTProof: SBTProof = {
-                nullifier: "0",
-                revealedData_packed: ["31", "32", "33"],
-                attestation_id: "0",
-                merkle_root: formatRoot(merkleTree.root),
-                scope: "1",
-                current_date: getDateNum(passedTwoDays),
-                user_identifier: addr1.address,
-                a: ["1", "1"],
-                b: [["1", "1"], ["1", "1"]],
-                c: ["1", "1"],
-            };
+            let mockSBTProof: SBTProof = createMockSBTProof({ current_date: getDateNum(passedTwoDays) });
 
-            await expect(sbt.mint(mockSBTProof)).to.be.revertedWith("Current date is not within the valid range");
+            await expect(mockedSbt.mint(mockSBTProof)).to.be.revertedWith("Current date is not within the valid range");
         });
 
         it("Test:mint, should be reverted if currentTimestamp is not within a -1 day range", async function() {
             let twoDaysBefore = new Date();
             twoDaysBefore.setUTCDate(twoDaysBefore.getUTCDate() - 2);
             
-            let mockSBTProof: SBTProof = {
-                nullifier: "0",
-                revealedData_packed: ["31", "32", "33"],
-                attestation_id: "0",
-                merkle_root: formatRoot(merkleTree.root),
-                scope: "1",
-                current_date: getDateNum(twoDaysBefore),
-                user_identifier: addr1.address,
-                a: ["1", "1"],
-                b: [["1", "1"], ["1", "1"]],
-                c: ["1", "1"],
-            };
+            let mockSBTProof: SBTProof = createMockSBTProof({ current_date: getDateNum(twoDaysBefore) });
 
-            await expect(sbt.mint(mockSBTProof)).to.be.revertedWith("Current date is not within the valid range");
+            await expect(mockedSbt.mint(mockSBTProof)).to.be.revertedWith("Current date is not within the valid range");
         });
 
         it("Test:mint, should be reverted if verifyProof returns false", async function () {
-            let mockSBTProof: SBTProof = {
-                nullifier: "1",
-                revealedData_packed: ["31", "32", "33"],
-                attestation_id: "0",
-                merkle_root: formatRoot(merkleTree.root),
-                scope: "1",
-                current_date: getDateNum(),
-                user_identifier: addr1.address,
-                a: ["1", "1"],
-                b: [["1", "1"], ["1", "1"]],
-                c: ["1", "1"],
-            };
-
-            await expect(sbt.mint(mockSBTProof)).to.be.revertedWith("Invalid Proof");
+            let mockSBTProof: SBTProof = createMockSBTProof({ nullifier: "1" });
+            await expect(mockedSbt.mint(mockSBTProof)).to.be.revertedWith("Invalid Proof");
         });
 
         it("Test:mint, should mint token if all validation was passed", async function () {
-            let mockSBTProof: SBTProof = {
-                nullifier: "0",
-                revealedData_packed: ["31", "32", "33"],
-                attestation_id: "0",
-                merkle_root: formatRoot(merkleTree.root),
-                scope: "1",
-                current_date: getDateNum(),
-                user_identifier: addr1.address,
-                a: ["1", "1"],
-                b: [["1", "1"], ["1", "1"]],
-                c: ["1", "1"],
-            };
+            let mockSBTProof: SBTProof = createMockSBTProof();
+            await mockedSbt.mint(mockSBTProof);
 
-            await sbt.mint(mockSBTProof);
-
-            expect(await sbt.totalSupply()).to.be.equal(1);
-            expect(await sbt.ownerOf(0)).to.be.equal(addr1.address);
+            expect(await mockedSbt.totalSupply()).to.be.equal(1);
+            expect(await mockedSbt.ownerOf(0)).to.be.equal(addr1.address);
         });
 
+    });
+
+    describe("Test attr functions in SBT", function() {
+
+        before(async function() {
+            let mockSBTProof: SBTProof = createMockSBTProof();
+            await sbt.mint(mockSBTProof);
+        });
+
+        it("Test:attr, check issuing state is correctly registered", async function () { 
+            let attr0 = await sbt.getIssuingStateOf(0);
+            console.log("issuing state: ", attr0);
+        });
     });
 
     describe("Test utils functions in SBT", function() {
@@ -234,3 +191,21 @@ function getDateNum(date: Date = new Date()): number[] {
 
     return dateNum;
 }
+
+function createMockSBTProof(options: Partial<SBTProof> = {}): SBTProof {
+    const defaults: SBTProof = {
+      nullifier: "0",
+      revealedData_packed: ["115261408968607033031307466064449130912187328440927354228438530358556114000", "90441811083069593795566189778555936593460904044458972628079823996559114828", "80649680061362283084530183871589323447324161052952025077985585"],
+      older_than: ["0", "0"],
+      attestation_id: "42",
+      merkle_root: "3371222684175752517807407619934459293988404217060542944534570329838598875982",
+      scope: "1049",
+      current_date: getDateNum(),
+      user_identifier: "642829559307850963015472508762062935916233390536",
+      a: ["1", "1"],
+      b: [["1", "1"], ["1", "1"]],
+      c: ["1", "1"]
+    };
+  
+    return { ...defaults, ...options };
+  }

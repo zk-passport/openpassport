@@ -6,7 +6,7 @@ contract MockVerifier_disclose {
         uint[2] calldata _pA,
         uint[2][2] calldata _pB,
         uint[2] calldata _pC,
-        uint[14] calldata _pubSignals
+        uint[16] calldata _pubSignals
     ) public view returns (bool) {
         if (_pubSignals[0] == 1) {
             return false;

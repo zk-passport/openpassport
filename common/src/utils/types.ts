@@ -34,6 +34,7 @@ export function castCSCAProof(proof: any): Proof {
 export type SBTProof = {
   nullifier: string,
   revealedData_packed: string[],
+  older_than: string[],
   attestation_id: string,
   merkle_root: string,
   scope: string,
