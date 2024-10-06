@@ -31,3 +31,15 @@ export function castCSCAProof(proof: any): Proof {
   }
 }
 
+export type SBTProof = {
+  nullifier: string,
+  revealedData_packed: string[],
+  attestation_id: string,
+  merkle_root: string,
+  scope: string,
+  current_date: number[] | string[],
+  user_identifier: string,
+  a: [string, string],
+  b: [[string, string], [string, string]],
+  c: [string, string]
+}
