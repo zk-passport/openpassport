@@ -28,7 +28,6 @@ import { SMT } from "@ashpect/smt"
 import { parseCertificate } from './certificates/handleCertificate';
 import { poseidon2 } from 'poseidon-lite';
 import namejson from '../../../common/ofacdata/outputs/nameSMT.json';
-import { mkdtemp } from 'fs';
 
 export function generateCircuitInputsDisclose(
   secret: string,
