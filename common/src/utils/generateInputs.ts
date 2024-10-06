@@ -28,6 +28,7 @@ import { SMT } from "@ashpect/smt"
 import { parseCertificate } from './certificates/handleCertificate';
 import { poseidon2 } from 'poseidon-lite';
 import namejson from '../../../common/ofacdata/outputs/nameSMT.json';
+import { mkdtemp } from 'fs';
 
 export function generateCircuitInputsDisclose(
   secret: string,
@@ -257,4 +258,21 @@ export function formatInput(input: any) {
   } else {
     return [BigInt(input).toString()];
   }
+}
+
+export function generatePassportMerkleTreeWithCommitment(
+  secret: string,
+  attestation_id: string,
+  passportData: PassportData,
+  pubkeyTreeDepth: number
+): LeanIMT<bigint> {
+  const pubkey_leaf = getLeaf(passportData.dsc);
+  const fomatterMrz = formatMrz(passportData.mrz);
+  const mrz_bytes = packBytes(fomatterMrz);
+
+  const commitment = generateCommitment(secret, attestation_id, pubkey_leaf, mrz_bytes, passportData.dg2Hash);
+
+  const merkletree = new LeanIMT<bigint>((a, b) => poseidon2([a, b]), [BigInt(pubkeyTreeDepth)]);
+  merkletree.insert(commitment);
+  return merkletree;
 }
