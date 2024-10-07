@@ -17,7 +17,7 @@ template PROVE_RSAPSS_65537_SHA256(n, k, max_datahashes_bytes) {
     signal input eContent[104];
     signal input signature[k];
     signal input dsc_modulus[k];
-    signal output signature_algorithm <== 001;
+    signal output signature_algorithm <== 004;
 
     // Verify passport validity
     component PV = PASSPORT_VERIFIER_RSAPSS_65537_SHA256(n, k, max_datahashes_bytes);

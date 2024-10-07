@@ -17,7 +17,7 @@ template PROVE_RSA_65537_SHA1(n, k, max_datahashes_bytes) {
     signal input eContent[92];
     signal input signature[k];
     signal input dsc_modulus[k];
-    signal output signature_algorithm <== 000;
+    signal output signature_algorithm <== 003;
 
     // Verify passport validity
     component PV = PASSPORT_VERIFIER_RSA_65537_SHA1(n, k, max_datahashes_bytes);
