@@ -17,6 +17,7 @@ for circuit in "${CIRCUITS[@]}"; do
       ARCHS="arm64" \
       -destination 'generic/platform=iOS' \
       PRODUCT_BUNDLE_IDENTIFIER=com.warrom.witnesscalc \
+      -allowProvisioningUpdates \
       build
 done
 
@@ -25,8 +26,6 @@ cd ../..
 # Copy artifacts for each circuit
 for circuit in "${CIRCUITS[@]}"; do
     cp witnesscalc/build_witnesscalc_ios/src/Release-iphoneos/libwitnesscalc_${circuit}.a ios
-    mkdir -p ios/ProofOfPassport/Assets.xcassets/${circuit}.dat.dataset
-    cp witnesscalc/src/${circuit}.dat ios/ProofOfPassport/Assets.xcassets/${circuit}.dat.dataset/${circuit}.dat
     cp witnesscalc/src/witnesscalc_${circuit}.h ios
 done
 

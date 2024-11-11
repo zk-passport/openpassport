@@ -1,80 +1,93 @@
-import { poseidon12, poseidon2, poseidon8 } from "poseidon-lite"
-import { SignatureAlgorithm, PUBKEY_TREE_DEPTH } from "../constants/constants";
-import { IMT } from '@zk-kit/imt'
-import { bigIntToChunkedBytes, formatSigAlgNameForCircuit } from "./utils";
-import { toStandardName } from "./formatNames";
+import { PUBKEY_TREE_DEPTH, COMMITMENT_TREE_TRACKER_URL, SignatureAlgorithmIndex } from "../constants/constants";
+import { LeanIMT } from '@openpassport/zk-kit-lean-imt'
+import axios from "axios";
+import { poseidon16, poseidon2, poseidon6, poseidon7 } from 'poseidon-lite';
+import { formatDg2Hash, getNAndK, getNAndKCSCA, hexToDecimal, splitToWords } from './utils';
+import { parseCertificate } from "./certificates/handleCertificate";
+import { flexiblePoseidon } from "./poseidon";
 
-export function buildPubkeyTree(pubkeys: any[]) {
-  let leaves: bigint[] = []
-  let startTime = performance.now();
-
-  for (let i = 0; i < pubkeys.length; i++) {
-    const pubkey = pubkeys[i]
-
-    if (i % 3000 === 0 && i !== 0) {
-      console.log('Processing pubkey number', i, "over", pubkeys.length);
-    }
-
-    const leaf = getLeaf(pubkey, i)
-
-    if (!leaf) {
-      // console.log('no leaf for this weird signature:', i, formatSigAlgNameForCircuit(pubkey.signatureAlgorithm, pubkey.exponent))
-      continue
-    }
-    leaves.push(leaf)
+export function customHasher(pubKeyFormatted: string[]) {
+  const rounds = Math.ceil(pubKeyFormatted.length / 16);
+  const hash = new Array(rounds);
+  for (let i = 0; i < rounds; i++) {
+    hash[i] = { inputs: new Array(16).fill(BigInt(0)) };
   }
-
-  const tree = new IMT(poseidon2, PUBKEY_TREE_DEPTH, 0, 2, leaves)
-  console.log('pubkey tree built in', performance.now() - startTime, 'ms')
-
-  return tree
+  for (let i = 0; i < rounds; i++) {
+    for (let j = 0; j < 16; j++) {
+      if (i * 16 + j < pubKeyFormatted.length) {
+        hash[i].inputs[j] = BigInt(pubKeyFormatted[i * 16 + j]);
+      }
+    }
+  }
+  const finalHash = flexiblePoseidon(hash.map(h => poseidon16(h.inputs)));
+  return finalHash.toString();
 }
 
-export function getLeaf(pubkey: any, i?: number): bigint {
-  if (!pubkey?.modulus && pubkey?.pubKey?.modulus) {
-    pubkey.modulus = pubkey.pubKey.modulus
-    pubkey.exponent = pubkey.pubKey.exponent
-  }
-  if (!pubkey?.publicKeyQ && pubkey?.pubKey?.publicKeyQ) {
-    pubkey.publicKeyQ = pubkey.pubKey.publicKeyQ
-  }
+export function getLeaf(dsc: string): string {
+  const { signatureAlgorithm, hashFunction, modulus, x, y, bits, curve, exponent } = parseCertificate(dsc);
+  const { n, k } = getNAndK(signatureAlgorithm);
+  console.log(`${signatureAlgorithm}_${curve || exponent}_${hashFunction}_${bits}`)
+  const sigAlgKey = `${signatureAlgorithm}_${curve || exponent}_${hashFunction}_${bits}`;
+  const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
 
-  const sigAlgFormatted = toStandardName(pubkey.signatureAlgorithm)
-  const sigAlgFormattedForCircuit = formatSigAlgNameForCircuit(sigAlgFormatted, pubkey.exponent)
-
-  // console.log('pubkey', pubkey)
-  // console.log('sigAlgFormatted', sigAlgFormatted)
-  if (
-    sigAlgFormattedForCircuit === "sha256WithRSAEncryption_65537"
-    || sigAlgFormattedForCircuit === "sha256WithRSAEncryption_3"
-    || sigAlgFormattedForCircuit === "sha1WithRSAEncryption_65537"
-    || sigAlgFormattedForCircuit === "sha256WithRSASSAPSS_65537"
-    || sigAlgFormattedForCircuit === "sha256WithRSASSAPSS_3"
-    || sigAlgFormattedForCircuit === "sha512WithRSAEncryption_65537"
-  ) {
-    // Converting pubkey.modulus into 11 chunks of 192 bits, assuming it is originally 2048 bits.
-    // This is because Poseidon circuit only supports an array of 16 elements, and field size is 254.
-    const pubkeyChunked = bigIntToChunkedBytes(BigInt(pubkey.modulus), 192, 11);
-
-    // console.log('pubkeyChunked', pubkeyChunked.length, pubkeyChunked)
-    try {
-      // leaf is poseidon(signatureAlgorithm, ...pubkey)
-      return poseidon12([SignatureAlgorithm[sigAlgFormattedForCircuit], ...pubkeyChunked])
-    } catch (err) {
-      console.log('err', err, i, sigAlgFormattedForCircuit, pubkey)
-    }
-  } else if (
-    sigAlgFormattedForCircuit === "ecdsa_with_SHA1"
-    || sigAlgFormattedForCircuit === "ecdsa_with_SHA224"
-    || sigAlgFormattedForCircuit === "ecdsa_with_SHA384"
-    || sigAlgFormattedForCircuit === "ecdsa_with_SHA256"
-    || sigAlgFormattedForCircuit === "ecdsa_with_SHA512"
-  ) {
-    try {
-      // this will be replaced by just X and Y or pubkey in publicKeyQ
-      return poseidon8([SignatureAlgorithm[sigAlgFormattedForCircuit], pubkey.pub, pubkey.prime, pubkey.a, pubkey.b, pubkey.generator, pubkey.order, pubkey.cofactor])
-    } catch (err) {
-      console.log('err', err, i, sigAlgFormattedForCircuit, pubkey)
-    }
+  if (sigAlgIndex == undefined) {
+    console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
+    throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
   }
+  if (signatureAlgorithm === 'ecdsa') {
+    let qx = splitToWords(BigInt(hexToDecimal(x)), n, k);
+    let qy = splitToWords(BigInt(hexToDecimal(y)), n, k);
+    return customHasher([sigAlgIndex, ...qx, ...qy])
+
+  } else {
+    const pubkeyChunked = splitToWords(BigInt(hexToDecimal(modulus)), n, k);
+    return customHasher([sigAlgIndex, ...pubkeyChunked]);
+  }
+}
+export function getLeafCSCA(dsc: string): string {
+  const { signatureAlgorithm, hashFunction, modulus, x, y, bits, curve, exponent } = parseCertificate(dsc);
+  const { n, k } = getNAndKCSCA(signatureAlgorithm);
+  console.log(`${signatureAlgorithm}_${curve || exponent}_${hashFunction}_${bits}`)
+  const sigAlgKey = `${signatureAlgorithm}_${curve || exponent}_${hashFunction}_${bits}`;
+  const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
+
+  if (sigAlgIndex == undefined) {
+    console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
+    throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
+  }
+  if (signatureAlgorithm === 'ecdsa') {
+    let qx = splitToWords(BigInt(hexToDecimal(x)), n, k);
+    let qy = splitToWords(BigInt(hexToDecimal(y)), n, k);
+    return customHasher([sigAlgIndex, ...qx, ...qy])
+
+  } else {
+    const pubkeyChunked = splitToWords(BigInt(hexToDecimal(modulus)), n, k);
+    return customHasher([sigAlgIndex, ...pubkeyChunked]);
+  }
+}
+
+export function generateCommitment(secret: string, attestation_id: string, pubkey_leaf: string, mrz_bytes: any[], dg2Hash: any[]) {
+  const dg2Hash2 = customHasher(formatDg2Hash(dg2Hash).map(x => x.toString()));
+  const commitment = poseidon7([
+    secret,
+    attestation_id,
+    pubkey_leaf,
+    mrz_bytes[0],
+    mrz_bytes[1],
+    mrz_bytes[2],
+    dg2Hash2
+  ]);
+  return commitment;
+}
+
+
+export async function fetchTreeFromUrl(url: string): Promise<LeanIMT> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const commitmentMerkleTree = await response.json();
+  console.log("\x1b[90m%s\x1b[0m", "commitment merkle tree: ", commitmentMerkleTree);
+  const tree = LeanIMT.import((a, b) => poseidon2([a, b]), commitmentMerkleTree);
+  return tree;
 }

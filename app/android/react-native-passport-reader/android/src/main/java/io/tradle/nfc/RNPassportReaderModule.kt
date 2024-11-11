@@ -114,6 +114,15 @@ import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.Callback
 
+object Messages {
+    const val SCANNING = "Scanning....."
+    const val STOP_MOVING = "Stop moving....." 
+    const val AUTH = "Auth....."
+    const val COMPARING = "Comparing....."
+    const val COMPLETED = "Scanning completed"
+    const val RESET = ""
+}
+
 class Response(json: String) : JSONObject(json) {
     val type: String? = this.optString("type")
     val data = this.optJSONArray("data")
@@ -171,6 +180,7 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
 
     @ReactMethod
     fun scan(opts: ReadableMap, promise: Promise) {
+        eventMessageEmitter(Messages.SCANNING)
         val mNfcAdapter = NfcAdapter.getDefaultAdapter(reactApplicationContext)
         // val mNfcAdapter = NfcAdapter.getDefaultAdapter(this.reactContext)
         if (mNfcAdapter == null) {
@@ -261,16 +271,30 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
 
         override fun doInBackground(vararg params: Void?): Exception? {
             try {
-                isoDep.timeout = 10000
+                eventMessageEmitter(Messages.STOP_MOVING)
+                isoDep.timeout = 20000
                 Log.e("MY_LOGS", "This should obvsly log")
-                val cardService = CardService.getInstance(isoDep)
-                Log.e("MY_LOGS", "cardService gotten")
-                cardService.open()
+                val cardService = try {
+                    CardService.getInstance(isoDep)
+                } catch (e: Exception) {
+                    Log.e("MY_LOGS", "Failed to get CardService instance", e)
+                    throw e
+                }
+                
+                try {
+                    cardService.open()
+                } catch (e: Exception) {
+                    Log.e("MY_LOGS", "Failed to open CardService", e)
+                    isoDep.close()
+                    Thread.sleep(500)
+                    isoDep.connect()
+                    cardService.open()
+                }
                 Log.e("MY_LOGS", "cardService opened")
                 val service = PassportService(
                     cardService,
-                    PassportService.NORMAL_MAX_TRANCEIVE_LENGTH,
-                    PassportService.DEFAULT_MAX_BLOCKSIZE,
+                    PassportService.NORMAL_MAX_TRANCEIVE_LENGTH * 2,
+                    PassportService.DEFAULT_MAX_BLOCKSIZE * 2,
                     false,
                     false,
                 )
@@ -302,14 +326,39 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                 }
                 Log.e("MY_LOGS", "Sending select applet command with paceSucceeded: ${paceSucceeded}") // this is false so PACE doesn't succeed
                 service.sendSelectApplet(paceSucceeded)
+
                 if (!paceSucceeded) {
-                    try {
-                        Log.e("MY_LOGS", "trying to get EF_COM...")
-                        service.getInputStream(PassportService.EF_COM).read()
-                    } catch (e: Exception) {
-                        Log.e("MY_LOGS", "doing BAC")
-                        service.doBAC(bacKey) // <======================== error happens here
-                        Log.e("MY_LOGS", "BAC done")
+                    var bacSucceeded = false
+                    var attempts = 0
+                    val maxAttempts = 3
+                    
+                    while (!bacSucceeded && attempts < maxAttempts) {
+                        try {
+                            attempts++
+                            Log.e("MY_LOGS", "BAC attempt $attempts of $maxAttempts")
+                            
+                            if (attempts > 1) {
+                                // Wait before retry
+                                Thread.sleep(500)
+                            }
+                            
+                            // Try to read EF_COM first
+                            try {
+                                service.getInputStream(PassportService.EF_COM).read()
+                            } catch (e: Exception) {
+                                // EF_COM failed, do BAC
+                                service.doBAC(bacKey)
+                            }
+                            
+                            bacSucceeded = true
+                            Log.e("MY_LOGS", "BAC succeeded on attempt $attempts")
+                            
+                        } catch (e: Exception) {
+                            Log.e("MY_LOGS", "BAC attempt $attempts failed: ${e.message}")
+                            if (attempts == maxAttempts) {
+                                throw e // Re-throw on final attempt
+                            }
+                        }
                     }
                 }
 
@@ -349,7 +398,7 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                 //     e.printStackTrace()
                 // }
                 // Log.d(TAG, "============LET'S VERIFY THE SIGNATURE=============")
-
+                eventMessageEmitter(Messages.AUTH)
                 doChipAuth(service)
                 doPassiveAuth()
 
@@ -372,6 +421,7 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                     imageBase64 = Base64.encodeToString(buffer, Base64.DEFAULT)
                 }
             } catch (e: Exception) {
+                eventMessageEmitter(Messages.RESET)
                 return e
             }
             return null
@@ -409,8 +459,11 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                 
                 val dataHashes = sodFile.dataGroupHashes
                 
+                eventMessageEmitter("Reading DG14.....")
                 val dg14Hash = if (chipAuthSucceeded) digest.digest(dg14Encoded) else ByteArray(0)
+                eventMessageEmitter("Reading DG1.....")
                 val dg1Hash = digest.digest(dg1File.encoded)
+                eventMessageEmitter("Reading DG2.....")
                 val dg2Hash = digest.digest(dg2File.encoded)
                 
                 // val gson = Gson()
@@ -432,7 +485,7 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                 // Log.d(TAG, "dg2HashjoinToString " + gson.toJson(dg2Hash.joinToString("") { "%02x".format(it) }))
 
                 Log.d(TAG, "Comparing data group hashes...")
-
+                eventMessageEmitter(Messages.COMPARING)
                 if (Arrays.equals(dg1Hash, dataHashes[1]) && Arrays.equals(dg2Hash, dataHashes[2])
                     && (!chipAuthSucceeded || Arrays.equals(dg14Hash, dataHashes[14]))) {
 
@@ -498,6 +551,7 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
                     Log.d(TAG, "Passive authentication success: $passiveAuthSuccess")
                 }
             } catch (e: Exception) {
+                eventMessageEmitter(Messages.RESET)
                 Log.w(TAG, "Exception in passive authentication", e)
             }
         }
@@ -538,6 +592,7 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
             val certificateBytes = certificate.encoded
             val certificateBase64 = Base64.encodeToString(certificateBytes, Base64.DEFAULT)
             Log.d(TAG, "certificateBase64: ${certificateBase64}")
+            
 
             passport.putString("documentSigningCertificate", certificateBase64)
 
@@ -588,6 +643,11 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
 
             passport.putString("encapContent", gson.toJson(ldsso.encoded))
 
+            // Convert the document signing certificate to PEM format
+            val docSigningCert = sodFile.docSigningCertificate
+            val pemCert = "-----BEGIN CERTIFICATE-----\n" + Base64.encodeToString(docSigningCert.encoded, Base64.DEFAULT) + "-----END CERTIFICATE-----"
+            passport.putString("documentSigningCertificate", pemCert)
+
             // passport.putString("getDocSigningCertificate", gson.toJson(sodFile.getDocSigningCertificate))
             // passport.putString("getIssuerX500Principal", gson.toJson(sodFile.getIssuerX500Principal))
             // passport.putString("getSerialNumber", gson.toJson(sodFile.getSerialNumber))
@@ -609,7 +669,9 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
             passport.putMap("photo", photo)
             // passport.putString("dg2File", gson.toJson(dg2File))
             
+            eventMessageEmitter(Messages.COMPLETED)
             scanPromise?.resolve(passport)
+            eventMessageEmitter(Messages.RESET)
             resetState()
         }
     }
@@ -626,6 +688,16 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         }
     }
 
+    private fun eventMessageEmitter(message: String) {
+        if (reactContext.hasActiveCatalystInstance()) {
+            reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                .emit("NativeEvent", message)
+        } else {
+            Log.d(TAG, "Error")
+        }
+    }
+
     companion object {
         private val TAG = RNPassportReaderModule::class.java.simpleName
         private const val PARAM_DOC_NUM = "documentNumber";
@@ -633,6 +705,10 @@ class RNPassportReaderModule(private val reactContext: ReactApplicationContext) 
         private const val PARAM_DOE = "dateOfExpiry";
         const val JPEG_DATA_URI_PREFIX = "data:image/jpeg;base64,"
         private const val KEY_IS_SUPPORTED = "isSupported"
-        var instance: RNPassportReaderModule? = null
+        private var instance: RNPassportReaderModule? = null
+
+        fun getInstance(): RNPassportReaderModule {
+            return instance ?: throw IllegalStateException("RNPassportReaderModule instance is not initialized")
+        }
     }
 }

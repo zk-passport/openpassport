@@ -1,54 +1,48 @@
 import React from 'react';
-import { ScrollView, YStack } from 'tamagui';
-import AppCard from '../components/AppCard';
-import { Steps } from '../utils/utils';
-import useNavigationStore from '../stores/navigationStore';
-import { AppType } from '../utils/appType';
-import sbtApp from '../apps/sbt';
-import zupassApp from '../apps/zupass';
-import gitcoinApp from '../apps/gitcoin';
+import { Text, YStack, Image } from 'tamagui';
+import { XStack } from 'tamagui';
+import CustomButton from '../components/CustomButton';
+import { QrCode } from '@tamagui/lucide-icons';
+import { textBlack } from '../utils/colors';
+import useUserStore from '../stores/userStore';
+import { scanQRCode } from '../utils/qrCode';
+import OPENPASSPORT_LOGO from '../images/openpassport.png';
 
-const AppScreen: React.FC = () => {
+interface AppScreenProps {
+  setSheetAppListOpen: (value: boolean) => void;
+  setSheetRegisterIsOpen: (value: boolean) => void;
+}
+
+const AppScreen: React.FC<AppScreenProps> = ({ setSheetAppListOpen, setSheetRegisterIsOpen }) => {
   const {
-    selectedApp,
-    update
-  } = useNavigationStore();
+    registered,
+  } = useUserStore();
 
-  const handleCardSelect = (app: AppType) => {
-    update({
-      selectedTab: "prove",
-      selectedApp: app,
-      step: Steps.APP_SELECTED,
-    })
-  };
 
-  // add new apps here
-  const cardsData = [
-    sbtApp,
-    zupassApp,
-    gitcoinApp
-  ];
 
   return (
-    <ScrollView f={1}>
-      <YStack my="$8" gap="$5" px="$5" jc="center" alignItems='center'>
-        {
-          cardsData.map(app => (
-            <AppCard
-              key={app.id}
-              title={app.title}
-              description={app.description}
-              id={app.id}
-              onTouchStart={() => handleCardSelect(app)}
-              selected={selectedApp && selectedApp.id === app.id ? true : false}
-              selectable={app.selectable}
-              icon={app.icon}
-              tags={app.tags}
-            />
-          ))
-        }
+    <YStack f={1} >
+      <XStack f={1} minHeight="$1" />
+
+      <Image alignSelf='center' src={OPENPASSPORT_LOGO} width={400} height={150} />
+      <Text mt="$2.5" textAlign='center' fontSize="$9" fontWeight='bold' color={textBlack}>OpenPassport</Text>
+
+      <XStack f={1} minHeight="$1" />
+      <Text textAlign='center' mb="$2" fontSize="$3" color={textBlack}>To use OpenPassport, scan the QR code displayed by an app.</Text>
+      <YStack gap="$2.5">
+        <CustomButton
+          text="Scan QR Code"
+          onPress={() => {
+            if (registered) {
+              scanQRCode();
+            } else {
+              setSheetRegisterIsOpen(true);
+            }
+          }}
+          Icon={<QrCode size={18} color={textBlack} />}
+        />
       </YStack>
-    </ScrollView>
+    </YStack>
   );
 }
 

@@ -1,4 +1,4 @@
-# Proof of Passport App
+# OpenPassport App
 
 ## Requirements
 
@@ -12,7 +12,7 @@
 ### Android
 | Requirement | Version | Installation Guide |
 |-------------|---------|--------------------|
-| Java        | 17      | [Install Java](https://www.oracle.com/java/technologies/downloads/#java17) |
+| Java        | 17      | [Install Java](https://www.oracle.com/java/technologies/javase-jdk17-downloads.html) |
 | Android Studio (Optional)* | Latest | [Install Android Studio](https://developer.android.com/studio) |
 | Android SDK | Latest  | [Install Android SDK](https://developer.android.com/studio#downloads) |
 | Android NDK         | 23.1.7779620 | [Install NDK](https://developer.android.com/studio) or [GPT4 guide](https://chatgpt.com/share/a6e2544b-d32a-4554-a452-402511d03ffc) |
@@ -123,12 +123,14 @@ Press `a` to open the app on Android.
 
 To view the Android logs, use the Logcat feature in Android Studio, or use the `adb logcat` command-line tool.
 
+**EDIT**: to test the app on android, see [this issue](https://github.com/zk-passport/openpassport/issues/191) temporarily
+
 ### iOS
 
 > :warning: To run the app on iOS, you will need a paying Apple Developer account. Free accounts can't run apps that use NFC reading.<br/>
 > Contact us if you need it to contribute.
 
-Open the ios project on Xcode and add your provisioning profile in Targets > ProofOfPassport > Signing and Capabilities
+Open the ios project on Xcode and add your provisioning profile in Targets > OpenPassport > Signing and Capabilities
 
 Then, install pods:
 ```
@@ -144,7 +146,7 @@ If you want to modify the circuits, you'll have to adapt a few things.
 
 First, go to the `circuit` folder of the monorepo, modify the circuits and build them.
 
-Then, upload the zipped zkeys built at publicly available urls and replace the urls in `app/src/utils/zkeyDownload.ts`. Be sure the zkey is named `<circuit_name>.zkey` before you zip it, and the zip is then named `<circuit_name>.zkey.zip`.
+Then, upload the zipped zkeys and dat files at publicly available urls and replace the urls in `app/src/utils/zkeyDownload.ts`.
 
 Adapt the input generation in `common/src/utils/generateInputs.ts`, and adapt and redeploy the contracts.
 
@@ -199,7 +201,7 @@ Don't forget to bump the build number.
 
 If you get something like this:
 ```
-'std::__1::system_error: open: /proof-of-passport/app: Operation not permitted'
+'std::__1::system_error: open: /openpassport/app: Operation not permitted'
 ```
 You might want to try [this](https://stackoverflow.com/questions/49443341/watchman-crawl-failed-retrying-once-with-node-crawler):
 ```
