@@ -4,7 +4,7 @@ import {
   MAX_PADDED_ECONTENT_LEN,
   MAX_PADDED_SIGNED_ATTR_LEN,
 } from '../constants/constants';
-import { assert, shaPad } from './shaPad';
+import { assert, sha384_512Pad, shaPad } from './shaPad';
 import { PassportData } from './types';
 import {
   bytesToBigDecimal,
@@ -224,15 +224,30 @@ export function generateCircuitInputsProve(
     );
   }
 
-  const [eContentPadded, eContentLen] = shaPad(
-    new Uint8Array(eContent),
-    MAX_PADDED_ECONTENT_LEN[signatureAlgorithmFullName]
-  );
+  let eContentPadded, eContentLen, signedAttrPadded, signedAttrPaddedLen;
+  if (hashFunction === 'sha384' || hashFunction === 'sha512') { 
+    [eContentPadded, eContentLen] = sha384_512Pad(
+      new Uint8Array(eContent),
+      MAX_PADDED_ECONTENT_LEN[signatureAlgorithmFullName]
+    );
+  } else {
+    [eContentPadded, eContentLen] = shaPad(
+      new Uint8Array(eContent),
+      MAX_PADDED_ECONTENT_LEN[signatureAlgorithmFullName]
+    );
+  }
 
-  const [signedAttrPadded, signedAttrPaddedLen] = shaPad(
-    new Uint8Array(signedAttr),
-    MAX_PADDED_SIGNED_ATTR_LEN[signatureAlgorithmFullName]
-  );
+  if (hashFunction === 'sha384' || hashFunction === 'sha512') {
+    [signedAttrPadded, signedAttrPaddedLen] = sha384_512Pad(
+      new Uint8Array(signedAttr),
+      MAX_PADDED_SIGNED_ATTR_LEN[signatureAlgorithmFullName]
+    );
+  } else {
+    [signedAttrPadded, signedAttrPaddedLen] = shaPad(
+      new Uint8Array(signedAttr),
+      MAX_PADDED_SIGNED_ATTR_LEN[signatureAlgorithmFullName]
+    );
+  }
 
   const formattedMajority = majority.length === 1 ? `0${majority}` : majority;
   const majority_ascii = formattedMajority.split('').map((char) => char.charCodeAt(0));

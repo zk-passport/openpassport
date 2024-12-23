@@ -2,9 +2,11 @@ pragma circom 2.1.9;
 
 include "../../../bitify/bitify.circom";
 include "../../../bitify/comparators.circom";
-include "../../other/fp.circom";
-include "../../other/array.circom";
-include "../../sha2/sha384/sha384_hash_bits.circom";
+// include "../../other/fp.circom";
+// include "../../other/array.circom";
+include "../../../utils/array.circom";
+
+include "../../sha2/sha384_temp/sha384_hash_bits.circom";
 
 template Sha384Bytes(maxByteLength) {
     signal input paddedIn[maxByteLength];
