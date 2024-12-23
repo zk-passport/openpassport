@@ -38,6 +38,8 @@ import {
   mock_dsc_sha384_rsapss_65537_4096,
   mock_dsc_key_sha512_rsapss_65537_3072,
   mock_dsc_sha512_rsapss_65537_3072,
+  mock_dsc_key_sha512_rsapss_65537_4096,
+  mock_dsc_sha512_rsapss_65537_4096,
 } from '../constants/mockCertificates';
 import { sampleDataHashes_small, sampleDataHashes_large, sampleDataHashes_large_sha384, sampleDataHashes_sha512 } from '../constants/sampleDataHashes';
 import { countryCodes } from '../constants/constants';
@@ -135,6 +137,11 @@ export function genMockPassportData(
       sampleDataHashes = sampleDataHashes_sha512;
       privateKeyPem = mock_dsc_key_sha512_rsapss_65537_3072;
       dsc = mock_dsc_sha512_rsapss_65537_3072;
+      break;
+    case 'rsapss_sha512_65537_4096':
+      sampleDataHashes = sampleDataHashes_sha512;
+      privateKeyPem = mock_dsc_key_sha512_rsapss_65537_4096;
+      dsc = mock_dsc_sha512_rsapss_65537_4096;
       break;
     case 'ecdsa_sha256_secp256r1_256':
       sampleDataHashes = sampleDataHashes_large;

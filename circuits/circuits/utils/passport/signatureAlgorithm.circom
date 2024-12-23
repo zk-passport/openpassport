@@ -81,6 +81,9 @@ function getHashLength(signatureAlgorithm) {
     if (signatureAlgorithm == 22) {
         return 512;
     }
+    if (signatureAlgorithm == 23) {
+        return 512;
+    }
     return 0;
 }
 
@@ -138,6 +141,9 @@ function getKeyLength(signatureAlgorithm) {
     }
     if (signatureAlgorithm == 22) {
         return 3072;
+    }
+    if (signatureAlgorithm == 23) {
+        return 4096;
     }
     return 0;
 }
@@ -198,6 +204,9 @@ function getKLengthFactor(signatureAlgorithm) {
     if (signatureAlgorithm == 22) {
         return 1;
     }
+    if (signatureAlgorithm == 23) {
+        return 1;
+    }
     return 0;
 
 }
@@ -247,6 +256,9 @@ function getExponentBits(signatureAlgorithm) {
         return 17;
     }
     if (signatureAlgorithm == 22) {
+        return 17;
+    }
+    if (signatureAlgorithm == 23) {
         return 17;
     }
     return 0;
