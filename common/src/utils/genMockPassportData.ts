@@ -36,8 +36,10 @@ import {
   mock_dsc_sha256_rsapss_65537_4096,
   mock_dsc_key_sha384_rsapss_65537_4096,
   mock_dsc_sha384_rsapss_65537_4096,
+  mock_dsc_key_sha512_rsapss_65537_3072,
+  mock_dsc_sha512_rsapss_65537_3072,
 } from '../constants/mockCertificates';
-import { sampleDataHashes_small, sampleDataHashes_large, sampleDataHashes_large_sha384 } from '../constants/sampleDataHashes';
+import { sampleDataHashes_small, sampleDataHashes_large, sampleDataHashes_large_sha384, sampleDataHashes_sha512 } from '../constants/sampleDataHashes';
 import { countryCodes } from '../constants/constants';
 import { parseCertificate } from './certificates/handleCertificate';
 import { SignatureAlgorithm } from './types';
@@ -129,6 +131,11 @@ export function genMockPassportData(
       privateKeyPem = mock_dsc_key_sha384_rsapss_65537_4096;
       dsc = mock_dsc_sha384_rsapss_65537_4096;
       break;
+    case 'rsapss_sha512_65537_3072':
+      sampleDataHashes = sampleDataHashes_sha512;
+      privateKeyPem = mock_dsc_key_sha512_rsapss_65537_3072;
+      dsc = mock_dsc_sha512_rsapss_65537_3072;
+      break;
     case 'ecdsa_sha256_secp256r1_256':
       sampleDataHashes = sampleDataHashes_large;
       privateKeyPem = mock_dsc_key_sha256_ecdsa;
@@ -211,6 +218,14 @@ function sign(privateKeyPem: string, dsc: string, eContent: number[]): number[] 
         md: forge.md.sha384.create(),
         mgf: forge.mgf.mgf1.create(forge.md.sha384.create()),
         saltLength: 48,
+      });
+    } if (hashFunction == 'sha512') {
+      md = forge.md.sha512.create();
+      md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
+      pss = forge.pss.create({
+        md: forge.md.sha512.create(),
+        mgf: forge.mgf.mgf1.create(forge.md.sha512.create()),
+        saltLength: 64,
       });
     } else {
       md = forge.md.sha256.create();

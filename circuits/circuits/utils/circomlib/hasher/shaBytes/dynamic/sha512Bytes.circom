@@ -2,9 +2,11 @@ pragma circom 2.1.9;
 
 include "../../../bitify/bitify.circom";
 include "../../../bitify/comparators.circom";
-include "../../other/fp.circom";
-include "../../other/array.circom";
-include "../../sha2/sha512/sha512_hash_bits.circom";
+// include "../../other/fp.circom";
+// include "../../other/array.circom";
+include "../../../utils/array.circom";
+
+include "../../sha2/sha512_temp/sha512_hash_bits.circom";
 
 template Sha512Bytes(maxByteLength) {
     signal input paddedIn[maxByteLength];

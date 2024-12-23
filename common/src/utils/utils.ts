@@ -4,6 +4,7 @@ import { sha1 } from 'js-sha1';
 import { sha384, sha512_256 } from 'js-sha512';
 import { SMT } from '@openpassport/zk-kit-smt';
 import forge from 'node-forge';
+import crypto from 'crypto';
 import {
   n_dsc,
   n_dsc_3072,
@@ -244,7 +245,9 @@ export function hash(hashFunction: string, bytesArray: number[]): number[] {
       hashResult = sha384(unsignedBytesArray);
       break;
     case 'sha512':
-      hashResult = sha512_256(unsignedBytesArray);
+      const hasher = crypto.createHash('sha512');
+      hasher.update(Buffer.from(unsignedBytesArray));
+      hashResult = hasher.digest('hex');
       break;
     default:
       console.log('\x1b[31m%s\x1b[0m', `${hashFunction} not found in hash`); // Log in red
