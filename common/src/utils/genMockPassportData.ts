@@ -226,7 +226,7 @@ function sign(privateKeyPem: string, dsc: string, eContent: number[]): number[] 
         mgf: forge.mgf.mgf1.create(forge.md.sha384.create()),
         saltLength: 48,
       });
-    } if (hashFunction == 'sha512') {
+    } else if (hashFunction == 'sha512') {
       md = forge.md.sha512.create();
       md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
       pss = forge.pss.create({
