@@ -54,9 +54,9 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         || signatureAlgorithm == 17
         || signatureAlgorithm == 18
         || signatureAlgorithm == 19
-        || signatureAlgorithm == 25
-        || signatureAlgorithm == 26
         || signatureAlgorithm == 27
+        || signatureAlgorithm == 28
+        || signatureAlgorithm == 29
     ) {
         var pubKeyBitsLength = getKeyLength(signatureAlgorithm);
         var SALT_LEN = HASH_LEN_BITS / 8;
@@ -83,6 +83,8 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         || signatureAlgorithm == 22
         || signatureAlgorithm == 23
         || signatureAlgorithm == 24
+        || signatureAlgorithm == 25
+        || signatureAlgorithm == 26
     ) {
         EcdsaVerifier (signatureAlgorithm, n, k)(signature, pubKey, hash);
     }

@@ -46,6 +46,10 @@ import {
   mock_dsc_sha512_rsapss_65537_3072,
   mock_dsc_key_sha512_rsapss_65537_4096,
   mock_dsc_sha512_rsapss_65537_4096,
+  mock_dsc_key_sha512_brainpoolP256r1,
+  mock_dsc_sha512_brainpoolP256r1,
+  mock_dsc_key_sha512_brainpoolP384r1,
+  mock_dsc_sha512_brainpoolP384r1,
 } from '../constants/mockCertificates';
 import { sampleDataHashes_small, sampleDataHashes_large, sampleDataHashes_large_sha384 } from '../constants/sampleDataHashes';
 import { countryCodes } from '../constants/constants';
@@ -181,6 +185,11 @@ export function genMockPassportData(
       privateKeyPem = mock_dsc_key_sha384_brainpoolP256r1;
       dsc = mock_dsc_sha384_brainpoolP256r1;
       break;
+    case 'ecdsa_sha512_brainpoolP256r1_256':
+      sampleDataHashes = genSampleDataHashes('large', 64);
+      privateKeyPem = mock_dsc_key_sha512_brainpoolP256r1;
+      dsc = mock_dsc_sha512_brainpoolP256r1;
+      break;
     case 'rsa_sha256_3_2048':
       sampleDataHashes = genSampleDataHashes('large', 32);
       privateKeyPem = mock_dsc_key_sha256_rsa_3_2048;
@@ -206,11 +215,14 @@ export function genMockPassportData(
       privateKeyPem = mock_dsc_key_sha384_brainpoolP384r1;
       dsc = mock_dsc_sha384_brainpoolP384r1;
       break;
+    case 'ecdsa_sha512_brainpoolP384r1_384':
+      sampleDataHashes = genSampleDataHashes('large', 64);
+      privateKeyPem = mock_dsc_key_sha512_brainpoolP384r1;
+      dsc = mock_dsc_sha512_brainpoolP384r1;
+      break;
   }
 
   const { hashFunction, hashLen } = parseCertificate(dsc);
-
-  console.log('hashFunction', hashFunction);
 
   const mrzHash = hash(hashFunction, formatMrz(mrz));
   const concatenatedDataHashes = formatAndConcatenateDataHashes(

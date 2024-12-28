@@ -1,7 +1,7 @@
 import { LeanIMT } from '@openpassport/zk-kit-lean-imt';
 import { sha256 } from 'js-sha256';
 import { sha1 } from 'js-sha1';
-import { sha384, sha512_256 } from 'js-sha512';
+import { sha384, sha512 } from 'js-sha512';
 import { SMT } from '@openpassport/zk-kit-smt';
 import forge from 'node-forge';
 import {
