@@ -17,7 +17,7 @@ include "../../hasher/hash.circom";
 * Use this for CHUNK_NUMBER == 2**n, otherwise error will occur.
 */
 template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
-    assert((HASH_TYPE == 384 && SALT_LEN == 48) || (HASH_TYPE == 256 && SALT_LEN == 64) || (HASH_TYPE == 256 && SALT_LEN == 32));
+    assert((HASH_TYPE == 512 && SALT_LEN == 64) || (HASH_TYPE == 384 && SALT_LEN == 48) || (HASH_TYPE == 256 && SALT_LEN == 64) || (HASH_TYPE == 256 && SALT_LEN == 32));
     
     signal input pubkey[CHUNK_NUMBER]; 
     signal input signature[CHUNK_NUMBER];
@@ -114,6 +114,18 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
 
         for (var i = 0; i < DB_MASK_LEN * 8; i++) {
             dbMask[i] <== MGF1_384.out[i];
+        }
+    }
+    if (HASH_TYPE == 512) {
+        component MGF1_512 = Mgf1Sha512(HASH_LEN, DB_MASK_LEN);
+        MGF1_512.dummy <== dummy;
+
+        for (var i = 0; i < (HASH_TYPE); i++) {
+            MGF1_512.seed[i] <== hash[i];
+        }
+
+        for (var i = 0; i < DB_MASK_LEN * 8; i++) {
+            dbMask[i] <== MGF1_512.out[i];
         }
     }
 
@@ -249,6 +261,17 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
         hDash384.in <== mDash384;
 
         hDash384.out === hash;
+    }
+    if (HASH_TYPE == 512 && SALT_LEN == 64) {
+        // 64 + 512 + 512 = 1088
+        component hDash512 = ShaHashBits(64 + SALT_LEN_BITS + HASH_LEN * 8, 512);
+        hDash512.dummy <== dummy;
+
+        for (var i = 0; i < 1088; i++) {
+            hDash512.in[i] <== mDash[i];
+        }
+
+        hDash512.out === hash;
     }
 }
 

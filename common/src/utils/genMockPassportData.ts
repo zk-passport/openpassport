@@ -42,6 +42,10 @@ import {
   mock_dsc_sha384_brainpoolP256r1,
   mock_dsc_key_sha384_rsapss_65537_4096,
   mock_dsc_sha384_rsapss_65537_4096,
+  mock_dsc_key_sha512_rsapss_65537_3072,
+  mock_dsc_sha512_rsapss_65537_3072,
+  mock_dsc_key_sha512_rsapss_65537_4096,
+  mock_dsc_sha512_rsapss_65537_4096,
 } from '../constants/mockCertificates';
 import { sampleDataHashes_small, sampleDataHashes_large, sampleDataHashes_large_sha384 } from '../constants/sampleDataHashes';
 import { countryCodes } from '../constants/constants';
@@ -136,6 +140,16 @@ export function genMockPassportData(
       sampleDataHashes = genSampleDataHashes('large', 48);
       privateKeyPem = mock_dsc_key_sha384_rsapss_65537_4096;
       dsc = mock_dsc_sha384_rsapss_65537_4096;
+      break;
+    case 'rsapss_sha512_65537_3072':
+      sampleDataHashes = genSampleDataHashes('large', 64);
+      privateKeyPem = mock_dsc_key_sha512_rsapss_65537_3072;
+      dsc = mock_dsc_sha512_rsapss_65537_3072;
+      break;
+    case 'rsapss_sha512_65537_4096':
+      sampleDataHashes = genSampleDataHashes('large', 64);
+      privateKeyPem = mock_dsc_key_sha512_rsapss_65537_4096;
+      dsc = mock_dsc_sha512_rsapss_65537_4096;
       break;
     case 'ecdsa_sha256_secp256r1_256':
       sampleDataHashes = genSampleDataHashes('large', 32);
