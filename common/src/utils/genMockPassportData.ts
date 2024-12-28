@@ -40,8 +40,10 @@ import {
   mock_dsc_sha256_secp384r1,
   mock_dsc_key_sha384_brainpoolP256r1,
   mock_dsc_sha384_brainpoolP256r1,
+  mock_dsc_key_sha384_rsapss_65537_4096,
+  mock_dsc_sha384_rsapss_65537_4096,
 } from '../constants/mockCertificates';
-import { sampleDataHashes_small, sampleDataHashes_large } from '../constants/sampleDataHashes';
+import { sampleDataHashes_small, sampleDataHashes_large, sampleDataHashes_large_sha384 } from '../constants/sampleDataHashes';
 import { countryCodes } from '../constants/constants';
 import { parseCertificate } from './certificates/handleCertificate';
 import { SignatureAlgorithm } from './types';
@@ -126,9 +128,14 @@ export function genMockPassportData(
       dsc = mock_dsc_sha256_rsapss_3_3072;
       break;
     case 'rsapss_sha384_65537_3072':
-      sampleDataHashes = genSampleDataHashes('large', 32);
+      sampleDataHashes = genSampleDataHashes('large', 48);
       privateKeyPem = mock_dsc_key_sha384_rsapss_65537_3072;
       dsc = mock_dsc_sha384_rsapss_65537_3072;
+      break;
+    case 'rsapss_sha384_65537_4096':
+      sampleDataHashes = genSampleDataHashes('large', 48);
+      privateKeyPem = mock_dsc_key_sha384_rsapss_65537_4096;
+      dsc = mock_dsc_sha384_rsapss_65537_4096;
       break;
     case 'ecdsa_sha256_secp256r1_256':
       sampleDataHashes = genSampleDataHashes('large', 32);
@@ -228,13 +235,32 @@ function sign(privateKeyPem: string, dsc: string, eContent: number[]): number[] 
 
   if (signatureAlgorithm === 'rsapss') {
     const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
-    const md = forge.md.sha256.create();
-    md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
-    const pss = forge.pss.create({
-      md: forge.md.sha256.create(),
-      mgf: forge.mgf.mgf1.create(forge.md.sha256.create()),
-      saltLength: 32,
-    });
+    let md, pss;
+    if (hashFunction == 'sha384') {
+      md = forge.md.sha384.create();
+      md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
+      pss = forge.pss.create({
+        md: forge.md.sha384.create(),
+        mgf: forge.mgf.mgf1.create(forge.md.sha384.create()),
+        saltLength: 48,
+      });
+    } else if (hashFunction == 'sha512') {
+      md = forge.md.sha512.create();
+      md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
+      pss = forge.pss.create({
+        md: forge.md.sha512.create(),
+        mgf: forge.mgf.mgf1.create(forge.md.sha512.create()),
+        saltLength: 64,
+      });
+    } else {
+      md = forge.md.sha256.create();
+      md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
+      pss = forge.pss.create({
+        md: forge.md.sha256.create(),
+        mgf: forge.mgf.mgf1.create(forge.md.sha256.create()),
+        saltLength: 32,
+      });
+    }
     const signatureBytes = privateKey.sign(md, pss);
     return Array.from(signatureBytes, (c: string) => c.charCodeAt(0));
   } else if (signatureAlgorithm === 'ecdsa') {

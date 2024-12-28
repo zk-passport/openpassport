@@ -138,7 +138,7 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
         salt[SALT_LEN_BITS - 1 - i] <== db[(DB_MASK_LEN * 8) - 1 - i];
     }
     
-    signal mDash[1024];
+    signal mDash[2048];
     //adding 0s
     for (var i = 0; i < 64; i++) {
         mDash[i] <== 0;
@@ -172,11 +172,16 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
         mDash[1016] <== 0;
         mDash[1015] <== 0;
         mDash[1014] <== 1;
+
+        signal mDash256[1024];
+        for (var i = 0; i < 1024; i++){
+            mDash256[i] <== mDash[i];
+        }
         
         //hashing
         component hDash256 = ShaHashChunks(2, HASH_TYPE);
         hDash256.dummy <== dummy;
-        hDash256.in <== mDash;
+        hDash256.in <== mDash256;
 
         hDash256.out === hash;
     }
@@ -198,9 +203,14 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
         mDash[1015] <== 1;
         mDash[1014] <== 1;
 
+        signal mDash256[1024];
+        for (var i = 0; i < 1024; i++){
+            mDash256[i] <== mDash[i];
+        }
+
         component hDash256 = ShaHashChunks(2, HASH_TYPE);
         hDash256.dummy <== dummy;
-        hDash256.in <== mDash;
+        hDash256.in <== mDash256;
 
         hDash256.out === hash;
     }
@@ -223,11 +233,20 @@ template VerifyRsaPssSig(CHUNK_SIZE, CHUNK_NUMBER, SALT_LEN, EXP, HASH_TYPE) {
         mDash[1016] <== 0;
         mDash[1015] <== 1;
         mDash[1014] <== 1;
+
+        for (var i = 1024; i < 2048; i++){
+            mDash[i] <== 0;
+        }
+
+        signal mDash384[1024];
+        for (var i = 0; i < 1024; i++){
+            mDash384[i] <== mDash[i];
+        }
         
         //hashing mDash
         component hDash384 = ShaHashChunks(1, HASH_TYPE);
         hDash384.dummy <== dummy;
-        hDash384.in <== mDash;
+        hDash384.in <== mDash384;
 
         hDash384.out === hash;
     }

@@ -18,6 +18,7 @@ import {
   k_dsc_3072,
 } from '../constants/constants';
 import { unpackReveal } from './revealBitmap';
+import cryto from 'crypto';
 import { SignatureAlgorithm } from './types';
 
 export function formatMrz(mrz: string) {
@@ -249,7 +250,11 @@ export function hash(hashFunction: string, bytesArray: number[]): number[] {
       hashResult = sha256(unsignedBytesArray);
       break;
     case 'sha384':
-      hashResult = sha384(unsignedBytesArray);
+      // hashResult = sha384(unsignedBytesArray);
+      const hasher = cryto.createHash('sha384');
+      hasher.update(Buffer.from(unsignedBytesArray));
+      hashResult = hasher.digest('hex');
+
       break;
     case 'sha512':
       hashResult = sha512_256(unsignedBytesArray);
