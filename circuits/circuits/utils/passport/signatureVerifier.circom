@@ -80,6 +80,8 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         || signatureAlgorithm == 22
         || signatureAlgorithm == 23
         || signatureAlgorithm == 24
+        || signatureAlgorithm == 25
+        || signatureAlgorithm == 26
     ) {
         EcdsaVerifier (signatureAlgorithm, n, k)(signature, pubKey, hash);
     }
