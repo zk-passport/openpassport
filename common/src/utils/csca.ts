@@ -1,4 +1,4 @@
-import { shaPad } from './shaPad';
+import { sha384_512Pad, shaPad } from './shaPad';
 import * as forge from 'node-forge';
 import {
   bytesToBigDecimal,
@@ -76,7 +76,7 @@ export function findStartIndex(modulus: string, messagePadded: Uint8Array): numb
     }
   }
   if (startIndex === -1) {
-    throw new Error('DSC Pubkey not found in CSCA certificate');
+    throw new Error('DSC Pubkey not found in certificate');
   }
   return startIndex;
 }
@@ -106,7 +106,9 @@ export function generateCircuitInputsDSC(
 
   let dsc_message_padded;
   let dsc_messagePaddedLen;
-  [dsc_message_padded, dsc_messagePaddedLen] = shaPad(dscTbsCertUint8Array, max_cert_bytes);
+  [dsc_message_padded, dsc_messagePaddedLen] = hashFunction == 'sha384' || hashFunction == 'sha512'
+    ? sha384_512Pad(dscTbsCertUint8Array, max_cert_bytes)
+    : shaPad(dscTbsCertUint8Array, max_cert_bytes);
 
   const { n, k } = getNAndK(`${signatureAlgorithm}_${hashFunction}_${bits}`);
   const dscSignature = dscCert.signatureValue.valueBlock.valueHexView;
@@ -127,11 +129,13 @@ export function generateCircuitInputsDSC(
 
   } else if (signatureAlgorithm === 'ecdsa') {
 
-    const dsc_x_formatted = splitToWords(BigInt(hexToDecimal(x)), n, k);
-    const dsc_y_formatted = splitToWords(BigInt(hexToDecimal(y)), n, k);
+    const normalizedX = x.length % 2 === 0 ? x : '0' + x;
+    const normalizedY = y.length % 2 === 0 ? y : '0' + y;
+    const dsc_x_formatted = splitToWords(BigInt(hexToDecimal(normalizedX)), n, k);
+    const dsc_y_formatted = splitToWords(BigInt(hexToDecimal(normalizedY)), n, k);
     pubKey_dsc = [...dsc_x_formatted, ...dsc_y_formatted];
 
-    const fullPubKey = x + y;
+    const fullPubKey = normalizedX + normalizedY;
     const pubKeyBytes = Buffer.from(fullPubKey, 'hex');
     startIndex = findStartIndexEC(pubKeyBytes.toString('hex'), dsc_message_padded).toString();
     console.log("\x1b[34m", "startIndex: ", startIndex, "\x1b[0m");
@@ -156,8 +160,12 @@ export function generateCircuitInputsDSC(
   } else {
     console.log("\x1b[34m", "signatureAlgorithm: ", parsedCSCAPem.signatureAlgorithm, "\x1b[0m");
     const { n: n_csca, k: k_csca } = getNAndK(`${parsedCSCAPem.signatureAlgorithm}_${parsedCSCAPem.hashFunction}_${parsedCSCAPem.bits}`);
-    const csca_x_formatted = splitToWords(BigInt(hexToDecimal(parsedCSCAPem.x)), n_csca, k_csca);
-    const csca_y_formatted = splitToWords(BigInt(hexToDecimal(parsedCSCAPem.y)), n_csca, k_csca);
+    console.log("\x1b[34m", "n_csca: ", n_csca, "k_csca: ", k_csca, "\x1b[0m");
+
+    const normalizedX = x.length % 2 === 0 ? parsedCSCAPem.x : '0' + parsedCSCAPem.x;
+    const normalizedY = y.length % 2 === 0 ? parsedCSCAPem.y : '0' + parsedCSCAPem.y;
+    const csca_x_formatted = splitToWords(BigInt(hexToDecimal(normalizedX)), n_csca, k_csca);
+    const csca_y_formatted = splitToWords(BigInt(hexToDecimal(normalizedY)), n_csca, k_csca);
     csca_pubKey_formatted = [...csca_x_formatted, ...csca_y_formatted];
 
     const { r, s } = extractRSFromSignature(sigantureRaw);

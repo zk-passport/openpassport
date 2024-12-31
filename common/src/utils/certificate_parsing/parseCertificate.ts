@@ -7,6 +7,7 @@ import { getIssuerCountryCode, getSubjectKeyIdentifier } from "./utils";
 import fs from 'fs';
 import { execSync } from 'child_process';
 import { getAuthorityKeyIdentifier } from "../certificates/handleCertificate";
+import { getNamedCurve } from "../certificates/curves";
 
 export function parseCertificate(pem: string, fileName: string): any {
     let certificateData: CertificateData = {
@@ -206,70 +207,117 @@ function getParamsRSAPSS2(cert: Certificate): PublicKeyDetailsRSAPSS {
 
 export function getParamsECDSA(cert: Certificate): PublicKeyDetailsECDSA {
     try {
-        const algorithmParams = cert.subjectPublicKeyInfo.algorithm.algorithmParams;
-        if (!algorithmParams) {
-            console.log('No algorithm params found');
-            return { curve: 'Unknown', params: {} as StandardCurve, bits: 'Unknown' };
-        }
+        const spki = cert.subjectPublicKeyInfo;
+        // Get curve parameters
+        const curveOid = spki.algorithm.algorithmParams.valueBlock.toString();
+        const curve = getNamedCurve(curveOid);
+        
+        // Get public key coordinates
+        const publicKeyBytes = spki.subjectPublicKey.valueBlock.valueHexView;
+        // Skip first byte (0x04 indicates uncompressed point)
+        const keyLength = (publicKeyBytes.length - 1) / 2;
+        const x = Buffer.from(publicKeyBytes.slice(1, 1 + keyLength)).toString('hex');
+        const y = Buffer.from(publicKeyBytes.slice(1 + keyLength)).toString('hex');
 
-        const params = asn1js.fromBER(algorithmParams.valueBeforeDecodeView).result;
-        const valueBlock: any = params.valueBlock;
+        return {
+            curve: curve,
+            params: {} as StandardCurve, // Not needed for secp384r1
+            bits: (keyLength * 8).toString(),
+            // x: x,
+            // y: y
+        };
 
-        if (valueBlock.value && valueBlock.value.length >= 5) {
-            const curveParams: StandardCurve = {} as StandardCurve;
-            // Field ID (index 1)
-            const fieldId = valueBlock.value[1];
-            if (fieldId && fieldId.valueBlock && fieldId.valueBlock.value) {
-                const fieldType = fieldId.valueBlock.value[0];
-                const prime = fieldId.valueBlock.value[1];
-                //curveParams.fieldType = fieldType.valueBlock.toString();
-                curveParams.p = Buffer.from(prime.valueBlock.valueHexView).toString('hex');
-            }
+///////////////////////////////////////////////////////////////////
+        
+        // const algorithmParams = cert.subjectPublicKeyInfo.algorithm.algorithmParams;
+        
+        // if (!algorithmParams) {
+        //     console.log('No algorithm params found');
+        //     return { curve: 'Unknown', params: {} as StandardCurve, bits: 'Unknown' };
+        // }
 
-            // Curve Coefficients (index 2)
-            const curveCoefficients = valueBlock.value[2];
-            if (curveCoefficients && curveCoefficients.valueBlock && curveCoefficients.valueBlock.value) {
-                const a = curveCoefficients.valueBlock.value[0];
-                const b = curveCoefficients.valueBlock.value[1];
-                curveParams.a = Buffer.from(a.valueBlock.valueHexView).toString('hex');
-                curveParams.b = Buffer.from(b.valueBlock.valueHexView).toString('hex');
-            }
+        // const params = asn1js.fromBER(algorithmParams.valueBeforeDecodeView).result;
+        // const valueBlock: any = params.valueBlock;
 
-            // Base Point G (index 3)
-            const basePoint = valueBlock.value[3];
-            if (basePoint && basePoint.valueBlock) {
-                curveParams.G = Buffer.from(basePoint.valueBlock.valueHexView).toString('hex');
-            }
+        // const curve = getNamedCurve(cert.subjectPublicKeyInfo.algorithm.algorithmParams.valueBlock.toString());
+        
+        // if (curve === 'brainpoolP256r1') { 
+        //     return {
+        //         curve: curve,
+        //         params: {
+        //             p: 'a9fb57dba1eea9bc3e660a909d838d726e3bf623d52620282013481d1f6e5377',
+        //             a: '7d5a0975fc2c3057eef67530417affe7fb8055c126dc5c6ce94a4b44f330b5d9',
+        //             b: '26dc5c6ce94a4b44f330b5d9bbd77cbf958416295cf7e1ce6bccdc18ff8c07b6',
+        //             G: '048bd2aeb9cb7e57cb2c4b482ffc81b7afb9de27e1e3bd23c23a4453bd9ace3262547ef835c3dac4fd97f8461a14611dc9c27745132ded8e545c1d54c72f046997',
+        //             n: 'a9fb57dba1eea9bc3e660a909d838d718c397aa3b561a6f7901e0e82974856a7',
+        //             h: '01'
+        //         } as StandardCurve, // Not needed for brainpoolP256r1
+        //         bits: '256'
+        //     }
+        // }
 
-            // Order n (index 4)
-            const order = valueBlock.value[4];
-            if (order && order.valueBlock) {
-                curveParams.n = Buffer.from(order.valueBlock.valueHexView).toString('hex');
-            }
+        // if (valueBlock.value && valueBlock.value.length >= 5) {
+        //     const curveParams: StandardCurve = {} as StandardCurve;
+        //     // Field ID (index 1)
+        //     const fieldId = valueBlock.value[1];
+        //     if (fieldId && fieldId.valueBlock && fieldId.valueBlock.value) {
+        //         const fieldType = fieldId.valueBlock.value[0];
+        //         const prime = fieldId.valueBlock.value[1];
+        //         //curveParams.fieldType = fieldType.valueBlock.toString();
+        //         curveParams.p = Buffer.from(prime.valueBlock.valueHexView).toString('hex');
+        //     }
 
-            if (valueBlock.value.length >= 6) {
-                // Cofactor h (index 5)
-                const cofactor = valueBlock.value[5];
-                if (cofactor && cofactor.valueBlock) {
-                    curveParams.h = Buffer.from(cofactor.valueBlock.valueHexView).toString('hex');
-                }
-            }
-            else {
-                curveParams.h = '01';
-            }
+        //     // Curve Coefficients (index 2)
+        //     const curveCoefficients = valueBlock.value[2];
+        //     if (curveCoefficients && curveCoefficients.valueBlock && curveCoefficients.valueBlock.value) {
+        //         const a = curveCoefficients.valueBlock.value[0];
+        //         const b = curveCoefficients.valueBlock.value[1];
+        //         curveParams.a = Buffer.from(a.valueBlock.valueHexView).toString('hex');
+        //         curveParams.b = Buffer.from(b.valueBlock.valueHexView).toString('hex');
+        //     }
 
-            const identifiedCurve = identifyCurve(curveParams);
-            return { curve: identifiedCurve, params: curveParams, bits: getECDSACurveBits(identifiedCurve) };
-        } else {
-            if (valueBlock.value) {
-                console.log(valueBlock.value);
-            }
-            else {
-                console.log('No value block found');
-            }
-        }
+        //     // Base Point G (index 3)
+        //     const basePoint = valueBlock.value[3];
+        //     if (basePoint && basePoint.valueBlock) {
+        //         curveParams.G = Buffer.from(basePoint.valueBlock.valueHexView).toString('hex');
+        //     }
+
+        //     // Order n (index 4)
+        //     const order = valueBlock.value[4];
+        //     if (order && order.valueBlock) {
+        //         curveParams.n = Buffer.from(order.valueBlock.valueHexView).toString('hex');
+        //     }
+
+        //     if (valueBlock.value.length >= 6) {
+        //         // Cofactor h (index 5)
+        //         const cofactor = valueBlock.value[5];
+        //         if (cofactor && cofactor.valueBlock) {
+        //             curveParams.h = Buffer.from(cofactor.valueBlock.valueHexView).toString('hex');
+        //         }
+        //     }
+        //     else {
+        //         curveParams.h = '01';
+        //     }
+
+        //     const identifiedCurve = identifyCurve(curveParams);
+        //     return { curve: identifiedCurve, params: curveParams, bits: getECDSACurveBits(identifiedCurve) };
+        // } else {
+        //     if (valueBlock.value) {
+        //         console.log(valueBlock.value);
+        //     }
+        //     else {
+        //         console.log('No value block found');
+        //     }
+        // }
     } catch (error) {
         console.error('Error parsing EC parameters:', error);
         return { curve: 'Error', params: {} as StandardCurve, bits: 'Unknown' };
     }
+}
+
+function extractHexValue(block: any, paramName: string): string {
+    if (!block?.valueBlock?.valueHexView) {
+        throw new Error(`Missing ${paramName} parameter`);
+    }
+    return Buffer.from(block.valueBlock.valueHexView).toString('hex');
 }
