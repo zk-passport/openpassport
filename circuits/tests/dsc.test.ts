@@ -34,6 +34,10 @@ import {
   mock_csca_sha384_brainpoolP384r1_384,
   mock_dsc_sha384_secp348r1_348,
   mock_csca_sha384_secp348r1_348,
+  mock_dsc_sha512_brainpoolP256r1_256,
+  mock_csca_sha512_brainpoolP256r1_256,
+  mock_dsc_sha512_brainpoolP384r1_384,
+  mock_csca_sha512_brainpoolP384r1_384,
 } from '../../common/src/constants/mockCertificates';
 import { max_cert_bytes } from '../../common/src/constants/constants';
 import { getCircuitName } from '../../common/src/utils/certificates/handleCertificate';
@@ -43,16 +47,21 @@ const sigAlgs = [
   // { sigAlg: 'rsa', hashFunction: 'sha256', domainParameter: '65537', keyLength: '4096' },
   // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '65537', keyLength: '4096' },
   
-  { sigAlg: 'ecdsa', hashFunction: 'sha1', domainParameter: 'secp256r1', keyLength: '256' },
+  // { sigAlg: 'ecdsa', hashFunction: 'sha1', domainParameter: 'secp256r1', keyLength: '256' },
 
-  { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'brainpoolP256r1', keyLength: '256' },
+  // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'brainpoolP256r1', keyLength: '256' },
   // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'brainpoolP224r1', keyLength: '224' }, //not tested
-  { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'secp256r1', keyLength: '256' },
+  // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'secp256r1', keyLength: '256' },
   // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'secp384r1', keyLength: '384' }, // killed
 
-  { sigAlg: 'ecdsa', hashFunction: 'sha384', domainParameter: 'brainpoolP256r1', keyLength: '256' },
-  { sigAlg: 'ecdsa', hashFunction: 'sha384', domainParameter: 'brainpoolP384r1', keyLength: '384' },
-  { sigAlg: 'ecdsa', hashFunction: 'sha384', domainParameter: 'secp384r1', keyLength: '384' },
+  // { sigAlg: 'ecdsa', hashFunction: 'sha384', domainParameter: 'brainpoolP256r1', keyLength: '256' },
+  // { sigAlg: 'ecdsa', hashFunction: 'sha384', domainParameter: 'brainpoolP384r1', keyLength: '384' },
+  // { sigAlg: 'ecdsa', hashFunction: 'sha384', domainParameter: 'secp384r1', keyLength: '384' },
+
+  // { sigAlg: 'ecdsa', hashFunction: 'sha512', domainParameter: 'brainpoolP256r1', keyLength: '256' },
+  { sigAlg: 'ecdsa', hashFunction: 'sha512', domainParameter: 'brainpoolP384r1', keyLength: '384' },
+
+
 ];
 
 sigAlgs.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
@@ -110,15 +119,31 @@ sigAlgs.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
         dscCertPem = mock_dsc_sha384_secp348r1_348;
         cscaCertPem = mock_csca_sha384_secp348r1_348;
         break;
+      case 'ecdsa_sha512_brainpoolP256r1_256':
+        dscCertPem = mock_dsc_sha512_brainpoolP256r1_256;
+        cscaCertPem = mock_csca_sha512_brainpoolP256r1_256;
+        break;
+      case 'ecdsa_sha512_brainpoolP384r1_384':
+        dscCertPem = mock_dsc_sha512_brainpoolP384r1_384;
+        cscaCertPem = mock_csca_sha512_brainpoolP384r1_384;
+        break;
       default:
         throw new Error('Unsupported signature algorithm and hash function combination');
+    }
+
+    //TODO temporary - remove after sha384/512 padding is fixed
+    const max_cert_bytes_map = {
+      sha1: max_cert_bytes,
+      sha256: max_cert_bytes,
+      sha384: 512,
+      sha512: 512,
     }
 
     const inputs = generateCircuitInputsDSC(
       BigInt(salt).toString(),
       dscCertPem,
       //TODO
-      hashFunction == 'sha384' ? 512 : max_cert_bytes, //max_cert_bytes,
+      max_cert_bytes_map[hashFunction], //max_cert_bytes,
       true
     );
 
