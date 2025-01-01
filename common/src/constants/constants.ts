@@ -123,6 +123,7 @@ export enum SignatureAlgorithmIndex {
   ecdsa_sha512_brainpoolP384r1_384 = 26,
   ecdsa_sha1_brainpoolP224r1_224 = 27,
   ecdsa_sha256_brainpoolP224r1_224 = 28,
+  ecdsa_sha1_secp384r1_384 = 29,
 }
 
 export const attributeToPosition = {

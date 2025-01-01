@@ -69,7 +69,7 @@ template EcdsaVerifier(signatureAlgorithm, n, k) {
         ecdsa_verify.hashed <== hash;
         ecdsa_verify.dummy <== 0;
     }
-    if (signatureAlgorithm == 9 || signatureAlgorithm == 23) {
+    if (signatureAlgorithm == 9 || signatureAlgorithm == 23 || signatureAlgorithm == 29) {
         component ecdsa_verify = verifyECDSABits(n, k, [
             4294967292,
             18446744069414584320,

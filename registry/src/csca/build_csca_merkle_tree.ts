@@ -74,8 +74,7 @@ async function buildCscaMerkleTree() {
             "../common/src/mock_certificates/sha384_ecdsa_secp384r1/mock_csca.pem",
             "../common/src/mock_certificates/sha512_ecdsa_brainpoolP256r1/mock_csca.pem",
             "../common/src/mock_certificates/sha512_ecdsa_brainpoolP384r1/mock_csca.pem",
-
-
+            "../common/src/mock_certificates/sha1_ecdsa_secp384r1/mock_csca.pem",
 
         ];
 
