@@ -18,6 +18,7 @@ import { SKI_PEM, SKI_PEM_DEV } from '../constants/skiPem';
 import { CertificateData, PublicKeyDetailsRSA } from './certificate_parsing/dataStructure';
 import { formatInput } from './generateInputs';
 import { getCertificateFromPem, parseCertificate } from './certificates/handleCertificate';
+import { SignatureAlgorithm } from './types';
 
 export function findStartIndexEC(modulus: string, messagePadded: Uint8Array): number {
   const modulusNumArray = [];
@@ -110,7 +111,7 @@ export function generateCircuitInputsDSC(
     ? sha384_512Pad(dscTbsCertUint8Array, max_cert_bytes)
     : shaPad(dscTbsCertUint8Array, max_cert_bytes);
 
-  const { n, k } = getNAndK(`${signatureAlgorithm}_${hashFunction}_${bits}`);
+  const { n, k } = getNAndK(`${signatureAlgorithm}_${hashFunction}_${exponent}_${bits}` as SignatureAlgorithm);
   const dscSignature = dscCert.signatureValue.valueBlock.valueHexView;
   const sigantureRaw = Array.from(forge.util.createBuffer(dscSignature).getBytes(), (char) =>
     char.charCodeAt(0)
@@ -124,6 +125,8 @@ export function generateCircuitInputsDSC(
     dsc_message_padded_formatted = Array.from(dsc_message_padded).map((x) => x.toString());
     dsc_messagePaddedLen_formatted = BigInt(dsc_messagePaddedLen).toString();
     console.log("\x1b[34m", "startIndex: ", startIndex, "\x1b[0m");
+    console.log("\x1b[34m", "n and k: ", n, k, "\x1b[0m");
+
 
     pubKey_dsc = formatInput(splitToWords(BigInt(hexToDecimal(modulus)), n, k));
 
@@ -145,6 +148,7 @@ export function generateCircuitInputsDSC(
   }
 
   const cscaPem = getCSCAFromSKI(authorityKeyIdentifier, devMode);
+  console.log("\x1b[34m", "cscaPem: ", cscaPem, "\x1b[0m");
   const leaf = getLeafCSCA(cscaPem);
   const [root, proof] = getCSCAModulusProof(leaf);
 
@@ -153,13 +157,17 @@ export function generateCircuitInputsDSC(
   let csca_pubKey_formatted;
   if (parsedCSCAPem.signatureAlgorithm === 'rsa' || parsedCSCAPem.signatureAlgorithm === 'rsapss') {
     const csca_modulus = parsedCSCAPem.modulus;
-    const { n: n_csca, k: k_csca } = getNAndKCSCA(parsedCSCAPem.signatureAlgorithm);
+    const { n: n_csca, k: k_csca } = getNAndK(`${parsedCSCAPem.signatureAlgorithm}_${parsedCSCAPem.hashFunction}_${exponent}_${parsedCSCAPem.bits}` as SignatureAlgorithm);
+    console.log('here', `${parsedCSCAPem.signatureAlgorithm}_${parsedCSCAPem.hashFunction}_${exponent}_${parsedCSCAPem.bits}`)
+    // const { n: n_csca, k: k_csca } = getNAndKCSCA(parsedCSCAPem.signatureAlgorithm);
+    console.log("\x1b[34m", "n_csca: ", n_csca, "k_csca: ", k_csca, "\x1b[0m");
+
     csca_pubKey_formatted = splitToWords(BigInt(hexToDecimal(csca_modulus)), n_csca, k_csca);
     signature = formatInput(splitToWords(BigInt(bytesToBigDecimal(sigantureRaw)), n_csca, k_csca));
 
   } else {
     console.log("\x1b[34m", "signatureAlgorithm: ", parsedCSCAPem.signatureAlgorithm, "\x1b[0m");
-    const { n: n_csca, k: k_csca } = getNAndK(`${parsedCSCAPem.signatureAlgorithm}_${parsedCSCAPem.hashFunction}_${parsedCSCAPem.bits}`);
+    const { n: n_csca, k: k_csca } = getNAndK(`${parsedCSCAPem.signatureAlgorithm}_${parsedCSCAPem.hashFunction}_${curve}_${parsedCSCAPem.bits}` as SignatureAlgorithm);
     console.log("\x1b[34m", "n_csca: ", n_csca, "k_csca: ", k_csca, "\x1b[0m");
 
     const normalizedX = x.length % 2 === 0 ? parsedCSCAPem.x : '0' + parsedCSCAPem.x;

@@ -64,6 +64,12 @@ async function buildCscaMerkleTree() {
         const mockCscaList = [
             '../common/src/mock_certificates/sha256_rsa_4096/mock_csca.pem',
             '../common/src/mock_certificates/sha256_rsapss_4096/mock_csca.pem',
+            '../common/src/mock_certificates/sha256_rsapss_2048/mock_csca.pem',
+            '../common/src/mock_certificates/sha256_rsapss_3072/mock_csca.pem',
+            '../common/src/mock_certificates/sha256_rsapss_3_3072/mock_csca.pem',
+            '../common/src/mock_certificates/sha256_rsapss_3_4096/mock_csca.pem',
+            '../common/src/mock_certificates/sha384_rsapss_65537_3072/mock_csca.pem',
+            // '../common/src/mock_certificates/sha384_rsapss_65537_4096/mock_csca.pem',
             '../common/src/mock_certificates/sha1_rsa_4096/mock_csca.pem',
             "../common/src/mock_certificates/sha256_brainpoolP256r1/mock_csca.pem",
             "../common/src/mock_certificates/sha256_ecdsa_brainpoolP224r1/mock_csca.pem",
@@ -75,6 +81,7 @@ async function buildCscaMerkleTree() {
             "../common/src/mock_certificates/sha512_ecdsa_brainpoolP256r1/mock_csca.pem",
             "../common/src/mock_certificates/sha512_ecdsa_brainpoolP384r1/mock_csca.pem",
             "../common/src/mock_certificates/sha1_ecdsa_secp384r1/mock_csca.pem",
+            "../common/src/mock_certificates/sha1_ecdsa_brainpoolp256r1/mock_csca.pem",
 
         ];
 
