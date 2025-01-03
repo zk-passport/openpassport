@@ -40,17 +40,51 @@ import {
   mock_csca_sha512_brainpoolP384r1_384,
   mock_dsc_sha1_secp384r1_384,
   mock_csca_sha1_secp384r1_384,
+  mock_dsc_sha1_brainpoolP256r1_256,
+  mock_csca_sha1_brainpoolP256r1_256,
+  mock_dsc_sha256_rsapss_2048,
+  mock_csca_sha256_rsapss_2048,
+  mock_dsc_sha256_rsapss_3_3072,
+  mock_dsc_sha256_rsapss_65537_3072,
+  mock_csca_sha256_rsapss_65537_3072,
+  mock_dsc_sha256_rsapss_3072,
+  mock_csca_sha256_rsapss_3072,
+  mock_csca_sha256_rsapss_3_3072,
+  mock_dsc_sha256_rsapss_3_4096,
+  mock_csca_sha256_rsapss_3_4096,
+  mock_dsc_sha384_rsapss_65537_3072,
+  mock_csca_sha384_rsapss_65537_3072,
+  mock_dsc_sha384_rsapss_65537_4096,
+  mock_csca_sha384_rsapss_65537_4096,
+  mock_dsc_sha1_rsa_2048,
+  mock_csca_sha1_rsa_2048,
+  mock_dsc_sha1_rsa_3072,
+  mock_csca_sha1_rsa_3072,
 } from '../../common/src/constants/mockCertificates';
 import { max_cert_bytes } from '../../common/src/constants/constants';
 import { getCircuitName } from '../../common/src/utils/certificates/handleCertificate';
 
 const sigAlgs = [
   // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '65537', keyLength: '4096' },
+  // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '65537', keyLength: '2048' },
+  { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '65537', keyLength: '3072' },
+
+
   // { sigAlg: 'rsa', hashFunction: 'sha256', domainParameter: '65537', keyLength: '4096' },
   // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '65537', keyLength: '4096' },
+  // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '65537', keyLength: '2048' },
+  // // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '65537', keyLength: '3072' },
+  // // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '3', keyLength: '3072' },
+  // // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '3', keyLength: '4096' },
+  // { sigAlg: 'rsapss', hashFunction: 'sha384', domainParameter: '65537', keyLength: '3072' },
+  // { sigAlg: 'rsapss', hashFunction: 'sha384', domainParameter: '65537', keyLength: '4096' },
+
+
   
   // { sigAlg: 'ecdsa', hashFunction: 'sha1', domainParameter: 'secp256r1', keyLength: '256' },
-  { sigAlg: 'ecdsa', hashFunction: 'sha1', domainParameter: 'secp384r1', keyLength: '384' },
+  // { sigAlg: 'ecdsa', hashFunction: 'sha1', domainParameter: 'secp384r1', keyLength: '384' }, //killed
+  // { sigAlg: 'ecdsa', hashFunction: 'sha1', domainParameter: 'brainpoolP256r1', keyLength: '256' },
+
 
 
   // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'brainpoolP256r1', keyLength: '256' },
@@ -83,13 +117,45 @@ sigAlgs.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
         dscCertPem = mock_dsc_sha256_rsa_4096;
         cscaCertPem = mock_csca_sha256_rsa_4096;
         break;
+      case 'rsa_sha1_65537_2048':
+        dscCertPem = mock_dsc_sha1_rsa_2048;
+        cscaCertPem = mock_csca_sha1_rsa_2048;
+        break;
+      case 'rsa_sha1_65537_3072':
+        dscCertPem = mock_dsc_sha1_rsa_3072;
+        cscaCertPem = mock_csca_sha1_rsa_3072;
+        break;
       case 'rsa_sha1_65537_4096':
         dscCertPem = mock_dsc_sha1_rsa_4096;
         cscaCertPem = mock_csca_sha1_rsa_4096;
         break;
+      case 'rsapss_sha256_65537_2048':
+        dscCertPem = mock_dsc_sha256_rsapss_2048;
+        cscaCertPem = mock_csca_sha256_rsapss_2048;
+        break;
+      case 'rsapss_sha256_65537_3072':
+        dscCertPem = mock_dsc_sha256_rsapss_65537_3072;
+        cscaCertPem = mock_csca_sha256_rsapss_65537_3072;
+        break;
       case 'rsapss_sha256_65537_4096':
         dscCertPem = mock_dsc_sha256_rsapss_4096;
         cscaCertPem = mock_csca_sha256_rsapss_4096;
+        break;
+      case 'rsapss_sha256_3_3072':
+        dscCertPem = mock_dsc_sha256_rsapss_3_3072;
+        cscaCertPem = mock_csca_sha256_rsapss_3_3072;
+        break;
+      case 'rsapss_sha256_3_4096':
+        dscCertPem = mock_dsc_sha256_rsapss_3_4096;
+        cscaCertPem = mock_csca_sha256_rsapss_3_4096;
+        break;
+      case 'rsapss_sha384_65537_3072':
+        dscCertPem = mock_dsc_sha384_rsapss_65537_3072;
+        cscaCertPem = mock_csca_sha384_rsapss_65537_3072;
+        break;
+      case 'rsapss_sha384_65537_4096':
+        dscCertPem = mock_dsc_sha384_rsapss_65537_4096;
+        cscaCertPem = mock_csca_sha384_rsapss_65537_4096;
         break;
       case 'ecdsa_sha1_secp256r1_256':
         dscCertPem = mock_csca_sha1_secp256r1_256 //mock_dsc_sha1_secp256r1_256;
@@ -98,6 +164,10 @@ sigAlgs.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
       case 'ecdsa_sha1_secp384r1_384':
         dscCertPem = mock_dsc_sha1_secp384r1_384;
         cscaCertPem = mock_csca_sha1_secp384r1_384;
+        break;
+      case 'ecdsa_sha1_brainpoolP256r1_256':
+        dscCertPem = mock_dsc_sha1_brainpoolP256r1_256
+        cscaCertPem = mock_csca_sha1_brainpoolP256r1_256
         break;
       case 'ecdsa_sha256_secp256r1_256':
         dscCertPem = mock_dsc_sha256_secp256r1;
@@ -143,7 +213,7 @@ sigAlgs.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
     const max_cert_bytes_map = {
       sha1: max_cert_bytes,
       sha256: max_cert_bytes,
-      sha384: 512,
+      sha384: 1024, //896, //512,
       sha512: 512,
     }
 

@@ -62,6 +62,8 @@ async function buildCscaMerkleTree() {
 
     if (DEVELOPMENT_MODE) {
         const mockCscaList = [
+            '../common/src/mock_certificates/sha1_rsa_2048/mock_csca.pem',
+            '../common/src/mock_certificates/sha1_rsa_65537_3072/mock_csca.pem',
             '../common/src/mock_certificates/sha256_rsa_4096/mock_csca.pem',
             '../common/src/mock_certificates/sha256_rsapss_4096/mock_csca.pem',
             '../common/src/mock_certificates/sha256_rsapss_2048/mock_csca.pem',
@@ -81,7 +83,7 @@ async function buildCscaMerkleTree() {
             "../common/src/mock_certificates/sha512_ecdsa_brainpoolP256r1/mock_csca.pem",
             "../common/src/mock_certificates/sha512_ecdsa_brainpoolP384r1/mock_csca.pem",
             "../common/src/mock_certificates/sha1_ecdsa_secp384r1/mock_csca.pem",
-            "../common/src/mock_certificates/sha1_ecdsa_brainpoolp256r1/mock_csca.pem",
+            // "../common/src/mock_certificates/sha1_ecdsa_brainpoolp256r1/mock_csca.pem",
 
         ];
 

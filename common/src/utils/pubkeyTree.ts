@@ -52,16 +52,16 @@ export function getLeafCSCA(dsc: string): string {
   const { signatureAlgorithm, hashFunction, modulus, x, y, bits, curve, exponent } =
     parseCertificate(dsc);
   let n, k;
-  if (signatureAlgorithm == 'ecdsa') {
-    const n_and_k = getNAndK(`${signatureAlgorithm}_${hashFunction}_${curve}_${bits}` as SignatureAlgorithm);
+  // if (signatureAlgorithm == 'ecdsa') {
+    const n_and_k = getNAndK(`${signatureAlgorithm}_${hashFunction}_${curve || exponent}_${bits}` as SignatureAlgorithm);
     n = n_and_k.n;
     k = n_and_k.k;
 
-  } else {
-    const n_and_k = getNAndKCSCA(signatureAlgorithm);
-    n = n_and_k.n;
-    k = n_and_k.k;
-  }
+  // } else {
+    // const n_and_k = getNAndKCSCA(signatureAlgorithm);
+    // n = n_and_k.n;
+    // k = n_and_k.k;
+  // }
   console.log(`${signatureAlgorithm}_${hashFunction}_${curve || exponent}_${bits}`);
   const sigAlgKey = `${signatureAlgorithm}_${hashFunction}_${curve || exponent}_${bits}`;
   console.log('sigAlgKey', sigAlgKey);
