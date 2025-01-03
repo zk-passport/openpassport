@@ -33,6 +33,11 @@ export const generateMockRsaPkcs1v1_5Inputs = (signatureAlgorithm: SignatureAlgo
       signAlgorithm = signatureAlgorithm.includes('sha256') ? 'sha256' : 'sha512';
       publicExponent = 65537;
       break;
+    case 'rsa_sha1_65537_3072':
+      modulusLength = 3072;
+      signAlgorithm = 'sha1';
+      publicExponent = 65537;
+      break;
     default:
       throw new Error(`Unsupported signature algorithm: ${signatureAlgorithm}`);
   }
