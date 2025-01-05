@@ -1,45 +1,19 @@
-import { PassportData } from './types';
+import { PassportData, SignatureAlgorithmCSCA } from './types';
 import { hash, generateSignedAttr, formatAndConcatenateDataHashes, formatMrz, getHashLen } from './utils';
 import * as forge from 'node-forge';
 import * as asn1 from 'asn1js';
 import elliptic from 'elliptic';
-import {
-  mock_dsc_key_sha1_rsa_4096,
-  mock_dsc_key_sha256_ecdsa,
-  mock_dsc_key_sha256_rsa_4096,
-  mock_dsc_key_sha256_rsapss_2048,
-  mock_dsc_key_sha256_rsapss_4096,
-  mock_dsc_sha1_rsa_4096,
-  mock_dsc_sha256_ecdsa,
-  mock_dsc_sha256_rsa_4096,
-  mock_dsc_sha256_rsapss_2048,
-  mock_dsc_sha256_rsapss_4096,
-  mock_dsc_key_sha1_ecdsa,
-  mock_dsc_sha1_ecdsa,
-  mock_dsc_key_sha384_ecdsa,
-  mock_dsc_sha384_ecdsa,
-  mock_dsc_key_sha256_brainpoolP256r1,
-  mock_dsc_sha256_brainpoolP256r1,
-  mock_dsc_key_sha256_rsa_3_2048,
-  mock_dsc_sha256_rsa_3_2048,
-  mock_dsc_key_sha256_rsa_65537_3072,
-  mock_dsc_sha256_rsa_65537_3072,
-  mock_dsc_key_sha256_rsapss_3_4096,
-  mock_dsc_sha256_rsapss_3_4096,
-  mock_dsc_key_sha256_rsapss_3_3072,
-  mock_dsc_sha256_rsapss_3_3072,
-  mock_dsc_key_sha384_rsapss_65537_3072,
-  mock_dsc_sha384_rsapss_65537_3072,
-  mock_dsc_key_sha256_rsapss_65537_3072,
-  mock_dsc_sha256_rsapss_65537_3072,
-  mock_dsc_key_rsapss_65537_4096,
-  mock_dsc_sha256_rsapss_65537_4096,
-} from '../constants/mockCertificates';
+
 import { countryCodes } from '../constants/constants';
 import { parseCertificateSimple } from './certificate_parsing/parseCertificateSimple';
 import { SignatureAlgorithm } from './types';
 import { PublicKeyDetailsECDSA, PublicKeyDetailsRSAPSS } from './certificate_parsing/dataStructure';
 import { getCurveForElliptic } from './certificate_parsing/curves';
+import { Crypto } from "@peculiar/webcrypto";
+import * as x509 from '@peculiar/x509';
+import { generateCertificate } from './genMockCertificate';
+const crypto = new Crypto();
+x509.cryptoProvider.set(crypto);
 
 function generateRandomBytes(length: number): number[] {
   // Generate numbers between -128 and 127 to match the existing signed byte format
@@ -63,17 +37,18 @@ function generateDataGroupHashes(mrzHash: number[], hashLen: number): [number, n
   return dataGroups;
 }
 
-export function genMockPassportData(
+export async function genMockPassportData(
   dgHashAlgo: string,
   eContentHashAlgo: string,
   signatureType: SignatureAlgorithm,
+  signatureTypeCSCA: SignatureAlgorithmCSCA,
   nationality: keyof typeof countryCodes,
   birthDate: string,
   expiryDate: string,
   passportNumber: string = '15AA81234',
   lastName: string = 'DUPONT',
   firstName: string = 'ALPHONSE HUGHUES ALBERT'
-): PassportData {
+): Promise<PassportData> {
   if (birthDate.length !== 6 || expiryDate.length !== 6) {
     throw new Error('birthdate and expiry date have to be in the "YYMMDD" format');
   }
@@ -113,67 +88,7 @@ export function genMockPassportData(
     throw new Error(`MRZ must be 88 characters long, got ${mrz.length}`);
   }
 
-  let privateKeyPem: string;
-  let dsc: string;
-
-  switch (signatureType) {
-    case 'rsa_sha1_65537_2048':
-      privateKeyPem = mock_dsc_key_sha1_rsa_4096;
-      dsc = mock_dsc_sha1_rsa_4096;
-      break;
-    case 'rsa_sha256_65537_2048':
-      privateKeyPem = mock_dsc_key_sha256_rsa_4096;
-      dsc = mock_dsc_sha256_rsa_4096;
-      break;
-    case 'rsapss_sha256_65537_2048':
-      privateKeyPem = mock_dsc_key_sha256_rsapss_4096;
-      dsc = mock_dsc_sha256_rsapss_4096;
-      break;
-    case 'rsapss_sha256_3_4096':
-      privateKeyPem = mock_dsc_key_sha256_rsapss_3_4096;
-      dsc = mock_dsc_sha256_rsapss_3_4096;
-      break;
-    case 'rsapss_sha256_3_3072':
-      privateKeyPem = mock_dsc_key_sha256_rsapss_3_3072;
-      dsc = mock_dsc_sha256_rsapss_3_3072;
-      break;
-    case 'rsapss_sha384_65537_3072':
-      privateKeyPem = mock_dsc_key_sha384_rsapss_65537_3072;
-      dsc = mock_dsc_sha384_rsapss_65537_3072;
-      break;
-    case 'ecdsa_sha256_secp256r1_256':
-      privateKeyPem = mock_dsc_key_sha256_ecdsa;
-      dsc = mock_dsc_sha256_ecdsa;
-      break;
-    case 'ecdsa_sha1_secp256r1_256':
-      privateKeyPem = mock_dsc_key_sha1_ecdsa;
-      dsc = mock_dsc_sha1_ecdsa;
-      break;
-    case 'ecdsa_sha384_secp384r1_384':
-      privateKeyPem = mock_dsc_key_sha384_ecdsa;
-      dsc = mock_dsc_sha384_ecdsa;
-      break;
-    case 'ecdsa_sha256_brainpoolP256r1_256':
-      privateKeyPem = mock_dsc_key_sha256_brainpoolP256r1;
-      dsc = mock_dsc_sha256_brainpoolP256r1;
-      break;
-    case 'rsa_sha256_3_2048':
-      privateKeyPem = mock_dsc_key_sha256_rsa_3_2048;
-      dsc = mock_dsc_sha256_rsa_3_2048;
-      break;
-    case 'rsa_sha256_65537_3072':
-      privateKeyPem = mock_dsc_key_sha256_rsa_65537_3072;
-      dsc = mock_dsc_sha256_rsa_65537_3072;
-      break;
-    case 'rsapss_sha256_65537_3072':
-      privateKeyPem = mock_dsc_key_sha256_rsapss_65537_3072;
-      dsc = mock_dsc_sha256_rsapss_65537_3072;
-      break;
-    case 'rsapss_sha256_65537_4096':
-      privateKeyPem = mock_dsc_key_rsapss_65537_4096;
-      dsc = mock_dsc_sha256_rsapss_65537_4096;
-      break;
-  }
+  const { dsc, dscKeyPair } = await generateCertificate(signatureType, signatureTypeCSCA);
 
 
   // Generate MRZ hash first
@@ -189,7 +104,7 @@ export function genMockPassportData(
 
   const signedAttr = generateSignedAttr(hash(eContentHashAlgo, eContent));
   const hashAlgo = signatureType.split('_')[1];
-  const signature = sign(privateKeyPem, dsc, hashAlgo, signedAttr);
+  const signature = await sign(dscKeyPair, dsc, hashAlgo, signedAttr);
   const signatureBytes = Array.from(signature, (byte) => (byte < 128 ? byte : byte - 256));
 
   return {
@@ -203,54 +118,91 @@ export function genMockPassportData(
     mockUser: true,
   };
 }
+async function sign(keyPair: CryptoKeyPair, dsc: string, hashAlgorithm: string, eContent: number[]): Promise<number[]> {
+  const { signatureAlgorithm } = parseCertificateSimple(dsc);
+  const parsedCertificate = parseCertificateSimple(dsc);
+  console.log('parsedCertificate', parsedCertificate);
 
-function sign(privateKeyPem: string, dsc: string, hashAlgorithm: string, eContent: number[]): number[] {
-  const { signatureAlgorithm, publicKeyDetails } = parseCertificateSimple(dsc);
-
-  if (signatureAlgorithm === 'rsapss') {
-    const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
-    const md = forge.md.sha256.create();
-    md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
-    const pss = forge.pss.create({
-      md: forge.md.sha256.create(),
-      mgf: forge.mgf.mgf1.create(forge.md.sha256.create()),
-      saltLength: parseInt((publicKeyDetails as PublicKeyDetailsRSAPSS).saltLength),
-    });
-    const signatureBytes = privateKey.sign(md, pss);
-    return Array.from(signatureBytes, (c: string) => c.charCodeAt(0));
-  } else if (signatureAlgorithm === 'ecdsa') {
-    const curve = (publicKeyDetails as PublicKeyDetailsECDSA).curve;
-    let curveForElliptic = getCurveForElliptic(curve);
-    const ec = new elliptic.ec(curveForElliptic);
-
-    const privateKeyDer = Buffer.from(
-      privateKeyPem.replace(/-----BEGIN EC PRIVATE KEY-----|\n|-----END EC PRIVATE KEY-----/g, ''),
-      'base64'
+  if (signatureAlgorithm === 'ecdsa') {
+    // Use WebCrypto for signing
+    const signature = await crypto.subtle.sign(
+      {
+        name: "ECDSA",
+        hash: { name: `SHA-${hashAlgorithm.replace('sha', '').toUpperCase()}` },
+      },
+      keyPair.privateKey,
+      new Uint8Array(eContent)
     );
-    const asn1Data = asn1.fromBER(privateKeyDer);
-    const privateKeyBuffer = (asn1Data.result.valueBlock as any).value[1].valueBlock.valueHexView;
-    // console.log('sig deets');
-    // console.log('pk', privateKeyBuffer);
-    // console.log('hashFUnction', hashAlgorithm);
-    // console.log('message', Buffer.from(eContent).toString('hex'));
 
-    const keyPair = ec.keyFromPrivate(privateKeyBuffer);
-    let md = forge.md[hashAlgorithm].create();
-    md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
+    // Get r and s from the signature
+    const signatureBytes = new Uint8Array(signature);
+    const r = Array.from(signatureBytes.slice(0, 32));
+    const s = Array.from(signatureBytes.slice(32, 64));
 
-    // console.log('message to sign', md.digest().toHex());
-    const signature = keyPair.sign(md.digest().toHex(), 'hex');
-    // console.log(Buffer.from(signature.toDER(), 'hex').toString('hex'));
-    const signatureBytes = Array.from(Buffer.from(signature.toDER(), 'hex'));
+    // Ensure positive integers by prepending 0x00 if highest bit is set
+    const rPadded = (r[0] & 0x80) ? [0, ...r] : r;
+    const sPadded = (s[0] & 0x80) ? [0, ...s] : s;
 
-    // console.log('sig', JSON.stringify(signatureBytes));
+    // Calculate lengths
+    const rLength = rPadded.length;
+    const sLength = sPadded.length;
+    const totalLength = rLength + sLength + 4; // 2 bytes each for type and length
 
-    return signatureBytes;
-  } else {
-    const privKey = forge.pki.privateKeyFromPem(privateKeyPem);
-    const md = forge.md[hashAlgorithm].create();
-    md.update(forge.util.binary.raw.encode(new Uint8Array(eContent)));
-    const forgeSignature = privKey.sign(md);
-    return Array.from(forgeSignature, (c: string) => c.charCodeAt(0));
+    // Create DER structure
+    const derSignature = [
+      0x30, totalLength,  // SEQUENCE
+      0x02, rLength,      // INTEGER for r
+      ...rPadded,        // r value
+      0x02, sLength,     // INTEGER for s
+      ...sPadded         // s value
+    ];
+
+    console.log('Generated signature:', {
+      rLength,
+      sLength,
+      totalLength,
+      derLength: derSignature.length
+    });
+
+    return derSignature;
   }
+  else if (signatureAlgorithm === 'rsa') {
+    // Use WebCrypto for RSA-PKCS1 signing
+    console.log('hashAlgo', `SHA-${hashAlgorithm.replace('sha', '').toUpperCase()}`);
+
+    const signature = await crypto.subtle.sign(
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        hash: { name: `SHA-${hashAlgorithm.replace('sha', '').toUpperCase()}` },
+      },
+      keyPair.privateKey,
+      new Uint8Array(eContent)
+    );
+
+    // RSA signatures are already in DER format
+    return Array.from(new Uint8Array(signature));
+  }
+  else if (signatureAlgorithm === 'rsapss') {
+    // Extract salt length from certificate details
+    const { publicKeyDetails } = parseCertificateSimple(dsc);
+    const saltLength = (publicKeyDetails as PublicKeyDetailsRSAPSS).saltLength || 32;
+
+    // Use WebCrypto for RSA-PSS signing
+    const signature = await crypto.subtle.sign(
+      {
+        name: "RSASSA-PSS",
+        saltLength: Number(saltLength),
+        hash: {
+          name: `SHA-${hashAlgorithm.replace('sha', '').toUpperCase()}`
+        }
+      } as RsaPssParams,
+      keyPair.privateKey,
+      new Uint8Array(eContent)
+    );
+
+    // RSA-PSS signatures are already in the correct format
+    return Array.from(new Uint8Array(signature));
+  }
+
+  throw new Error(`Signature algorithm ${signatureAlgorithm} not yet implemented`);
 }

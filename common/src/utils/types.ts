@@ -15,11 +15,11 @@ export type PassportData = {
 export type SignatureAlgorithm =
   | 'rsa_sha1_65537_2048'
   | 'rsa_sha256_65537_2048'
-  | 'rsapss_sha256_65537_2048'
-  | 'rsapss_sha256_3_4096'
-  | 'rsapss_sha256_3_3072'
-  | 'rsapss_sha384_65537_3072'
-  | 'rsapss_sha384_65537_4096'
+  | 'rsapss_sha256_32_65537_2048'
+  | 'rsapss_sha256_32_3_4096'
+  | 'rsapss_sha256_32_3_3072'
+  | 'rsapss_sha384_48_65537_3072'
+  | 'rsapss_sha384_48_65537_4096'
   | 'ecdsa_sha256_secp256r1_256'
   | 'ecdsa_sha1_secp256r1_256'
   | 'ecdsa_sha384_secp384r1_384'
@@ -28,8 +28,25 @@ export type SignatureAlgorithm =
   | 'rsa_sha256_65537_3072'
   | 'rsa_sha256_65537_4096'
   | 'rsa_sha512_65537_4096'
-  | 'rsapss_sha256_65537_3072'
-  | 'rsapss_sha256_65537_4096';
+  | 'rsapss_sha256_32_65537_3072'
+  | 'rsapss_sha256_32_65537_4096';
+
+export type SignatureAlgorithmCSCA =
+  | 'rsa_sha256_65537_4096'
+  | 'rsapss_sha256_32_3_4096'
+  | 'rsapss_sha256_32_65537_4096'
+  | 'rsapss_sha1_32_3_4096'
+  | 'ecdsa_sha1_secp256r1_256'
+  | 'ecdsa_sha256_secp256r1_256'
+  | 'ecdsa_sha384_secp384r1_384'
+  | 'ecdsa_sha512_secp521r1_521'
+  | 'ecdsa_sha1_brainpoolP256r1_256'
+  | 'ecdsa_sha256_brainpoolP256r1_256'
+  | 'ecdsa_sha384_brainpoolP384r1_384'
+  | 'ecdsa_sha512_brainpoolP512r1_512'
+  | 'rsa_sha512_65537_4096'
+  | 'rsa_sha384_65537_4096'
+  | 'rsa_sha1_3_4096';
 
 export type Proof = {
   proof: {

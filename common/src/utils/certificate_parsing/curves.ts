@@ -139,3 +139,15 @@ export function getCurveForElliptic(curveName: string): string {
 
     return curves[curveName];
 }
+
+export function getCurveForPecularX509(curveName: string): string {
+    const curves = {
+        'secp256r1': 'P-256',
+        'secp384r1': 'P-384',
+        'secp521r1': 'P-521',
+        'brainpoolP256r1': 'brainpoolP256r1',
+        'brainpoolP384r1': 'brainpoolP384r1',
+        'brainpoolP512r1': 'brainpoolP512r1',
+    };
+    return curves[curveName];
+}
