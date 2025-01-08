@@ -26,7 +26,9 @@ pragma circom 2.1.9;
  26: ecdsa_sha512_brainpoolP384r1_384
  27: ecdsa_sha1_brainpoolP224r1_224
  28: ecdsa_sha256_brainpoolP224r1_224
- 29: ecdsa_sha1_secp384r1_384
+ 29: ecdsa_sha512_brainpoolP512r1_512
+ 30: ecdsa_sha224_brainpoolP224r1_224
+ 31: ecdsa_sha1_secp384r1_384
 */
 
 function getHashLength(signatureAlgorithm) {
@@ -106,6 +108,12 @@ function getHashLength(signatureAlgorithm) {
         return 256;
     }
     if (signatureAlgorithm == 29) { 
+        return 512;
+    }
+    if (signatureAlgorithm == 30) { 
+        return 224;
+    }
+    if (signatureAlgorithm == 31) { 
         return 160;
     }
     return 0;
@@ -185,6 +193,12 @@ function getKeyLength(signatureAlgorithm) {
         return 224;
     }
     if (signatureAlgorithm == 29) { 
+        return 512;
+    }
+    if (signatureAlgorithm == 30) { 
+        return 224;
+    }
+    if (signatureAlgorithm == 31) { 
         return 384;
     }
     return 0;
@@ -265,6 +279,12 @@ function getKLengthFactor(signatureAlgorithm) {
         return 2;
     }
     if (signatureAlgorithm == 29) { 
+        return 2;
+    }
+    if (signatureAlgorithm == 30) { 
+        return 2;
+    }
+    if (signatureAlgorithm == 31) { 
         return 2;
     }
     return 0;

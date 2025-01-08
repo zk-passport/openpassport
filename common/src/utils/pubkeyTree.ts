@@ -1,15 +1,16 @@
-import {
-  PUBKEY_TREE_DEPTH,
-  COMMITMENT_TREE_TRACKER_URL,
-  SignatureAlgorithmIndex,
-} from '../constants/constants';
+import { SignatureAlgorithmIndex } from '../constants/constants';
 import { LeanIMT } from '@openpassport/zk-kit-lean-imt';
-import axios from 'axios';
-import { poseidon16, poseidon2, poseidon6, poseidon7 } from 'poseidon-lite';
+import { poseidon16, poseidon2, poseidon7 } from 'poseidon-lite';
 import { formatDg2Hash, getNAndK, getNAndKCSCA, hexToDecimal, splitToWords } from './utils';
-import { parseCertificate } from './certificates/handleCertificate';
 import { flexiblePoseidon } from './poseidon';
+import { parseCertificateSimple } from './certificate_parsing/parseCertificateSimple';
+import {
+  PublicKeyDetailsECDSA,
+  PublicKeyDetailsRSA,
+  PublicKeyDetailsRSAPSS,
+} from './certificate_parsing/dataStructure';
 import { SignatureAlgorithm } from './types';
+import { parseCertificate } from './certificate_parsing/parseCertificate';
 
 export function customHasher(pubKeyFormatted: string[]) {
   const rounds = Math.ceil(pubKeyFormatted.length / 16);
@@ -29,54 +30,73 @@ export function customHasher(pubKeyFormatted: string[]) {
 }
 
 export function getLeaf(dsc: string): string {
-  const { signatureAlgorithm, hashFunction, modulus, x, y, bits, curve, exponent } =
-    parseCertificate(dsc);
-  const { n, k } = getNAndK(signatureAlgorithm);
-  const sigAlgKey = `${signatureAlgorithm}_${hashFunction}_${curve || exponent}_${bits}`;
-  const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
+  const { signatureAlgorithm, publicKeyDetails, hashAlgorithm } = parseCertificateSimple(dsc);
 
-  if (sigAlgIndex == undefined) {
-    console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
-    throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
-  }
   if (signatureAlgorithm === 'ecdsa') {
+    const { x, y, curve, bits } = publicKeyDetails as PublicKeyDetailsECDSA;
+    const sigAlgKey = `${signatureAlgorithm}_${hashAlgorithm}_${curve}_${bits}`;
+    const { n, k } = getNAndK(sigAlgKey as SignatureAlgorithm);
+    const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
+
+    if (sigAlgIndex == undefined) {
+      console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
+      throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
+    }
     let qx = splitToWords(BigInt(hexToDecimal(x)), n, k);
     let qy = splitToWords(BigInt(hexToDecimal(y)), n, k);
     return customHasher([sigAlgIndex, ...qx, ...qy]);
   } else {
+    const { modulus, bits, exponent } = publicKeyDetails as PublicKeyDetailsRSA;
+    const sigAlgKey = `${signatureAlgorithm}_${hashAlgorithm}_${exponent}_${bits}`;
+    const { n, k } = getNAndK(sigAlgKey as SignatureAlgorithm);
     const pubkeyChunked = splitToWords(BigInt(hexToDecimal(modulus)), n, k);
+
+    const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
+    if (sigAlgIndex == undefined) {
+      console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
+      throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
+    }
     return customHasher([sigAlgIndex, ...pubkeyChunked]);
   }
 }
 export function getLeafCSCA(dsc: string): string {
-  const { signatureAlgorithm, hashFunction, modulus, x, y, bits, curve, exponent } =
-    parseCertificate(dsc);
-  let n, k;
-  // if (signatureAlgorithm == 'ecdsa') {
-    const n_and_k = getNAndK(`${signatureAlgorithm}_${hashFunction}_${curve || exponent}_${bits}` as SignatureAlgorithm);
-    n = n_and_k.n;
-    k = n_and_k.k;
+  const { signatureAlgorithm, hashAlgorithm, publicKeyDetails } =
+    parseCertificate(dsc, 'dsc')
 
-  // } else {
-    // const n_and_k = getNAndKCSCA(signatureAlgorithm);
-    // n = n_and_k.n;
-    // k = n_and_k.k;
-  // }
-  console.log(`${signatureAlgorithm}_${hashFunction}_${curve || exponent}_${bits}`);
-  const sigAlgKey = `${signatureAlgorithm}_${hashFunction}_${curve || exponent}_${bits}`;
-  console.log('sigAlgKey', sigAlgKey);
-  const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
-  console.log('sigAlgIndex', sigAlgIndex);
+  const { n, k } = signatureAlgorithm == 'ecdsa'
+    ? getNAndK(`${signatureAlgorithm}_${hashAlgorithm}_${publicKeyDetails.curve || publicKeyDetails.exponent}_${publicKeyDetails.bits}` as SignatureAlgorithm)
+    : getNAndKCSCA(signatureAlgorithm as any);
 
-  if (sigAlgIndex == undefined) {
-    console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
-    throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
-  }
   if (signatureAlgorithm === 'ecdsa') {
+    const { x, y, curve, bits } = publicKeyDetails as PublicKeyDetailsECDSA;
+    const sigAlgKey = `${signatureAlgorithm}_${hashAlgorithm}_${curve}_${bits}`;
+    const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
+    if (sigAlgIndex == undefined) {
+      console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
+      throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
+    }
     let qx = splitToWords(BigInt(hexToDecimal(x)), n, k);
     let qy = splitToWords(BigInt(hexToDecimal(y)), n, k);
     return customHasher([sigAlgIndex, ...qx, ...qy]);
-  } else {
+  } else if (signatureAlgorithm === 'rsa') {
+    const { modulus, bits, exponent } = publicKeyDetails as PublicKeyDetailsRSA;
+    const sigAlgKey = `${signatureAlgorithm}_${hashAlgorithm}_${exponent}_${bits}`;
+    const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
+    if (sigAlgIndex == undefined) {
+      console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
+      throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
+    }
+    const pubkeyChunked = splitToWords(BigInt(hexToDecimal(modulus)), n, k);
+    return customHasher([sigAlgIndex, ...pubkeyChunked]);
+  } else if (signatureAlgorithm === 'rsapss') {
+    const { modulus, bits, exponent, hashAlgorithm } = publicKeyDetails as PublicKeyDetailsRSAPSS;
+    const sigAlgKey = `${signatureAlgorithm}_${hashAlgorithm}_${exponent}_${bits}`;
+    const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
+    if (sigAlgIndex == undefined) {
+      console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
+      throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
+    }
+
     const pubkeyChunked = splitToWords(BigInt(hexToDecimal(modulus)), n, k);
     return customHasher([sigAlgIndex, ...pubkeyChunked]);
   }
