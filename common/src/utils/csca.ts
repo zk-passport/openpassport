@@ -151,7 +151,7 @@ export function generateCircuitInputsDSC(
   const parsedCSCAPem = parseCertificate(cscaPem, 'csca_cert');
   let csca_pubKey_formatted;
   if (parsedCSCAPem.signatureAlgorithm === 'rsa' || parsedCSCAPem.signatureAlgorithm === 'rsapss') {
-    const csca_modulus = parsedCSCAPem.modulus;
+    const csca_modulus = parsedCSCAPem.publicKeyDetails.modulus;
     const { n: n_csca, k: k_csca } = getNAndK(`${parsedCSCAPem.signatureAlgorithm}_${parsedCSCAPem.hashAlgorithm}_${exponent}_${parsedCSCAPem.publicKeyDetails.bits}` as SignatureAlgorithm);
     // const { n: n_csca, k: k_csca } = getNAndKCSCA(parsedCSCAPem.signatureAlgorithm);
     console.log("\x1b[34m", "n_csca: ", n_csca, "k_csca: ", k_csca, "\x1b[0m");

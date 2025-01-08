@@ -60,6 +60,8 @@ import {
   mock_csca_sha1_rsa_2048,
   mock_dsc_sha1_rsa_3072,
   mock_csca_sha1_rsa_3072,
+  mock_dsc_sha1_rsa_3_4096,
+  mock_csca_sha1_rsa_3_4096,
 } from '../../common/src/constants/mockCertificates';
 import { max_cert_bytes } from '../../common/src/constants/constants';
 import { getCircuitName } from '../../common/src/utils/certificate_parsing/parseCertificateSimple';
@@ -68,6 +70,10 @@ const sigAlgs = [
   // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '65537', keyLength: '4096' },
   // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '65537', keyLength: '2048' },
   // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '65537', keyLength: '3072' },
+  { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '3', keyLength: '4096' },
+  // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '3', keyLength: '2048' },
+  // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '3', keyLength: '3072' },
+
 
 
   // { sigAlg: 'rsa', hashFunction: 'sha256', domainParameter: '65537', keyLength: '4096' },
@@ -87,7 +93,7 @@ const sigAlgs = [
 
 
 
-  { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'brainpoolP256r1', keyLength: '256' }, //works
+  // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'brainpoolP256r1', keyLength: '256' }, //works
   // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'brainpoolP224r1', keyLength: '224' }, //not tested
   // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'secp256r1', keyLength: '256' }, //works
   // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'secp384r1', keyLength: '384' }, //works // killed
@@ -128,6 +134,10 @@ sigAlgs.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
       case 'rsa_sha1_65537_4096':
         dscCertPem = mock_dsc_sha1_rsa_4096;
         cscaCertPem = mock_csca_sha1_rsa_4096;
+        break;
+      case 'rsa_sha1_3_4096':
+        dscCertPem = mock_dsc_sha1_rsa_3_4096;
+        cscaCertPem = mock_csca_sha1_rsa_3_4096;
         break;
       case 'rsapss_sha256_65537_2048':
         dscCertPem = mock_dsc_sha256_rsapss_2048;
@@ -220,8 +230,7 @@ sigAlgs.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
     const inputs = generateCircuitInputsDSC(
       BigInt(salt).toString(),
       dscCertPem,
-      //TODO
-      max_cert_bytes_map[hashFunction], //max_cert_bytes,
+      max_cert_bytes,
       true
     );
 
