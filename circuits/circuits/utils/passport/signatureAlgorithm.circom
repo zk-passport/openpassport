@@ -24,9 +24,13 @@ pragma circom 2.1.9;
  24: ecdsa_sha384_brainpoolP256r1_256
  25: ecdsa_sha512_brainpoolP256r1_256
  26: ecdsa_sha512_brainpoolP384r1_384
- 27: rsapss_sha384_65537_4096
- 28: rsapss_sha512_65537_3072
- 29: rsapss_sha512_65537_4096
+ 27: ecdsa_sha1_brainpoolP224r1_224
+ 28: ecdsa_sha256_brainpoolP224r1_224
+ 29: ecdsa_sha512_brainpoolP512r1_512
+ 30: ecdsa_sha224_brainpoolP224r1_224
+ 31: rsapss_sha384_65537_4096
+ 32: rsapss_sha512_65537_3072
+ 33: rsapss_sha512_65537_4096
 */
 
 function getHashLength(signatureAlgorithm) {
@@ -100,12 +104,24 @@ function getHashLength(signatureAlgorithm) {
         return 512;
     }
     if (signatureAlgorithm == 27) { 
-        return 384;
+        return 160;
     }
     if (signatureAlgorithm == 28) { 
-        return 512;
+        return 256;
     }
     if (signatureAlgorithm == 29) { 
+        return 512;
+    }
+    if (signatureAlgorithm == 30) { 
+        return 224;
+    }
+    if (signatureAlgorithm == 31) { 
+        return 384;
+    }
+    if (signatureAlgorithm == 32) { 
+        return 512;
+    }
+    if (signatureAlgorithm == 33) { 
         return 512;
     }
     return 0;
@@ -178,19 +194,25 @@ function getKeyLength(signatureAlgorithm) {
     if (signatureAlgorithm == 26) { 
         return 384;
     }
-    if (signatureAlgorithm == 25) {
-        return 4096;
-    }
-    if (signatureAlgorithm == 26) {
-        return 3072;
-    }
-    if (signatureAlgorithm == 27) {
-        return 4096;
+    if (signatureAlgorithm == 27) { 
+        return 224;
     }
     if (signatureAlgorithm == 28) { 
-        return 3072;
+        return 224;
     }
     if (signatureAlgorithm == 29) { 
+        return 512;
+    }
+    if (signatureAlgorithm == 30) { 
+        return 224;
+    }
+    if (signatureAlgorithm == 31) {
+        return 4096;
+    }
+    if (signatureAlgorithm == 32) { 
+        return 3072;
+    }
+    if (signatureAlgorithm == 33) { 
         return 4096;
     }
     return 0;
@@ -264,13 +286,25 @@ function getKLengthFactor(signatureAlgorithm) {
     if (signatureAlgorithm == 26) { 
         return 2;
     }
-    if (signatureAlgorithm == 27) {
-        return 1;
+    if (signatureAlgorithm == 27) { 
+        return 2;
     }
     if (signatureAlgorithm == 28) { 
-        return 1;
+        return 2;
     }
     if (signatureAlgorithm == 29) { 
+        return 2;
+    }
+    if (signatureAlgorithm == 30) { 
+        return 2;
+    }
+    if (signatureAlgorithm == 31) {
+        return 1;
+    }
+    if (signatureAlgorithm == 32) { 
+        return 1;
+    }
+    if (signatureAlgorithm == 33) { 
         return 1;
     }
     return 0;
@@ -324,13 +358,13 @@ function getExponentBits(signatureAlgorithm) {
     if (signatureAlgorithm == 26) {
         return 17;
     }
-    if (signatureAlgorithm == 27) {
+    if (signatureAlgorithm == 31) {
         return 17;
     }
-    if (signatureAlgorithm == 28) { 
+    if (signatureAlgorithm == 32) { 
         return 17;
     }
-    if (signatureAlgorithm == 29) { 
+    if (signatureAlgorithm == 33) { 
         return 17;
     }
     return 0;

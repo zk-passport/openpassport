@@ -1,6 +1,6 @@
 pragma circom 2.1.6;
 
-include "../../bitify/bitify.circom";
+include "circomlib/circuits/bitify.circom";
 
 template Mgf1Sha512(seedLen, maskLen) { //in bytes
     var seedLenBits = seedLen * 8;
@@ -9,7 +9,6 @@ template Mgf1Sha512(seedLen, maskLen) { //in bytes
     var hashLenBits = hashLen * 8;//output len of sha function in bits
 
     signal input seed[seedLenBits]; //each represents a bit
-    signal input dummy;
     signal output out[maskLenBits];
 
     assert(maskLen <= 0xffffffff * hashLen );
@@ -20,7 +19,6 @@ template Mgf1Sha512(seedLen, maskLen) { //in bytes
     for (var i = 0; i < iterations; i++) {
         //512 + 32 bits for counter
         sha512[i] = ShaHashBits(544, 512);
-        sha512[i].dummy <== dummy;
 
         num2Bits[i] = Num2Bits(32);
     }
@@ -60,11 +58,9 @@ template Mgf1Sha384(SEED_LEN, MASK_LEN) { //in bytes
     var HASH_LEN_BITS = HASH_LEN * 8;//output len of sha function in bits
 
     signal input seed[SEED_LEN_BITS]; //each represents a bit
-    signal input dummy;
 
     signal output out[MASK_LEN_BITS];
 
-    dummy * dummy === 0;
     
     assert(MASK_LEN <= 0xffffffff * HASH_LEN );
 
@@ -74,8 +70,8 @@ template Mgf1Sha384(SEED_LEN, MASK_LEN) { //in bytes
     component num2Bits[ITERATIONS];
 
     for (var i = 0; i < ITERATIONS; i++) {
-        sha384[i] = ShaHashChunks(1 , 384); //32 bits for counter
-        sha384[i].dummy <== dummy;
+        // sha384[i] = ShaHashChunks(1 , 384); //32 bits for counter
+        sha384[i] = ShaBytesDynamic(384, 1024); //32 bits for counter
         
         num2Bits[i] = Num2Bits(32);
     }
@@ -112,10 +108,11 @@ template Mgf1Sha384(SEED_LEN, MASK_LEN) { //in bytes
         concated[1015] = 1;
 
         //hashing value
-        sha384[i].in <== concated;
+        sha384[i].in_padded <== concated;
+        sha384[i].in_len_padded_bytes <== 128;
 
         for (var j = 0; j < HASH_LEN_BITS; j++) {
-            hashed[i * HASH_LEN_BITS + j] <== sha384[i].out[j];
+            hashed[i * HASH_LEN_BITS + j] <== sha384[i].hash[j];
         }
     }
 
@@ -131,10 +128,8 @@ template Mgf1Sha256(SEED_LEN, MASK_LEN) { //in bytes
     var HASH_LEN_BITS = HASH_LEN * 8;//output len of sha function in bits
 
     signal input seed[SEED_LEN_BITS]; //each represents a bit
-    signal input dummy;
 
     signal output out[MASK_LEN_BITS];
-    dummy * dummy === 0;
     
     assert(MASK_LEN <= 0xffffffff * HASH_LEN );
     var ITERATIONS = (MASK_LEN \ HASH_LEN) + 1; //adding 1, in-case MASK_LEN \ HASH_LEN is 0
@@ -144,7 +139,6 @@ template Mgf1Sha256(SEED_LEN, MASK_LEN) { //in bytes
 
     for (var i = 0; i < ITERATIONS; i++) {
         sha256[i] = ShaHashChunks(1, 256); //32 bits for counter
-        sha256[i].dummy <== dummy;
 
         num2Bits[i] = Num2Bits(32);
     }

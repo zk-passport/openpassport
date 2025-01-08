@@ -2,8 +2,9 @@ pragma circom 2.1.9;
 
 include "../circomlib/signature/rsapss/rsapss.circom";
 include "ecdsaVerifier.circom";
-include "../circomlib/signature/rsa/verifyRsaPkcs1v1_5.circom";
-include "../circomlib/utils/bytes.circom";
+include "../circomlib/signature/rsa/verifyRsa3Pkcs1v1_5.circom";
+include "../circomlib/signature/rsa/verifyRsa65537Pkcs1v1_5.circom";
+include "@zk-email/circuits/utils/bytes.circom";
 
 template SignatureVerifier(signatureAlgorithm, n, k) {
     var kLengthFactor = getKLengthFactor(signatureAlgorithm);
@@ -15,14 +16,13 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
     signal input pubKey[kScaled];
     signal input signature[kScaled];
 
-    signal input dummy;
 
     var msg_len = (HASH_LEN_BITS + n) \ n;
 
     signal hashParsed[msg_len] <== HashParser(signatureAlgorithm, n, k)(hash);
    
     if (signatureAlgorithm == 1) { 
-        component rsa = VerifyRsaPkcs1v1_5(signatureAlgorithm, n, k, 65537, 256);
+        component rsa = VerifyRsa65537Pkcs1v1_5(n, k, 256);
         for (var i = 0; i < msg_len; i++) {
             rsa.message[i] <== hashParsed[i];
         }
@@ -31,11 +31,10 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         }
         rsa.modulus <== pubKey;
         rsa.signature <== signature;
-        rsa.dummy <== dummy;
 
     }
     if (signatureAlgorithm == 3) {
-        component rsa = VerifyRsaPkcs1v1_5(signatureAlgorithm, n, k, 65537, 160);
+        component rsa = VerifyRsa65537Pkcs1v1_5(n, k, 160);
         for (var i = 0; i < msg_len; i++) {
             rsa.message[i] <== hashParsed[i];
         }
@@ -44,7 +43,6 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         }
         rsa.modulus <== pubKey;
         rsa.signature <== signature;
-        rsa.dummy <== dummy;
     }
 
     if (
@@ -54,9 +52,9 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         || signatureAlgorithm == 17
         || signatureAlgorithm == 18
         || signatureAlgorithm == 19
-        || signatureAlgorithm == 27
-        || signatureAlgorithm == 28
-        || signatureAlgorithm == 29
+        || signatureAlgorithm == 31
+        || signatureAlgorithm == 32
+        || signatureAlgorithm == 33
     ) {
         var pubKeyBitsLength = getKeyLength(signatureAlgorithm);
         var SALT_LEN = HASH_LEN_BITS / 8;
@@ -72,7 +70,6 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         rsaPssShaVerification.pubkey <== pubKey;
         rsaPssShaVerification.signature <== signature;
         rsaPssShaVerification.hashed <== hash; // send the raw hash
-        rsaPssShaVerification.dummy <== 0;
 
     }
     if (
@@ -85,11 +82,15 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         || signatureAlgorithm == 24
         || signatureAlgorithm == 25
         || signatureAlgorithm == 26
+        || signatureAlgorithm == 27
+        || signatureAlgorithm == 28
+        || signatureAlgorithm == 29
+        || signatureAlgorithm == 30
     ) {
         EcdsaVerifier (signatureAlgorithm, n, k)(signature, pubKey, hash);
     }
     if (signatureAlgorithm == 10) {
-        component rsa = VerifyRsaPkcs1v1_5(signatureAlgorithm, n, k, 65537, 256);
+        component rsa = VerifyRsa65537Pkcs1v1_5(n, k, 256);
         for (var i = 0; i < msg_len; i++) {
             rsa.message[i] <== hashParsed[i];
         }
@@ -98,10 +99,9 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         }
         rsa.modulus <== pubKey;
         rsa.signature <== signature;
-        rsa.dummy <== dummy;
     }
     if (signatureAlgorithm == 11) {
-        component rsa = VerifyRsaPkcs1v1_5(signatureAlgorithm, n, k, 65537, 160);
+        component rsa = VerifyRsa65537Pkcs1v1_5(n, k, 160);
         for (var i = 0; i < msg_len; i++) {
             rsa.message[i] <== hashParsed[i];
         }
@@ -110,13 +110,12 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         }
         rsa.modulus <== pubKey;
         rsa.signature <== signature;
-        rsa.dummy <== dummy;
     }
     if (signatureAlgorithm == 12) {
 
     }
     if (signatureAlgorithm == 13) {
-        component rsa = VerifyRsaPkcs1v1_5(signatureAlgorithm, n, k, 3, 256);
+        component rsa = VerifyRsa3Pkcs1v1_5(n, k, 256);
         for (var i = 0; i < msg_len; i++) {
             rsa.message[i] <== hashParsed[i];
         }
@@ -125,10 +124,9 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         }
         rsa.modulus <== pubKey;
         rsa.signature <== signature;
-        rsa.dummy <== dummy;
     }
     if (signatureAlgorithm == 14) {
-        component rsa = VerifyRsaPkcs1v1_5(signatureAlgorithm, n, k, 65537, 256);
+        component rsa = VerifyRsa65537Pkcs1v1_5(n, k, 256);
         for (var i = 0; i < msg_len; i++) {
             rsa.message[i] <== hashParsed[i];
         }
@@ -137,7 +135,6 @@ template SignatureVerifier(signatureAlgorithm, n, k) {
         }
         rsa.modulus <== pubKey;
         rsa.signature <== signature;
-        rsa.dummy <== dummy;
     }
     if (signatureAlgorithm == 15) {
 

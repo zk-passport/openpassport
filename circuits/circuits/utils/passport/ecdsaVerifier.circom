@@ -67,7 +67,6 @@ template EcdsaVerifier(signatureAlgorithm, n, k) {
         ecdsa_verify.pubkey <== pubkey_xy;
         ecdsa_verify.signature <== [signature_r, signature_s];
         ecdsa_verify.hashed <== hash;
-        ecdsa_verify.dummy <== 0;
     }
     if (signatureAlgorithm == 9 || signatureAlgorithm == 23) {
         component ecdsa_verify = verifyECDSABits(n, k, [
@@ -98,7 +97,6 @@ template EcdsaVerifier(signatureAlgorithm, n, k) {
         ecdsa_verify.pubkey <== pubkey_xy;
         ecdsa_verify.signature <== [signature_r, signature_s];
         ecdsa_verify.hashed <== hash;
-        ecdsa_verify.dummy <== 0;
     }
     if (signatureAlgorithm == 21 || signatureAlgorithm == 24 || signatureAlgorithm == 25) {
         component ecdsa_verify = verifyECDSABits(n, k, [
@@ -123,7 +121,6 @@ template EcdsaVerifier(signatureAlgorithm, n, k) {
         ecdsa_verify.pubkey <== pubkey_xy;
         ecdsa_verify.signature <== [signature_r, signature_s];
         ecdsa_verify.hashed <== hash;
-        ecdsa_verify.dummy <== 0;
     }
     if (signatureAlgorithm == 22 || signatureAlgorithm == 26) { 
         component ecdsa_verify = verifyECDSABits(n, k, [
@@ -154,6 +151,74 @@ template EcdsaVerifier(signatureAlgorithm, n, k) {
         ecdsa_verify.pubkey <== pubkey_xy;
         ecdsa_verify.signature <== [signature_r, signature_s];
         ecdsa_verify.hashed <== hash;
-        ecdsa_verify.dummy <== 0;
+    }
+    if (signatureAlgorithm == 27 || signatureAlgorithm == 28 || signatureAlgorithm == 30) { 
+        component ecdsa_verify = verifyECDSABits(n, k, [
+            3402800963,
+            2953063001,
+            1310206680,
+            3243445073,
+            697828262,
+            2848877596,
+            1755702828
+        ],
+        [
+            946618379,
+            1725674354,
+            1042363858,
+            2837670371,
+            2265387953,
+            3487842616,
+            629208636
+        ],
+        [
+            2127085823,
+            2547681781,
+            2963212119,
+            1976686471,
+            706228261,
+            641951366,
+            3619763370
+        ], n * k);
+
+        ecdsa_verify.pubkey <== pubkey_xy;
+        ecdsa_verify.signature <== [signature_r, signature_s];
+        ecdsa_verify.hashed <== hash;
+    }
+    if (signatureAlgorithm == 29) { 
+         component ecdsa_verify = verifyECDSABits(n, k, [
+            16699818341992010954,
+            9156125524185237433,
+            733789637240866997,
+            3309403945136634529,
+            12120384836935902140,
+            10721906936585459216,
+            16299214545461923013,
+            8660601516620528521
+        ],
+        [
+            2885045271355914019,
+            10970857440773072349,
+            8645948983640342119,
+            3166813089265986637,
+            10059573399531886503,
+            12116154835845181897,
+            16904370861210688858,
+            4465624766311842250
+        ],
+        [
+            2930260431521597683,
+            2918894611604883077,
+            12595900938455318758,
+            9029043254863489090,
+            15448363540090652785,
+            14641358191536493070,
+            4599554755319692295,
+            12312170373589877899
+        ], n * k);
+
+        ecdsa_verify.pubkey <== pubkey_xy;
+        ecdsa_verify.signature <== [signature_r, signature_s];
+        ecdsa_verify.hashed <== hash;
     }
 }

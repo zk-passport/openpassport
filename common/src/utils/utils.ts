@@ -1,5 +1,5 @@
 import { LeanIMT } from '@openpassport/zk-kit-lean-imt';
-import { sha256 } from 'js-sha256';
+import { sha224, sha256 } from 'js-sha256';
 import { sha1 } from 'js-sha1';
 import { sha384, sha512 } from 'js-sha512';
 import { SMT } from '@openpassport/zk-kit-smt';
@@ -38,7 +38,9 @@ export function getNAndK(sigAlg: SignatureAlgorithm) {
   }
 
   if (sigAlg.startsWith('ecdsa_')) {
-    if (sigAlg.endsWith('256')) {
+    if (sigAlg.endsWith('224')) {
+      return { n: 32, k: 7 };
+    } else if (sigAlg.endsWith('256')) {
       return { n: n_dsc_ecdsa, k: 4 };
     } else if (sigAlg.endsWith('384')) {
       return { n: n_dsc_ecdsa, k: 6 };
@@ -46,6 +48,8 @@ export function getNAndK(sigAlg: SignatureAlgorithm) {
       return { n: n_dsc_ecdsa, k: 8 };
     } else if (sigAlg.endsWith('521')) {
       return { n: n_dsc_ecdsa, k: 16 };
+    } else {
+      throw new Error('invalid key size');
     }
   }
 
@@ -86,7 +90,6 @@ export function formatDg2Hash(dg2Hash: number[]) {
 
 export function formatAndConcatenateDataHashes(
   dataHashes: [number, number[]][],
-  hashLen: number,
   dg1HashOffset: number
 ) {
   // concatenating dataHashes :
@@ -168,7 +171,7 @@ export function formatAndConcatenateDataHashes(
   return concat;
 }
 
-export function assembleEContent(messageDigest: number[]) {
+export function generateSignedAttr(messageDigest: number[]) {
   const constructedEContent = [];
 
   // Detailed description is in private file r&d.ts for now
@@ -246,6 +249,9 @@ export function hash(hashFunction: string, bytesArray: number[]): number[] {
   switch (hashFunction) {
     case 'sha1':
       hashResult = sha1(unsignedBytesArray);
+      break;
+    case 'sha224':
+      hashResult = sha224(unsignedBytesArray);
       break;
     case 'sha256':
       hashResult = sha256(unsignedBytesArray);
@@ -329,6 +335,8 @@ export function getHashLen(hashFunction: string) {
   switch (hashFunction) {
     case 'sha1':
       return 20;
+    case 'sha224':
+      return 28;
     case 'sha256':
       return 32;
     case 'sha384':
@@ -426,8 +434,21 @@ export function generateMerkleProof(imt: LeanIMT, _index: number, maxDepth: numb
   return { merkleProofSiblings, merkleProofIndices, depthForThisOne };
 }
 
-export function findSubarrayIndex(arr: any[], subarray: any[]): number {
-  return arr.findIndex((_, index) => subarray.every((element, i) => element === arr[index + i]));
+export function findSubarrayIndex(arr: number[], subArr: number[]): number {
+  if (!arr || !Array.isArray(arr) || !subArr || !Array.isArray(subArr)) {
+    console.warn('Invalid input to findSubarrayIndex:', { arr, subArr });
+    return -1;
+  }
+
+  if (subArr.length === 0) {
+    return -1;
+  }
+
+  if (subArr.length > arr.length) {
+    return -1;
+  }
+
+  return arr.findIndex((_, i) => subArr.every((val, j) => arr[i + j] === val));
 }
 
 export function extractRSFromSignature(signatureBytes: number[]): { r: string; s: string } {
