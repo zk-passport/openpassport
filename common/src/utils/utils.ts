@@ -52,7 +52,7 @@ export function getNAndK(sigAlg: SignatureAlgorithm) {
     }
   }
 
-  if (sigAlg.startsWith('rsapss_')) {
+  if (sigAlg.startsWith('rsapss_') || sigAlg.startsWith('rsa')) {
     const keyLength = parseInt(sigAlg.split('_')[3]);
 
     if (keyLength === 3072) {
