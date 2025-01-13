@@ -28,12 +28,14 @@ pragma circom 2.1.9;
  28: ecdsa_sha256_brainpoolP224r1_224
  29: ecdsa_sha512_brainpoolP512r1_512
  30: ecdsa_sha224_brainpoolP224r1_224
+ 31: rsa_sha512_65537_2048
+ 32: rsa_sha256_3_4096
+ 
  34: ecdsa_sha1_secp384r1_384
  35: rsa_sha1_65537_3072
  36: rsa_sha1_3_4096
  37: rsa_sha384_65537_4096
  38: rsa_sha256_3_4096
-
 */
 
 function getHashLength(signatureAlgorithm) {
@@ -117,6 +119,12 @@ function getHashLength(signatureAlgorithm) {
     }
     if (signatureAlgorithm == 30) { 
         return 224;
+    }
+    if (signatureAlgorithm == 31) {
+        return 512;
+    }
+    if (signatureAlgorithm == 32) {
+        return 256;
     }
     if (signatureAlgorithm == 34) { 
         return 160;
@@ -214,6 +222,12 @@ function getKeyLength(signatureAlgorithm) {
     }
     if (signatureAlgorithm == 30) { 
         return 224;
+    }
+    if (signatureAlgorithm == 31) {
+        return 2048;
+    }
+    if (signatureAlgorithm == 32) {
+        return 4096;
     }
     if (signatureAlgorithm == 34) { 
         return 384;
@@ -313,6 +327,12 @@ function getKLengthFactor(signatureAlgorithm) {
     if (signatureAlgorithm == 30) { 
         return 2;
     }
+    if (signatureAlgorithm == 31) {
+        return 1;
+    }
+    if (signatureAlgorithm == 32) {
+        return 1;
+    }
     if (signatureAlgorithm == 34) { 
         return 2;
     }
@@ -328,6 +348,7 @@ function getKLengthFactor(signatureAlgorithm) {
     if (signatureAlgorithm == 38) { 
         return 1;
     }
+    
     return 0;
 
 }
@@ -373,6 +394,12 @@ function getExponentBits(signatureAlgorithm) {
     if (signatureAlgorithm == 19) {
         return 17;
     }
+    if (signatureAlgorithm == 31) {
+        return 17;
+    }
+    if (signatureAlgorithm == 32) {
+        return 2;
+    }
     if (signatureAlgorithm == 35) { 
         return 17;
     }
@@ -385,6 +412,7 @@ function getExponentBits(signatureAlgorithm) {
     if (signatureAlgorithm == 38) { 
         return 2;
     }
+
     return 0;
 }
 
