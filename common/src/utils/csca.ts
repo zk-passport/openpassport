@@ -182,6 +182,7 @@ export function generateCircuitInputsDSC(
     inputs: {
       raw_dsc_cert: dsc_message_padded_formatted,
       raw_dsc_cert_padded_bytes: [dsc_messagePaddedLen_formatted],
+      dsc_pubkey_length_bytes: [bits / 8],
       csca_pubKey: csca_pubKey_formatted,
       signature: signature,
       dsc_pubKey: pubKey_dsc,
