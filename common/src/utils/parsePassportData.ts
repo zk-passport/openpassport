@@ -69,9 +69,9 @@ function getDgPaddingBytes(passportData: PassportData, dg1HashFunction: string):
   const hashValue = hash(dg1HashFunction, formattedMrz);
   const normalizedHash = (hashValue as number[]).map((byte) => (byte > 127 ? byte - 256 : byte));
   const dg1HashOffset = findSubarrayIndex(passportData.eContent, normalizedHash);
-//   const dg2Hash = passportData.dg2Hash;
-//   const normalizedDg2Hash = (dg2Hash as number[]).map((byte) => (byte > 127 ? byte - 256 : byte));
-//   const dg2HashOffset = findSubarrayIndex(passportData.eContent, normalizedDg2Hash);
+  //   const dg2Hash = passportData.dg2Hash;
+  //   const normalizedDg2Hash = (dg2Hash as number[]).map((byte) => (byte > 127 ? byte - 256 : byte));
+  //   const dg2HashOffset = findSubarrayIndex(passportData.eContent, normalizedDg2Hash);
   return dg1HashOffset - getHashLen(dg1HashFunction);
 }
 

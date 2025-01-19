@@ -23,10 +23,12 @@ import { customHasher } from './pubkeyTree';
 
 export function getNullifier(signedAttr_padded: string[], hashFunction: string) {
   return customHasher(
-    (hash(
-      hashFunction,
-      signedAttr_padded.slice(0, signedAttr_padded.lastIndexOf('128')).map((x) => +x)
-    ) as any).map((x) => (x & 0xff).toString())
+    (
+      hash(
+        hashFunction,
+        signedAttr_padded.slice(0, signedAttr_padded.lastIndexOf('128')).map((x) => +x)
+      ) as any
+    ).map((x) => (x & 0xff).toString())
   );
 }
 

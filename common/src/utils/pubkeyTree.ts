@@ -98,7 +98,7 @@ export function generateCommitment(
   secret: string,
   attestation_id: string,
   pubkey_leaf: string,
-  mrz_bytes: any[],
+  mrz_bytes: any[]
 ) {
   const commitment = poseidon7([
     secret,

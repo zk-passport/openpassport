@@ -162,8 +162,6 @@ export function findIndexInTree(tree: LeanIMT, commitment: bigint): number {
   return index;
 }
 
-
-
 export function generateCircuitInputsRegister(
   secret: number | string,
   dsc_secret: number | string,
@@ -209,9 +207,11 @@ export function generateCircuitInputsRegister(
     dsc_secret: dsc_secret,
   };
 
-  return Object.entries(inputs).map(([key, value]) => ({
-    [key]: formatInput(value)
-  })).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+  return Object.entries(inputs)
+    .map(([key, value]) => ({
+      [key]: formatInput(value),
+    }))
+    .reduce((acc, curr) => ({ ...acc, ...curr }), {});
 }
 
 function getDscPubKeyInfo(passportData: PassportData) {
@@ -268,16 +268,16 @@ export function formatInput(input: any) {
   if (Array.isArray(input)) {
     return input.map((item) => BigInt(item).toString());
   } else if (input instanceof Uint8Array) {
-    return Array.from(input).map(num => BigInt(num).toString());
+    return Array.from(input).map((num) => BigInt(num).toString());
   } else if (typeof input === 'string' && input.includes(',')) {
     const numbers = input
       .split(',')
-      .map(s => s.trim())
-      .filter(s => s !== '' && !isNaN(Number(s)))
+      .map((s) => s.trim())
+      .filter((s) => s !== '' && !isNaN(Number(s)))
       .map(Number);
 
     try {
-      return numbers.map(num => BigInt(num).toString());
+      return numbers.map((num) => BigInt(num).toString());
     } catch (e) {
       throw e;
     }
