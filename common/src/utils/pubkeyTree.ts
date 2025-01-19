@@ -99,9 +99,7 @@ export function generateCommitment(
   attestation_id: string,
   pubkey_leaf: string,
   mrz_bytes: any[],
-  dg2Hash: any[]
 ) {
-  const dg2Hash2 = customHasher(formatDg2Hash(dg2Hash).map((x) => x.toString()));
   const commitment = poseidon7([
     secret,
     attestation_id,
@@ -109,7 +107,6 @@ export function generateCommitment(
     mrz_bytes[0],
     mrz_bytes[1],
     mrz_bytes[2],
-    dg2Hash2,
   ]);
   return commitment;
 }

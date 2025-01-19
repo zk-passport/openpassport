@@ -52,8 +52,7 @@ export function generateCircuitInputsDisclose(
     BigInt(secret).toString(),
     BigInt(attestation_id).toString(),
     BigInt(pubkey_leaf).toString(),
-    mrz_bytes_packed,
-    formatDg2Hash(passportData.dg2Hash)
+    mrz_bytes_packed
   );
   console.log('\x1b[90mcommitment:\x1b[0m', commitment);
 

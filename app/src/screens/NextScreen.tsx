@@ -46,9 +46,12 @@ const NextScreen: React.FC = () => {
             h={height > 750 ? 190 : 130}
             borderRadius={height > 750 ? '$7' : '$6'}
             source={{
-              uri: passportData.mockUser
-                ? USER_PROFILE
-                : passportData.photoBase64 ?? USER_PROFILE,
+              uri:
+                passportData.mockUser ||
+                !passportData.photoBase64 ||
+                passportData.photoBase64.length === 0
+                  ? USER_PROFILE
+                  : passportData.photoBase64,
             }}
           />
         )}

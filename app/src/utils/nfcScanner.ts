@@ -141,8 +141,8 @@ const handleResponseIOS = async (
   const dgHashesObj = JSON.parse(parsed?.dataGroupHashes);
   const dg1HashString = dgHashesObj?.DG1?.sodHash;
   const dg1Hash = Array.from(Buffer.from(dg1HashString, 'hex'));
-  const dg2HashString = dgHashesObj?.DG2?.sodHash;
-  const dg2Hash = Array.from(Buffer.from(dg2HashString, 'hex'));
+  // const dg2HashString = dgHashesObj?.DG2?.sodHash;
+  // const dg2Hash = Array.from(Buffer.from(dg2HashString, 'hex'));
 
   const eContentBase64 = parsed?.eContentBase64; // this is what we call concatenatedDataHashes in android world
   const signedAttributes = parsed?.signedAttributes; // this is what we call eContent in android world
@@ -157,7 +157,7 @@ const handleResponseIOS = async (
     parsed?.isChipAuthenticationSupported,
   );
   console.log('residenceAddress', parsed?.residenceAddress);
-  console.log('passportPhoto', parsed?.passportPhoto.substring(0, 100) + '...');
+  //  console.log('passportPhoto', parsed?.passportPhoto.substring(0, 100) + '...');
   console.log(
     'encapsulatedContentDigestAlgorithm',
     parsed?.encapsulatedContentDigestAlgorithm,
@@ -200,13 +200,15 @@ const handleResponseIOS = async (
   const passportData = {
     mrz,
     dsc: pem,
-    dg2Hash: dg2Hash,
+    // dg2Hash: dg2Hash,
     dg1Hash: dg1Hash,
     dgPresents: parsed?.dataGroupsPresent,
     eContent: concatenatedDataHashesArraySigned,
     signedAttr: signedEContentArray,
     encryptedDigest: encryptedDigestArray,
-    photoBase64: 'data:image/jpeg;base64,' + parsed.passportPhoto,
+    photoBase64: parsed?.passportPhoto
+      ? 'data:image/jpeg;base64,' + parsed?.passportPhoto
+      : '',
     mockUser: false,
   };
   const parsedPassportData = parsePassportData(passportData);
@@ -271,30 +273,30 @@ const handleResponseAndroid = async (
     eContent: JSON.parse(encapContent),
     signedAttr: JSON.parse(eContent),
     encryptedDigest: JSON.parse(encryptedDigest),
-    photoBase64: photo.base64,
+    photoBase64: photo?.base64 ?? '',
     mockUser: false,
   };
 
-  console.log(
-    'passportData',
-    JSON.stringify(
-      {
-        ...passportData,
-        photoBase64: passportData.photoBase64.substring(0, 100) + '...',
-      },
-      null,
-      2,
-    ),
-  );
+  // console.log(
+  //   'passportData',
+  //   JSON.stringify(
+  //     {
+  //       ...passportData,
+  //       photoBase64: passportData.photoBase64.substring(0, 100) + '...',
+  //     },
+  //     null,
+  //     2,
+  //   ),
+  // );
 
   console.log('mrz', passportData?.mrz);
   console.log('dataGroupHashes', passportData?.eContent);
   console.log('eContent', passportData?.eContent);
   console.log('encryptedDigest', passportData?.encryptedDigest);
-  console.log(
-    'photoBase64',
-    passportData?.photoBase64.substring(0, 100) + '...',
-  );
+  // console.log(
+  //   'photoBase64',
+  //   passportData?.photoBase64.substring(0, 100) + '...',
+  // );
   console.log('digestAlgorithm', digestAlgorithm);
   console.log('signerInfoDigestAlgorithm', signerInfoDigestAlgorithm);
   console.log('digestEncryptionAlgorithm', digestEncryptionAlgorithm);

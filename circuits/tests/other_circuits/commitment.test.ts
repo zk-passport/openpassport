@@ -57,7 +57,6 @@ describe('commitment hasher', function () {
         BigInt(attestation_id).toString(),
         BigInt(leaf).toString(),
         mrz_bytes_packed,
-        dg2HashFormatted
       );
       console.log('\x1b[34m', 'commitment in js : ', commitment, '\x1b[0m');
       expect(BigInt(leafValueCircom).toString()).to.equal(BigInt(commitment).toString());
