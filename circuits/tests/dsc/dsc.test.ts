@@ -1,7 +1,7 @@
 import { assert, expect } from 'chai';
 import path from 'path';
 import { wasm as wasm_tester } from 'circom_tester';
-import { generateCircuitInputsDSC } from '../../common/src/utils/csca';
+import { generateCircuitInputsDSC } from '../../../common/src/utils/csca';
 import {
   mock_dsc_sha1_rsa_4096,
   mock_dsc_sha256_rsa_4096,
@@ -76,57 +76,14 @@ import {
   mock_csca_sha512_rsa_65537_4096,
   mock_dsc_sha256_rsa_3_4096,
   mock_csca_sha256_rsa_3_4096,
-} from '../../common/src/constants/mockCertificates';
-import { max_cert_bytes } from '../../common/src/constants/constants';
-import { getCircuitName } from '../../common/src/utils/certificate_parsing/parseCertificateSimple';
+} from '../../../common/src/constants/mockCertificates';
+import { max_cert_bytes } from '../../../common/src/constants/constants';
+import { getCircuitName } from '../../../common/src/utils/certificate_parsing/parseCertificateSimple';
+import { fullSigAlgs, sigAlgs } from './test_cases';
 
-const sigAlgs = [
-  { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '65537', keyLength: '4096' },
-  // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '65537', keyLength: '2048' },
-  // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '65537', keyLength: '3072' },
-  { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '3', keyLength: '4096' },
-  // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '3', keyLength: '2048' },
-  // { sigAlg: 'rsa', hashFunction: 'sha1', domainParameter: '3', keyLength: '3072' },
+const testSuite = process.env.FULL_TEST_SUITE === 'true' ? fullSigAlgs : sigAlgs;
 
-  { sigAlg: 'rsa', hashFunction: 'sha256', domainParameter: '65537', keyLength: '4096' },
-  // { sigAlg: 'rsa', hashFunction: 'sha256', domainParameter: '65537', keyLength: '2048' },
-  // { sigAlg: 'rsa', hashFunction: 'sha256', domainParameter: '65537', keyLength: '3072' },
-  { sigAlg: 'rsa', hashFunction: 'sha384', domainParameter: '65537', keyLength: '4096' },
-  { sigAlg: 'rsa', hashFunction: 'sha512', domainParameter: '65537', keyLength: '4096' },
-
-  { sigAlg: 'rsa', hashFunction: 'sha256', domainParameter: '3', keyLength: '4096' },  
-  // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '65537', keyLength: '4096' },
-  // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '65537', keyLength: '2048' },
-  // // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '65537', keyLength: '3072' },
-  // // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '3', keyLength: '3072' },
-  // // { sigAlg: 'rsapss', hashFunction: 'sha256', domainParameter: '3', keyLength: '4096' },
-  // { sigAlg: 'rsapss', hashFunction: 'sha384', domainParameter: '65537', keyLength: '3072' },
-  // { sigAlg: 'rsapss', hashFunction: 'sha384', domainParameter: '65537', keyLength: '4096' },
-
-
-  
-  // { sigAlg: 'ecdsa', hashFunction: 'sha1', domainParameter: 'secp256r1', keyLength: '256' },
-  // { sigAlg: 'ecdsa', hashFunction: 'sha1', domainParameter: 'secp384r1', keyLength: '384' }, //killed
-  // { sigAlg: 'ecdsa', hashFunction: 'sha1', domainParameter: 'brainpoolP256r1', keyLength: '256' },
-
-
-
-  // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'brainpoolP256r1', keyLength: '256' }, //works
-  // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'brainpoolP224r1', keyLength: '224' }, //not tested
-  // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'secp256r1', keyLength: '256' }, //works
-  // { sigAlg: 'ecdsa', hashFunction: 'sha256', domainParameter: 'secp384r1', keyLength: '384' }, //works // killed
-
-  // { sigAlg: 'ecdsa', hashFunction: 'sha384', domainParameter: 'brainpoolP256r1', keyLength: '256' }, //works
-  // { sigAlg: 'ecdsa', hashFunction: 'sha384', domainParameter: 'brainpoolP384r1', keyLength: '384' }, //works
-  // { sigAlg: 'ecdsa', hashFunction: 'sha384', domainParameter: 'secp384r1', keyLength: '384' }, //works
-
-  // { sigAlg: 'ecdsa', hashFunction: 'sha512', domainParameter: 'brainpoolP256r1', keyLength: '256' }, //works
-  // { sigAlg: 'ecdsa', hashFunction: 'sha512', domainParameter: 'brainpoolP384r1', keyLength: '384' }, //works
-
-
-];
-
-sigAlgs.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
+testSuite.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
   describe(`DSC chain certificate - ${hashFunction.toUpperCase()} ${sigAlg.toUpperCase()} ${domainParameter.toUpperCase()} ${keyLength}`, function () {
     this.timeout(0); // Disable timeout
     let circuit;
@@ -265,14 +222,6 @@ sigAlgs.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
         throw new Error('Unsupported signature algorithm and hash function combination');
     }
 
-    //TODO temporary - remove after sha384/512 padding is fixed
-    const max_cert_bytes_map = {
-      sha1: max_cert_bytes,
-      sha256: max_cert_bytes,
-      sha384: max_cert_bytes, //1024, //896, //512,
-      sha512: 512,
-    }
-
     const inputs = generateCircuitInputsDSC(
       BigInt(salt).toString(),
       dscCertPem,
@@ -284,7 +233,7 @@ sigAlgs.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
       circuit = await wasm_tester(
         path.join(
           __dirname,
-          `../circuits/dsc/instances/${getCircuitName('dsc', sigAlg, hashFunction, domainParameter, keyLength)}.circom`
+          `../../circuits/dsc/instances/${getCircuitName('dsc', sigAlg, hashFunction, domainParameter, keyLength)}.circom`
         ),
         {
           include: [
