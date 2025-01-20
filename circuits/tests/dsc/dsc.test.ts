@@ -171,7 +171,7 @@ testSuite.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
         cscaCertPem = mock_csca_sha384_rsapss_65537_4096;
         break;
       case 'ecdsa_sha1_secp256r1_256':
-        dscCertPem = mock_csca_sha1_secp256r1_256 //mock_dsc_sha1_secp256r1_256;
+        dscCertPem = mock_csca_sha1_secp256r1_256; //mock_dsc_sha1_secp256r1_256;
         cscaCertPem = mock_csca_sha1_secp256r1_256;
         break;
       case 'ecdsa_sha1_secp384r1_384':
@@ -179,15 +179,15 @@ testSuite.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
         cscaCertPem = mock_csca_sha1_secp384r1_384;
         break;
       case 'ecdsa_sha1_brainpoolP256r1_256':
-        dscCertPem = mock_dsc_sha1_brainpoolP256r1_256
-        cscaCertPem = mock_csca_sha1_brainpoolP256r1_256
+        dscCertPem = mock_dsc_sha1_brainpoolP256r1_256;
+        cscaCertPem = mock_csca_sha1_brainpoolP256r1_256;
         break;
       case 'ecdsa_sha256_secp256r1_256':
         dscCertPem = mock_dsc_sha256_secp256r1;
         cscaCertPem = mock_csca_sha256_secp256r1;
         break;
       case 'ecdsa_sha256_secp384r1_384':
-        dscCertPem = mock_dsc_sha256_secp384r1_384  ;
+        dscCertPem = mock_dsc_sha256_secp384r1_384;
         cscaCertPem = mock_csca_sha256_secp384r1_384;
         break;
       case 'ecdsa_sha256_brainpoolP256r1_256':
@@ -195,7 +195,7 @@ testSuite.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
         cscaCertPem = mock_csca_sha256_brainpoolP256r1_256;
         break;
       case 'ecdsa_sha256_brainpoolP224r1_224':
-        dscCertPem = mock_dsc_sha256_brainpoolP224r1_224
+        dscCertPem = mock_dsc_sha256_brainpoolP224r1_224;
         cscaCertPem = mock_csca_sha256_brainpoolP224r1_224;
         break;
       case 'ecdsa_sha384_brainpoolP256r1_256':
