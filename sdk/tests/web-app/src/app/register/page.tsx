@@ -10,7 +10,7 @@ export default function Prove() {
   const scope = 'scope';
 
 
-  const openPassportVerifier = new OpenPassportVerifier('register', scope).allowMockPassports()
+  const openPassportVerifier = new OpenPassportVerifier('register', scope)
     .setCommitmentMerkleTreeUrl(COMMITMENT_TREE_TRACKER_URL);
 
 
