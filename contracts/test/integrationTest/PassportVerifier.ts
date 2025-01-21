@@ -42,7 +42,7 @@ describe("Test one time verification flow", async function () {
 
     // contracts
     let genericVerifier: any;
-    let openPassportVerifier: any;
+    let passportVerifier: any;
 
     let verifierProveRsa65537Sha256: any;
     let verifierDscRsa65537Sha256_4096: any;
@@ -101,12 +101,12 @@ describe("Test one time verification flow", async function () {
         await genericVerifier.waitForDeployment();
         console.log('\x1b[34m%s\x1b[0m', `VerfiersManager deployed to ${genericVerifier.target}`);
 
-        const openPassportVerifierFactory = await ethers.getContractFactory("OpenPassportVerifier", owner);
-        openPassportVerifier = await openPassportVerifierFactory.deploy(
+        const passportVerifierFactory = await ethers.getContractFactory("passportVerifier", owner);
+        passportVerifier = await passportVerifierFactory.deploy(
             genericVerifier
         );
-        await openPassportVerifier.waitForDeployment();
-        console.log('\x1b[34m%s\x1b[0m', `sbt deployed to ${openPassportVerifier.target}`);
+        await passportVerifier.waitForDeployment();
+        console.log('\x1b[34m%s\x1b[0m', `sbt deployed to ${passportVerifier.target}`);
 
         await genericVerifier.updateVerifier(
             VERIFICATION_TYPE_ENUM_PROVE,
@@ -151,8 +151,8 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.verify(attestation))
+        
+            await expect(passportVerifier.verify(attestation))
                 .to.not.be.reverted;
         });
 
@@ -180,8 +180,8 @@ describe("Test one time verification flow", async function () {
                 }
             };
 
-            await expect(openPassportVerifier.verify(attestation))
-                .to.be.revertedWithCustomError(openPassportVerifier, "CURRENT_DATE_NOT_IN_VALID_RANGE");
+            await expect(passportVerifier.verify(attestation))
+                .to.be.revertedWithCustomError(passportVerifier, "CURRENT_DATE_NOT_IN_VALID_RANGE");
         });
 
         // TODO: After update modal server, return this code.
@@ -208,8 +208,8 @@ describe("Test one time verification flow", async function () {
         //         }
         //     };
 
-        //     await expect(openPassportVerifier.verify(attestation))
-        //         .to.be.revertedWithCustomError(openPassportVerifier, "CUNEQUAL_BLINDED_DSC_COMMITMENT");
+        //     await expect(passportVerifier.verify(attestation))
+        //         .to.be.revertedWithCustomError(passportVerifier, "CUNEQUAL_BLINDED_DSC_COMMITMENT");
         // });
 
         it("Should revert with invalid prove proof", async function () {
@@ -234,9 +234,9 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.verify(attestation))
-                .to.be.revertedWithCustomError(openPassportVerifier, "INVALID_PROVE_PROOF");
+    
+            await expect(passportVerifier.verify(attestation))
+                .to.be.revertedWithCustomError(passportVerifier, "INVALID_PROVE_PROOF");
         });
 
         it("Should revert with invalid DSC proof", async function () {
@@ -261,9 +261,9 @@ describe("Test one time verification flow", async function () {
                     pubSignals: invalid_dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.verify(attestation))
-                .to.be.revertedWithCustomError(openPassportVerifier, "INVALID_DSC_PROOF");
+    
+            await expect(passportVerifier.verify(attestation))
+                .to.be.revertedWithCustomError(passportVerifier, "INVALID_DSC_PROOF");
         });
 
         it("Should revert with invalid signature type", async function () {
@@ -285,8 +285,8 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.verify(attestation))
+    
+            await expect(passportVerifier.verify(attestation))
                 .to.be.reverted;
         });
 
@@ -312,9 +312,9 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.discloseIssuingState(attestation))
-                .to.emit(openPassportVerifier, "IssuingStateDisclosed")
+        
+            await expect(passportVerifier.discloseIssuingState(attestation))
+                .to.emit(passportVerifier, "IssuingStateDisclosed")
                 .withArgs("FRA");
         });
 
@@ -337,9 +337,9 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.discloseName(attestation))
-                .to.emit(openPassportVerifier, "NameDisclosed")
+            
+            await expect(passportVerifier.discloseName(attestation))
+                .to.emit(passportVerifier, "NameDisclosed")
                 .withArgs("DUPONT<<ALPHONSE<HUGHUES<ALBERT<<<<<<<<");
         });
 
@@ -362,9 +362,9 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.disclosePassportNumber(attestation))
-                .to.emit(openPassportVerifier, "PassportNumberDisclosed")
+            
+            await expect(passportVerifier.disclosePassportNumber(attestation))
+                .to.emit(passportVerifier, "PassportNumberDisclosed")
                 .withArgs("15AA81234");
         });
 
@@ -387,9 +387,9 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.discloseNationality(attestation))
-                .to.emit(openPassportVerifier, "NationalityDisclosed")
+            
+            await expect(passportVerifier.discloseNationality(attestation))
+                .to.emit(passportVerifier, "NationalityDisclosed")
                 .withArgs("FRA");
         });
 
@@ -412,9 +412,9 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.discloseDateOfBirth(attestation))
-                .to.emit(openPassportVerifier, "DateOfBirthDisclosed")
+            
+            await expect(passportVerifier.discloseDateOfBirth(attestation))
+                .to.emit(passportVerifier, "DateOfBirthDisclosed")
                 .withArgs("940131");
         });
 
@@ -437,9 +437,9 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.discloseGender(attestation))
-                .to.emit(openPassportVerifier, "GenderDisclosed")
+            
+            await expect(passportVerifier.discloseGender(attestation))
+                .to.emit(passportVerifier, "GenderDisclosed")
                 .withArgs("M");
         });
 
@@ -462,9 +462,9 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.discloseExpiryDate(attestation))
-                .to.emit(openPassportVerifier, "ExpiryDateDisclosed")
+            
+            await expect(passportVerifier.discloseExpiryDate(attestation))
+                .to.emit(passportVerifier, "ExpiryDateDisclosed")
                 .withArgs("401031");
         });
 
@@ -487,9 +487,9 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.discloseOlderThan(attestation))
-                .to.emit(openPassportVerifier, "OlderThanDisclosed")
+            
+            await expect(passportVerifier.discloseOlderThan(attestation))
+                .to.emit(passportVerifier, "OlderThanDisclosed")
                 .withArgs("20");
         });
 
@@ -512,10 +512,10 @@ describe("Test one time verification flow", async function () {
                     pubSignals: dsc_proof[3]
                 }
             };
-
-            await expect(openPassportVerifier.discloseOfacResult(attestation))
-                .to.emit(openPassportVerifier, "OfacResultDisclosed")
-                .withArgs(false);
+            
+            await expect(passportVerifier.discloseOfacResult(attestation))
+                .to.emit(passportVerifier, "OfacResultDisclosed")
+                .withArgs(false); 
         });
 
         it("Should emit ForbiddenCountriesDisclosed event with correct value", async function () {
@@ -540,8 +540,8 @@ describe("Test one time verification flow", async function () {
 
             let expectedForbiddenCountries = new Array(20).fill("0x000000");
             expectedForbiddenCountries[0] = "0x414141";
-            await expect(openPassportVerifier.discloseForbiddenCountries(attestation))
-                .to.emit(openPassportVerifier, "ForbiddenCountriesDisclosed")
+            await expect(passportVerifier.discloseForbiddenCountries(attestation))
+                .to.emit(passportVerifier, "ForbiddenCountriesDisclosed")
                 .withArgs(expectedForbiddenCountries);
         });
     });

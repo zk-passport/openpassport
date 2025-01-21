@@ -47,10 +47,10 @@ describe("Test register flow", async function () {
 
     // contracts
     let genericVerifier: any;
-    let openPassportVerifier: any;
+    let passportVerifier: any;
 
-    let openPassportRegistry: any;
-    let openPassportRegister: any;
+    let passportRegistry: any;
+    let passportRegister: any;
 
     let verifierProveRsa65537Sha256: any;
     let verifierDscRsa65537Sha256_4096: any;
@@ -111,16 +111,16 @@ describe("Test register flow", async function () {
         await genericVerifier.waitForDeployment();
         console.log('\x1b[34m%s\x1b[0m', `VerfiersManager deployed to ${genericVerifier.target}`);
 
-        const openPassportVerifierFactory = await ethers.getContractFactory("OpenPassportVerifier", owner);
-        openPassportVerifier = await openPassportVerifierFactory.deploy(
+        const passportVerifierFactory = await ethers.getContractFactory("passportVerifier", owner);
+        passportVerifier = await passportVerifierFactory.deploy(
             genericVerifier
         );
-        await openPassportVerifier.waitForDeployment();
-        console.log('\x1b[34m%s\x1b[0m', `sbt deployed to ${openPassportVerifier.target}`);
+        await passportVerifier.waitForDeployment();
+        console.log('\x1b[34m%s\x1b[0m', `sbt deployed to ${passportVerifier.target}`);
 
         const merkleTree = getCSCAModulusMerkleTree();
-        const openPassportRegistryFacotry = await ethers.getContractFactory("OpenPassportRegistry", owner);
-        openPassportRegistry = await openPassportRegistryFacotry.deploy(
+        const passportRegistryFacotry = await ethers.getContractFactory("passportRegistry", owner);
+        passportRegistry = await passportRegistryFacotry.deploy(
             formatRoot(merkleTree.root)
         );
         console.log("root: ", formatRoot(merkleTree.root));
@@ -130,14 +130,14 @@ describe("Test register flow", async function () {
         await poseidonT3.waitForDeployment();
         console.log('\x1b[34m%s\x1b[0m', `PoseidonT3 deployed to: ${poseidonT3.target}`);
 
-        const openPassportRegisterFactory = await ethers.getContractFactory("OpenPassportRegister", {
+        const passportRegisterFactory = await ethers.getContractFactory("passportRegister", {
             libraries: {
               PoseidonT3: poseidonT3
             }
         });
-        openPassportRegister = await openPassportRegisterFactory.deploy(
-            openPassportRegistry,
-            openPassportVerifier
+        passportRegister = await passportRegisterFactory.deploy(
+            passportRegistry,
+            passportVerifier
         );
 
         await genericVerifier.updateVerifier(
@@ -185,9 +185,9 @@ describe("Test register flow", async function () {
                 }
             };
         
-            let preRoot = await openPassportRegister.getMerkleRoot();
-            await openPassportRegister.registerCommitment(attestation);
-            let afterRoot = await openPassportRegister.getMerkleRoot();
+            let preRoot = await passportRegister.getMerkleRoot();
+            await passportRegister.registerCommitment(attestation);
+            let afterRoot = await passportRegister.getMerkleRoot();
         });
 
         it("Should revert with invalid merkle root", async function() {
@@ -212,7 +212,7 @@ describe("Test register flow", async function () {
             };
         
             await expect(
-                openPassportRegister.registerCommitment(attestation)
+                passportRegister.registerCommitment(attestation)
             ).to.be.revertedWith("Register__InvalidMerkleRoot");
         });
 
@@ -236,11 +236,11 @@ describe("Test register flow", async function () {
         //         }
         //     };
             
-        //     await openPassportRegister.registerCommitment(attestation);
+        //     await passportRegister.registerCommitment(attestation);
             
         //     // Try to register the same commitment again
         //     await expect(
-        //         openPassportRegister.registerCommitment(attestation)
+        //         passportRegister.registerCommitment(attestation)
         //     ).not.to.be.reverted();
         // });
 
@@ -264,8 +264,8 @@ describe("Test register flow", async function () {
                 }
             };
             
-            await expect(openPassportRegister.registerCommitment(attestation))
-                .to.emit(openPassportRegister, "ProofValidated")
+            await expect(passportRegister.registerCommitment(attestation))
+                .to.emit(passportRegister, "ProofValidated")
                 .withArgs(
                     dsc_proof[3][DSC_MERKLE_ROOT_INDEX],
                     prove_proof[3][PROVE_RSA_NULLIFIER_INDEX],
@@ -276,7 +276,7 @@ describe("Test register flow", async function () {
 
     describe("test merkle tree functions", async function() {
         it("Should correctly track merkle tree size", async function() {
-            const initialSize = await openPassportRegister.getMerkleTreeSize();
+            const initialSize = await passportRegister.getMerkleTreeSize();
             
             const attestation = {
                 proveVerifierId: PROVE_RSA_65537_SHA256_VERIFIER_ID,
@@ -297,9 +297,9 @@ describe("Test register flow", async function () {
                 }
             };
             
-            await openPassportRegister.registerCommitment(attestation);
+            await passportRegister.registerCommitment(attestation);
             
-            expect(await openPassportRegister.getMerkleTreeSize())
+            expect(await passportRegister.getMerkleTreeSize())
                 .to.equal(initialSize + BigInt(1));
         });
 
@@ -323,28 +323,28 @@ describe("Test register flow", async function () {
                 }
             };
             
-            await openPassportRegister.registerCommitment(attestation);
-            const root = await openPassportRegister.getMerkleRoot();
+            await passportRegister.registerCommitment(attestation);
+            const root = await passportRegister.getMerkleRoot();
             
-            expect(await openPassportRegister.checkRoot(root)).to.be.true;
-            expect(await openPassportRegister.checkRoot("0x1234")).to.be.false;
+            expect(await passportRegister.checkRoot(root)).to.be.true;
+            expect(await passportRegister.checkRoot("0x1234")).to.be.false;
         });
     });
 
     describe("test owner functions", async function() {
         it("Should allow owner to add commitment directly", async function() {
             const commitment = "123456";
-            await openPassportRegister.connect(owner).devAddCommitment(commitment);
+            await passportRegister.connect(owner).devAddCommitment(commitment);
             
-            const index = await openPassportRegister.indexOf(commitment);
+            const index = await passportRegister.indexOf(commitment);
             expect(index).to.equal(BigInt(0));
         });
 
         it("Should not allow non-owner to add commitment directly", async function() {
             const commitment = "123456";
             await expect(
-                openPassportRegister.connect(addr1).devAddCommitment(commitment)
-            ).to.be.revertedWithCustomError(openPassportRegister, "OwnableUnauthorizedAccount")
+                passportRegister.connect(addr1).devAddCommitment(commitment)
+            ).to.be.revertedWithCustomError(passportRegister, "OwnableUnauthorizedAccount")
             .withArgs(addr1.address);
         });
     });
