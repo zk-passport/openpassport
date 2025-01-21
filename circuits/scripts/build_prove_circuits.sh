@@ -16,7 +16,7 @@ build_circuit() {
     yarn snarkjs groth16 setup build/prove/${CIRCUIT_NAME}/${CIRCUIT_NAME}.r1cs build/powersOfTau28_hez_final_${POWEROFTAU}.ptau build/prove/${CIRCUIT_NAME}/${CIRCUIT_NAME}.zkey
 
     echo "building vkey"
-    yarn snarkjs zkey contribute build/prove/${CIRCUIT_NAME}/${CIRCUIT_NAME}.zkey build/prove/${CIRCUIT_NAME}/${CIRCUIT_NAME}_final.zkey -e="random text"
+    # yarn snarkjs zkey contribute build/prove/${CIRCUIT_NAME}/${CIRCUIT_NAME}.zkey build/prove/${CIRCUIT_NAME}/${CIRCUIT_NAME}_final.zkey -e="random text"
     yarn snarkjs zkey export verificationkey build/prove/${CIRCUIT_NAME}/${CIRCUIT_NAME}_final.zkey build/prove/${CIRCUIT_NAME}/${CIRCUIT_NAME}_vkey.json
 
     yarn snarkjs zkey export solidityverifier build/prove/${CIRCUIT_NAME}/${CIRCUIT_NAME}_final.zkey build/prove/${CIRCUIT_NAME}/Verifier_${CIRCUIT_NAME}.sol
@@ -38,8 +38,8 @@ CIRCUITS=(
     "prove_rsa_sha256_65537_2048:prove:20:true"
     "prove_rsa_65537_sha1:prove:20:false"
     "prove_rsapss_65537_sha256:prove:20:false"
-    "prove_ecdsa_secp256r1_sha256:prove:22:false"
-    "prove_ecdsa_secp256r1_sha1:prove:22:false"
+    "prove_ecdsa_secp256r1_sha256_256:prove:22:false"
+    "prove_ecdsa_secp256r1_sha1_256:prove:22:false"
 )
 
 TOTAL_START_TIME=$(date +%s)

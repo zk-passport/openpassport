@@ -12,9 +12,18 @@ import { genMockPassportData } from '../../../common/src/utils/genMockPassportDa
 let circuit: any;
 
 // Mock passport added in ofac list to test circuits
-const passportData = genMockPassportData('rsa_sha256_65537_2048', 'FRA', '040211', '300101');
+const passportData = genMockPassportData(
+  'sha256',
+  'sha256',
+  'rsa_sha256_65537_2048',
+  'FRA',
+  '040211',
+  '300101'
+);
 // Mock passport not added in ofac list to test circuits
 const passportDataInOfac = genMockPassportData(
+  'sha256',
+  'sha256',
   'rsa_sha256_65537_2048',
   'FRA',
   '541007',
@@ -82,13 +91,12 @@ describe('OFAC - Passport number match', function () {
   it('should pass - wrong merkleroot, level 3', async function () {
     const wrongInputs = {
       ...nonMemSmtInputs,
-      smt_leaf_value: BigInt(Math.floor(Math.random() * Math.pow(2, 254))).toString(),
+      smt_leaf_key: BigInt(Math.floor(Math.random() * Math.pow(2, 254))).toString(),
     };
     let w = await circuit.calculateWitness(wrongInputs);
     const ofacCheckResult = (await circuit.getOutput(w, ['ofacCheckResult'])).ofacCheckResult;
     expect(ofacCheckResult).to.equal('0');
   });
-
 });
 
 // Level 2: NameDob match in OfacList
@@ -150,7 +158,7 @@ describe('OFAC - Name and DOB match', function () {
   it('should pass - wrong merkleroot, level 2', async function () {
     const wrongInputs = {
       ...nonMemSmtInputs,
-      smt_leaf_value: BigInt(Math.floor(Math.random() * Math.pow(2, 254))).toString(),
+      smt_leaf_key: BigInt(Math.floor(Math.random() * Math.pow(2, 254))).toString(),
     };
 
     let w = await circuit.calculateWitness(wrongInputs);
@@ -218,7 +226,7 @@ describe('OFAC - Name match', function () {
   it('should pass - wrong merkleroot, level 1', async function () {
     const wrongInputs = {
       ...nonMemSmtInputs,
-      smt_leaf_value: BigInt(Math.floor(Math.random() * Math.pow(2, 254))).toString(),
+      smt_leaf_key: BigInt(Math.floor(Math.random() * Math.pow(2, 254))).toString(),
     };
     let w = await circuit.calculateWitness(wrongInputs);
     const ofacCheckResult = (await circuit.getOutput(w, ['ofacCheckResult'])).ofacCheckResult;
