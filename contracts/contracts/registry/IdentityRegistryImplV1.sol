@@ -263,6 +263,15 @@ contract IdentityRegistryImplV1 is UUPSUpgradeable, OwnableUpgradeable, Identity
     {
         return cscaRoot == root;
     }
+
+    function getHubAddress()
+        external
+        onlyProxy
+        view
+        returns (address)
+    {
+        return hub;
+    }
     
     ///////////////////////////////////////////////////////////////////
     ///                     DEV FUNCTIONS                        ///

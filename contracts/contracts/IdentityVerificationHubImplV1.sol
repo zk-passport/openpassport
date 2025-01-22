@@ -421,4 +421,12 @@ contract IdentityVerificationHubImplV1 is UUPSUpgradeable, OwnableUpgradeable, I
         );
     }
 
+    function getRegistryAddress()
+        external
+        view
+        returns (address)
+    {
+        return registry;
+    }
+
 }
