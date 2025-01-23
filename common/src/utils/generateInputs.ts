@@ -29,6 +29,7 @@ import { SMT } from '@openpassport/zk-kit-smt';
 import { parseCertificateSimple } from './certificate_parsing/parseCertificateSimple';
 import { PublicKeyDetailsECDSA, PublicKeyDetailsRSA } from './certificate_parsing/dataStructure';
 import { parsePassportData, PassportMetadata } from './parsePassportData';
+import type { CircuitSignals } from "snarkjs";
 
 export function generateCircuitInputsDisclose(
   secret: string,
@@ -43,7 +44,7 @@ export function generateCircuitInputsDisclose(
   selector_ofac: string | number,
   forbidden_countries_list: string[],
   user_identifier: string
-) {
+): CircuitSignals {
   const pubkey_leaf = getLeaf(passportData.dsc);
   const formattedMrz = formatMrz(passportData.mrz);
   const mrz_bytes_packed = packBytes(formattedMrz);
@@ -104,7 +105,7 @@ export function generateCircuitInputsOfac(
   passportData: PassportData,
   sparsemerkletree: SMT,
   proofLevel: number
-) {
+): CircuitSignals {
   const mrz_bytes = formatMrz(passportData.mrz);
   const passport_leaf = getPassportNumberLeaf(mrz_bytes.slice(49, 58));
   const namedob_leaf = getNameDobLeaf(mrz_bytes.slice(10, 49), mrz_bytes.slice(62, 68)); // [57-62] + 5 shift
@@ -132,7 +133,7 @@ export function generateCircuitInputsOfac(
 export function generateCircuitInputsCountryVerifier(
   passportData: PassportData,
   sparsemerkletree: SMT
-) {
+): CircuitSignals {
   const mrz_bytes = formatMrz(passportData.mrz);
   const usa_ascii = stringToAsciiBigIntArray('USA');
   const country_leaf = getCountryLeaf(usa_ascii, mrz_bytes.slice(7, 10));
@@ -169,7 +170,7 @@ export function generateCircuitInputsRegister(
   secret: number | string,
   dsc_secret: number | string,
   passportData: PassportData
-) {
+): CircuitSignals {
   const { mrz, eContent, signedAttr, dg2Hash } = passportData;
   const passportMetadata = parsePassportData(passportData);
 

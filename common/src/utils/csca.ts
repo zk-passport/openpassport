@@ -12,6 +12,7 @@ import { SKI_PEM, SKI_PEM_DEV } from '../constants/skiPem';
 import { CertificateData, PublicKeyDetailsRSA } from './certificate_parsing/dataStructure';
 import { formatInput } from './generateInputs';
 import { SignatureAlgorithm } from './types';
+import type { CircuitSignals } from "snarkjs";
 
 export function findStartIndex(modulus: string, messagePadded: Uint8Array): number {
   const modulusNumArray = [];
@@ -49,7 +50,7 @@ export function generateCircuitInputsDSC(
   dscCertificate: any,
   max_cert_bytes: number,
   devMode: boolean = false
-) {
+): { signature_algorithm: string, inputs: CircuitSignals } {
   const dscCert = forge.pki.certificateFromPem(dscCertificate);
   const dscTbs = dscCert.tbsCertificate;
   const dscTbsCertDer = forge.asn1.toDer(dscTbs).getBytes();
@@ -130,7 +131,7 @@ export function generateCircuitInputsDSC(
   }
 
   console.log('dsc_pubKey_length', pubKey_dsc.length);
-  return {
+  const inputs = {
     signature_algorithm: `${signatureAlgorithm}_${curve || exponent}_${hashAlgorithm}_${4096}`,
     inputs: {
       raw_dsc_cert: dsc_message_padded_formatted,
@@ -145,6 +146,13 @@ export function generateCircuitInputsDSC(
       siblings: proof.siblings.flat().map((sibling) => sibling.toString()),
     },
   };
+
+  return {
+    signature_algorithm: inputs.signature_algorithm,
+    inputs: Object.entries(inputs.inputs).map(([key, value]) => ({
+      [key]: formatInput(value)
+    })).reduce((acc, curr) => ({ ...acc, ...curr }), {})
+  }
 }
 
 export function getCSCAFromSKI(ski: string, devMode: boolean): string {

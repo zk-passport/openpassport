@@ -353,7 +353,10 @@ contract IdentityVerificationHubImplV1 is UUPSUpgradeable, OwnableUpgradeable, I
         }
 
         result = IRegisterCircuitVerifier(verifier).verifyProof(
-            registerCircuitProof
+            registerCircuitProof.a,
+            registerCircuitProof.b,
+            registerCircuitProof.c,
+            registerCircuitProof.pubSignals
         );
         return result;
     }
@@ -427,6 +430,26 @@ contract IdentityVerificationHubImplV1 is UUPSUpgradeable, OwnableUpgradeable, I
         returns (address)
     {
         return registry;
+    }
+
+    function getRegisterCircuitVerifier(
+        uint256 typeId
+    )
+        external
+        view
+        returns (address)
+    {
+        return sigTypeToRegisterCircuitVerifiers[typeId];
+    }
+
+    function getDscCircuitVerifier(
+        uint256 typeId
+    )
+        external
+        view
+        returns (address)
+    {
+        return sigTypeToDscCircuitVerifiers[typeId];
     }
 
 }
