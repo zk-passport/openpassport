@@ -336,8 +336,7 @@ contract IdentityVerificationHubImplV1 is UUPSUpgradeable, OwnableUpgradeable, I
 
         return attrs;
     }
-
-
+    
     // Functions for register commitment
     function verifyPassportRegisterCircuit(
         uint256 registerCircuitVerifierId,

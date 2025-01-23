@@ -137,7 +137,7 @@ contract IdentityRegistryImplV1 is UUPSUpgradeable, OwnableUpgradeable, Identity
         onlyProxy
     {
         if (address(hub) == address(0)) revert HUB_NOT_SET();
-            if (msg.sender != address(hub)) revert ONLY_HUB_CAN_REGISTER_COMMITMENT();
+        if (msg.sender != address(hub)) revert ONLY_HUB_CAN_REGISTER_COMMITMENT();
         if (nullifiers[attestationId][nullifier]) revert REGISTERED_IDENTITY();
 
         nullifiers[attestationId][nullifier] = true;
