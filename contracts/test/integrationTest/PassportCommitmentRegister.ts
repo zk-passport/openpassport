@@ -4,7 +4,7 @@ const GREEN = '\x1b[32m';
 const RESET = '\x1b[0m';
 
 import {ethers} from "hardhat";
-import {BigNumberish} from "ethers";
+import {BigNumberish, ContractTransactionReceipt, Log} from "ethers";
 import {expect} from "chai";
 import {Contract, Signer} from "ethers";
 import {groth16} from "snarkjs";
@@ -48,6 +48,10 @@ import type {
 } from "snarkjs";
 
 // Contract imports
+import {
+    ATTESTATION_ID,
+    CONTRACT_CONSTANTS
+} from "../utils/constants"
 import {
     IdentityVerificationHub,
     IdentityVerificationHubImplV1,
@@ -173,32 +177,27 @@ describe("Test passport commitment register", async function () {
             const previousRoot = await registry.getIdentityCommitmentMerkleRoot();
             console.log(YELLOW, "Previous root: ", previousRoot, RESET);
             const tx = await hub.verifyAndRegisterPassportCommitment(passportProof);
-            const receipt = await tx.wait();
+            const receipt = await tx.wait() as ContractTransactionReceipt;
+            const event = (receipt.logs[0] as Log);
+            const eventArgs = registry.interface.parseLog(event)?.args;
 
-            // const commitmentRegisteredEvent = receipt?.logs.find(
-            //     log => {
-            //         try {
-            //             return registry.interface.parseLog(log as any)?.name === "CommitmentRegistered";
-            //         } catch (error) {
-            //             return false;
-            //         }
-            //     }
-            // );
-
-            // const commitmentRegisteredEventData = registry.interface.parseLog(commitmentRegisteredEvent as any);
-            // if (commitmentRegisteredEventData) {
-            //     const parsedLog = registry.interface.parseLog(commitmentRegisteredEvent as any);
-            //     expect(parsedLog?.args.attestationId).to.not.be.undefined;
-            //     expect(parsedLog?.args.nullifier).to.not.be.undefined;
-            //     expect(parsedLog?.args.commitment).to.not.be.undefined;
-            //     expect(parsedLog?.args.timestamp).to.not.be.undefined;
-            //     expect(parsedLog?.args.imt_root).to.not.be.undefined;
-            //     expect(parsedLog?.args.index).to.not.be.undefined;
-            // }
+            const block = await ethers.provider.getBlock(receipt.blockNumber);
+            const blockTimestamp = block!.timestamp;
 
             const currentRoot = await registry.getIdentityCommitmentMerkleRoot();
-            expect(currentRoot).to.not.equal(previousRoot);
+            const size = await registry.getIdentityCommitmentMerkleTreeSize();
+            
+            // Check event args
+            expect(eventArgs?.attestationId).to.equal(ATTESTATION_ID.E_PASSPORT);
+            expect(eventArgs?.nullifier).to.equal(registerProof.pubSignals[CONTRACT_CONSTANTS.REGISTER_NULLIFIER_INDEX]);
+            expect(eventArgs?.commitment).to.equal(registerProof.pubSignals[CONTRACT_CONSTANTS.REGISTER_COMMITMENT_INDEX]);
+            expect(eventArgs?.timestamp).to.equal(blockTimestamp);
+            expect(eventArgs?.imtRoot).to.equal(currentRoot);
+            expect(eventArgs?.imtIndex).to.equal(0);
 
+            // Check state
+            expect(currentRoot).to.not.equal(previousRoot);
+            expect(size).to.equal(1);
         });
     });
 });
