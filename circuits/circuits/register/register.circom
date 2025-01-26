@@ -1,5 +1,6 @@
 pragma circom 2.1.9;
 
+include "@zk-kit/binary-merkle-root.circom/src/binary-merkle-root.circom";
 include "../utils/passport/customHashers.circom";
 include "../utils/passport/signatureAlgorithm.circom";
 include "../utils/passport/date/isValid.circom";
@@ -33,7 +34,7 @@ include "../utils/crypto/bitify/splitWordsToBytes.circom";
 /// @output commitment Commitment that will be added to the onchain registration tree
 /// @output glue Used to link register and dsc proofs - the same is generated in the dsc circuit
 
-template REGISTER(DG_HASH_ALGO, ECONTENT_HASH_ALGO, signatureAlgorithm, n, k, MAX_ECONTENT_PADDED_LEN, MAX_SIGNED_ATTR_PADDED_LEN) {
+template REGISTER(DG_HASH_ALGO, ECONTENT_HASH_ALGO, signatureAlgorithm, n, k, MAX_ECONTENT_PADDED_LEN, MAX_SIGNED_ATTR_PADDED_LEN, nLevels) {
     var kLengthFactor = getKLengthFactor(signatureAlgorithm);
     var kScaled = k * kLengthFactor;
     var HASH_LEN_BITS = getHashLength(signatureAlgorithm);
@@ -52,6 +53,10 @@ template REGISTER(DG_HASH_ALGO, ECONTENT_HASH_ALGO, signatureAlgorithm, n, k, MA
     signal input signature_passport[kScaled];
 
     signal input pubKey_csca_hash;
+
+    signal input merkle_root;
+    signal input path[nLevels];
+    signal input siblings[nLevels];
     
     signal input secret;
     signal input salt;
@@ -86,6 +91,11 @@ template REGISTER(DG_HASH_ALGO, ECONTENT_HASH_ALGO, signatureAlgorithm, n, k, MA
     signal eContent_shaBytes_packed_hash <== PackBytesAndPoseidon(ECONTENT_HASH_ALGO_BYTES)(passportVerifier.eContentShaBytes);
     
     signal pubKey_dsc_hash <== CustomHasher(kScaled)(pubKey_dsc);
+
+    signal leaf <== Poseidon(2)([pubKey_dsc_hash, pubKey_csca_hash]);
+
+    signal computed_merkle_root <== BinaryMerkleRoot(nLevels)(leaf, nLevels, path, siblings);
+    merkle_root === computed_merkle_root;
     
     signal output commitment <== Poseidon(6)([
         secret,

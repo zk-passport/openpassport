@@ -6,44 +6,15 @@ import {
   PublicKeyDetailsECDSA,
   PublicKeyDetailsRSA,
 } from './certificate_parsing/dataStructure';
-import { SignatureAlgorithm } from './types';
+import { PassportData, SignatureAlgorithm } from './types';
 import { getNAndK, getNAndKCSCA } from './passports/passport';
 import { splitToWords } from './bytes';
 import { hexToDecimal } from './bytes';
 import { customHasher } from './hash';
+import { parseDscCertificateData } from './passports/passport_parsing/parseDscCertificateData';
 
 
 export function getLeaf(dsc: string): string {
-  const { signatureAlgorithm, publicKeyDetails, hashAlgorithm } = parseCertificateSimple(dsc);
-
-  if (signatureAlgorithm === 'ecdsa') {
-    const { x, y, curve, bits } = publicKeyDetails as PublicKeyDetailsECDSA;
-    const sigAlgKey = `${signatureAlgorithm}_${hashAlgorithm}_${curve}_${bits}`;
-    const { n, k } = getNAndK(sigAlgKey as SignatureAlgorithm);
-    const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
-
-    if (sigAlgIndex == undefined) {
-      console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
-      throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
-    }
-    let qx = splitToWords(BigInt(hexToDecimal(x)), n, k);
-    let qy = splitToWords(BigInt(hexToDecimal(y)), n, k);
-    return customHasher([sigAlgIndex, ...qx, ...qy]);
-  } else {
-    const { modulus, bits, exponent } = publicKeyDetails as PublicKeyDetailsRSA;
-    const sigAlgKey = `${signatureAlgorithm}_${hashAlgorithm}_${exponent}_${bits}`;
-    const { n, k } = getNAndK(sigAlgKey as SignatureAlgorithm);
-    const pubkeyChunked = splitToWords(BigInt(hexToDecimal(modulus)), n, k);
-
-    const sigAlgIndex = SignatureAlgorithmIndex[sigAlgKey];
-    if (sigAlgIndex == undefined) {
-      console.error(`\x1b[31mInvalid signature algorithm: ${sigAlgKey}\x1b[0m`);
-      throw new Error(`Invalid signature algorithm: ${sigAlgKey}`);
-    }
-    return customHasher([sigAlgIndex, ...pubkeyChunked]);
-  }
-}
-export function getLeafCSCA(dsc: string): string {
   const parsedCertificate = parseCertificateSimple(dsc);
 
   const signatureAlgorithm = parsedCertificate.signatureAlgorithm;
@@ -63,6 +34,29 @@ export function getLeafCSCA(dsc: string): string {
     const pubkeyChunked = splitToWords(BigInt(hexToDecimal(modulus)), n, k);
     return customHasher([...pubkeyChunked]);
   }
+}
+
+export function getLeafDSCFromPassportData(passportData: PassportData): string {
+  if (!passportData.parsed) {
+    throw new Error('Passport data not parsed');
+  }
+  if (!passportData.passportMetadata.cscaFound) {
+    throw new Error('CSCA not found');
+  }
+  return getLeafDscFromDSCAndCsca(passportData.passportMetadata.dsc, passportData.passportMetadata.csca);
+}
+
+export function getLeafDsc(dsc: string): string {
+  const parsedDsc = parseCertificateSimple(dsc);
+  const parsedDscCertificateData = parseDscCertificateData(parsedDsc);
+  return getLeafDscFromDSCAndCsca(dsc, parsedDscCertificateData.csca);
+}
+
+
+function getLeafDscFromDSCAndCsca(dsc: string, csca: string): string {
+  const leafDSC = getLeaf(dsc);
+  const leafCSCA = getLeaf(csca);
+  return poseidon2([leafDSC, leafCSCA]).toString();
 }
 
 export async function fetchTreeFromUrl(url: string): Promise<LeanIMT> {

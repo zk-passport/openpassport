@@ -5,8 +5,9 @@ import { CSCA_TREE_DEPTH, MODAL_SERVER_ADDRESS } from '../constants/constants';
 import { poseidon2 } from 'poseidon-lite';
 import { IMT } from '@openpassport/zk-kit-imt';
 import serialized_csca_tree from '../../pubkeys/serialized_csca_tree.json';
+import serialized_dsc_tree from '../../pubkeys/serialized_dsc_tree.json';
 import axios from 'axios';
-import { getLeafCSCA } from './pubkeyTree';
+import { getLeaf } from './pubkeyTree';
 import { SKI_PEM, SKI_PEM_DEV } from '../constants/skiPem';
 import { formatInput } from './circuits/generateInputs';
 // import { getCertificateFromPem, parseCertificate } from './certificates/handleCertificate';
@@ -226,7 +227,7 @@ export function generateCircuitInputsDSC(
   console.log('authorityKeyIdentifier: ', authorityKeyIdentifier);
   const cscaPem = getCSCAFromSKI(authorityKeyIdentifier, devMode);
   console.log('\x1b[34m', 'cscaPem: ', cscaPem, '\x1b[0m');
-  const leaf = getLeafCSCA(cscaPem);
+  const leaf = getLeaf(cscaPem);
   const [root, proof] = getCSCAModulusProof(leaf);
 
   const parsedCSCAPem = parseCertificate(cscaPem, 'csca_cert');
@@ -328,6 +329,17 @@ export function getCSCAModulusProof(leaf) {
   console.log('leaf', leaf);
   let tree = new IMT(poseidon2, CSCA_TREE_DEPTH, 0, 2);
   tree.setNodes(serialized_csca_tree);
+  const index = tree.indexOf(leaf);
+  if (index === -1) {
+    throw new Error('Your public key was not found in the registry');
+  }
+  const proof = tree.createProof(index);
+  return [tree.root, proof];
+}
+export function getDSCPublicKeyTreeProof(leaf) {
+  console.log('leaf', leaf);
+  let tree = new IMT(poseidon2, CSCA_TREE_DEPTH, 0, 2);
+  tree.setNodes(serialized_dsc_tree);
   const index = tree.indexOf(leaf);
   if (index === -1) {
     throw new Error('Your public key was not found in the registry');

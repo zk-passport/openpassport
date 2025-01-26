@@ -21,6 +21,8 @@ import { getCurrentDateYYMMDD } from '../date';
 import { castFromScope } from './uuid';
 import { formatCountriesList } from './formatInputs';
 import { generateMerkleProof, generateSMTProof } from '../trees';
+import { getLeafDSCFromPassportData } from '../pubkeyTree';
+import { getDSCPublicKeyTreeProof } from '../csca';
 export function generateCircuitInputsRegister(
   secret: number | string,
   dsc_secret: number | string,
@@ -60,6 +62,9 @@ export function generateCircuitInputsRegister(
   );
   const pubKey_csca_hash = customHasher(pubKey_csca);
 
+  const leaf = getLeafDSCFromPassportData(passportData);
+  const [root, proof] = getDSCPublicKeyTreeProof(leaf);
+
   const inputs = {
     dg1: mrz_formatted,
     dg1_hash_offset: passportMetadata.dg1HashOffset,
@@ -73,6 +78,9 @@ export function generateCircuitInputsRegister(
     pubKey_csca_hash: pubKey_csca_hash,
     secret: secret,
     salt: dsc_secret,
+    merkle_root: root,
+    path: proof.pathIndices.map((index) => index.toString()),
+    siblings: proof.siblings.flat().map((sibling) => sibling.toString()),
   };
 
   return Object.entries(inputs)
