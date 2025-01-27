@@ -99,7 +99,7 @@ export function generateNullifier(passportData: PassportData) {
 
 export function generateGlue(salt: string, passportData: PassportData) {
     const passportMetadata = passportData.passportMetadata;
-    const kLengthFactor = passportMetadata.signatureAlgorithm == 'ecda' ? 2 : 1;
+    const kLengthFactor = passportMetadata.signatureAlgorithm == 'ecdsa' ? 2 : 1;
 
     const pubKey_dsc = getCertificatePubKey(
         passportData.dsc_parsed,
