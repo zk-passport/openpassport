@@ -251,12 +251,11 @@ testSuite.forEach(({ sigAlg, hashFunction, domainParameter, keyLength }) => {
 
     it('should compute the correct output', async () => {
       const witness = await circuit.calculateWitness(inputs.inputs, true);
+      await circuit.checkConstraints(witness);
       console.log('\x1b[34m%s\x1b[0m', 'witness generated ', sigAlg);
-      // const blinded_dsc_commitment = (await circuit.getOutput(witness, ['blinded_dsc_commitment']))
-      //   .blinded_dsc_commitment;
-      // console.log('\x1b[34m%s\x1b[0m', 'blinded_dsc_commitment: ', blinded_dsc_commitment);
-      // const merkle_root = (await circuit.getOutput(witness, ['merkle_root'])).merkle_root;
-      // console.log('\x1b[34m%s\x1b[0m', 'merkle_root: ', merkle_root);
+      const glue = (await circuit.getOutput(witness, ['glue']))
+        .glue;
+      console.log('\x1b[34m%s\x1b[0m', 'glue: ', glue);
       // expect(blinded_dsc_commitment).to.be.not.null;
     });
   });

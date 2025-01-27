@@ -9,7 +9,7 @@ export const sigAlgs = [
   //   checkNullifier: true,
   // },
   {
-    dgHashAlgo: 'sha1',
+    dgHashAlgo: 'sha256',
     eContentHashAlgo: 'sha256',
     sigAlg: 'rsa',
     hashFunction: 'sha256',

@@ -57,8 +57,10 @@ template REGISTER(DG_HASH_ALGO, ECONTENT_HASH_ALGO, signatureAlgorithm, n, k, MA
     signal input secret;
     signal input salt;
 
-    signal dsc_pubkey_length_bytes_temp <== GetKLengthBytes(signatureAlgorithm)();
-    signal dsc_pubkey_length_bytes <== dsc_pubkey_length_bytes_temp * kLengthFactor;
+    var dsc_pubkey_length_bytes_temp = getKLengthBytes(signatureAlgorithm);
+    var dsc_pubkey_length_bytes = dsc_pubkey_length_bytes_temp * kLengthFactor;
+
+    log("dsc_pubkey_length_bytes", dsc_pubkey_length_bytes);
 
     // This means the attestation is a passport
     signal attestation_id <== 1;
@@ -89,79 +91,52 @@ template REGISTER(DG_HASH_ALGO, ECONTENT_HASH_ALGO, signatureAlgorithm, n, k, MA
     signal dg1_packed_hash <== PackBytesAndPoseidon(93)(dg1);
     signal eContent_shaBytes_packed_hash <== PackBytesAndPoseidon(ECONTENT_HASH_ALGO_BYTES)(passportVerifier.eContentShaBytes);
 
-    signal pubKey_dsc_hash_commitement <== CustomHasher(kScaled)(pubKey_dsc);
-        
-    //convert DSC public key to 35 words of 120 bits each
-    component standardizedDSCPubKey = StandardizeDSCPubKey(n, k, kLengthFactor);
-    standardizedDSCPubKey.pubKey_dsc <== pubKey_dsc;
+    signal pubKey_dsc_hash_commitment <== CustomHasher(kScaled)(pubKey_dsc);
+    
+    signal dsc_pubKey_bytes[525] <== WordsToBytes(n, k, n * k / 8)(pubKey_dsc);
 
-    signal pubKey_dsc_hash <== CustomHasher(35)(standardizedDSCPubKey.out);
+    signal padded_dsc_pubKey_bytes[525];
+    for (var i = 0; i < dsc_pubkey_length_bytes; i++) {
+        padded_dsc_pubKey_bytes[i] <== dsc_pubKey_bytes[dsc_pubkey_length_bytes - i - 1];
+    }
+
+    for (var i = dsc_pubkey_length_bytes; i < 525; i++) {
+        padded_dsc_pubKey_bytes[i] <== 0;
+    }
+
+    log("padded_dsc_pubKey_bytes[0]", padded_dsc_pubKey_bytes[0]);
+    log("padded_dsc_pubKey_bytes[1]", padded_dsc_pubKey_bytes[1]);
+    log("padded_dsc_pubKey_bytes[2]", padded_dsc_pubKey_bytes[2]);
+
+    log("padded_dsc_pubKey_bytes[254]", padded_dsc_pubKey_bytes[254]);
+    log("padded_dsc_pubKey_bytes[255]", padded_dsc_pubKey_bytes[255]);
+    log("padded_dsc_pubKey_bytes[256]", padded_dsc_pubKey_bytes[256]);
+    log("padded_dsc_pubKey_bytes[257]", padded_dsc_pubKey_bytes[257]);
+    log("padded_dsc_pubKey_bytes[524]", padded_dsc_pubKey_bytes[524]);
+
+    signal standardized_pubkey[35] <== SplitBytesToWords(525, 120, 35)(padded_dsc_pubKey_bytes);
+
+    for (var i = 0; i < 35; i++) {
+        log("standardized_pubkey[", i, "]", standardized_pubkey[i]);
+    }
+
+    signal pubKey_dsc_hash <== CustomHasher(35)(standardized_pubkey);
     
     signal output commitment <== Poseidon(6)([
         secret,
         attestation_id,
         dg1_packed_hash,
         eContent_shaBytes_packed_hash,
-        pubKey_dsc_hash_commitement,
+        pubKey_dsc_hash_commitment,
         pubKey_csca_hash
     ]);
+
+    log("salt", salt);
+    log("dsc_pubkey_length_bytes", dsc_pubkey_length_bytes);
+    log("pubKey_dsc_hash", pubKey_dsc_hash);
+    log("pubKey_csca_hash", pubKey_csca_hash);
     
     signal output glue <== Poseidon(4)([salt, dsc_pubkey_length_bytes, pubKey_dsc_hash, pubKey_csca_hash]);
+
     log("glue", glue);
-}
-
-/// @notice Converts DSC public key into standardized 35 words of 120 bits each 
-/// @param n Number of bits per input word
-/// @param k Number of input words 
-/// @param kLengthFactor Indicates if key needs to be split (2 for ECDSA)
-/// @input pubKey_dsc Input DSC public key words
-/// @output out 35 standardized words
-template StandardizeDSCPubKey(n, k, kLengthFactor) {
-    signal input pubKey_dsc[k * kLengthFactor];
-    signal output out[35];
-
-    var maxPubkeyBytesLength = getMaxDscPubKeyLength();
-
-    if (kLengthFactor == 1) {
-        // RSA case
-
-        //In our case we always have 35 words of 120 bits each for RSA keys,
-        //So not converting to 8 bits. This is why we have the assert below.
-        assert(k == 35);
-        assert(n == 120);
-        component dsc_bytes = WordsToBytes(n, k, maxPubkeyBytesLength);
-        dsc_bytes.words <== pubKey_dsc;
-
-        component splitToWords = SplitBytesToWords(maxPubkeyBytesLength, 120, 35);
-        splitToWords.in <== dsc_bytes.bytes;
-
-        for (var i=0; i < 35; i++) {
-            out[i] <== splitToWords.out[i];
-        }
-
-    } else if (kLengthFactor == 2) {
-        // ECDSA case
-        component dsc_bytes_x = WordsToBytes(n, k, (n * k) / 8);
-        component dsc_bytes_y = WordsToBytes(n, k, (n * k) / 8);
-
-        for (var i=0; i < k; i++) {
-            dsc_bytes_y.words[i] <== pubKey_dsc[i];
-            dsc_bytes_x.words[i] <== pubKey_dsc[i + k];
-        }
-
-        component splitToWords = SplitBytesToWords(maxPubkeyBytesLength, 120, 35);
-        for (var i=0; i < 525; i++) {
-            if (i < n * k / 8) {
-                splitToWords.in[i] <== dsc_bytes_x.bytes[i];
-            } else if (i < n * k / 4) {
-                splitToWords.in[i] <== dsc_bytes_y.bytes[i - n * k / 8];
-            } else {
-                splitToWords.in[i] <== 0;
-            }
-        }
-
-        for (var i=0; i < 35; i++) {
-            out[i] <== splitToWords.out[i];
-        }
-    }
 }

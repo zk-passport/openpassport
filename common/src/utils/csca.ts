@@ -152,6 +152,7 @@ export function generateCircuitInputsDSC(
   max_cert_bytes: number,
   devMode: boolean = false
 ) {
+  console.log('dscCertificate', dscCertificate);
   const dscCert = getCertificateFromPem(dscCertificate);
   const dscTbs = dscCert.tbsView;
   const dscTbsCertUint8Array = Uint8Array.from(
@@ -167,6 +168,7 @@ export function generateCircuitInputsDSC(
   } = parseCertificate(dscCertificate, 'dsc_cert');
 
   const { bits, x, y, modulus, exponent, curve } = publicKeyDetails;
+  console.log('bits', bits);
 
   let dsc_message_padded;
   let dsc_messagePaddedLen;
@@ -175,23 +177,16 @@ export function generateCircuitInputsDSC(
       ? sha384_512Pad(dscTbsCertUint8Array, max_cert_bytes)
       : shaPad(dscTbsCertUint8Array, max_cert_bytes);
 
-  // const { n, k } = getNAndK(`${signatureAlgorithm}_${hashAlgorithm}_${exponent}_${bits}` as SignatureAlgorithm);
-  //dsc key is padded to 525 bytes
-  const n = 8;
-  const k = 525;
   const dscSignature = dscCert.signatureValue.valueBlock.valueHexView;
   const sigantureRaw = Array.from(forge.util.createBuffer(dscSignature).getBytes(), (char) =>
     char.charCodeAt(0)
   );
 
-  let pubKey_dsc,
-    signature,
+  let signature,
     startIndex,
     dsc_message_padded_formatted,
     dsc_messagePaddedLen_formatted: any;
   let oidData;
-
-  const sigAlgIndex = SignatureAlgorithmIndex[`${signatureAlgorithm}_${hashAlgorithm}_${exponent || curve}_${bits}` as keyof typeof SignatureAlgorithmIndex]
 
   if (signatureAlgorithm === 'rsa' || signatureAlgorithm === 'rsapss') {
     startIndex = findStartIndex(modulus, dsc_message_padded).toString();
@@ -199,28 +194,31 @@ export function generateCircuitInputsDSC(
 
     dsc_message_padded_formatted = Array.from(dsc_message_padded).map((x) => x.toString());
     dsc_messagePaddedLen_formatted = BigInt(dsc_messagePaddedLen).toString();
+    console.log('\x1b[34m', 'modulus: ', modulus, '\x1b[0m');
+    const modulusBytes = Buffer.from(modulus, 'hex');
+    console.log('\x1b[34m', 'modulus bytes: ', Array.from(modulusBytes), '\x1b[0m');
     console.log('\x1b[34m', 'startIndex: ', startIndex, '\x1b[0m');
-    console.log('\x1b[34m', 'n and k: ', n, k, '\x1b[0m');
+    // console.log('\x1b[34m', 'n and k: ', n, k, '\x1b[0m');
 
     // const pubKey_dsc_1 = formatInput(splitToWords(BigInt(hexToDecimal(modulus)), n, k));
     // const pubkey_dsc_2 = formatInput(splitToWords(BigInt(0), n, k));
 
     // pubKey_dsc = [...pubKey_dsc_1, ...pubkey_dsc_2];
-    pubKey_dsc = formatInput(splitToWords(BigInt(hexToDecimal(modulus)), n, k));
+    // pubKey_dsc = formatInput(splitToWords(BigInt(hexToDecimal(modulus)), n, k));
   } else if (signatureAlgorithm === 'ecdsa') {
     oidData = findOIDPosition(publicKeyAlgoOID, dsc_message_padded);
 
-    const normalizedX = x.length % 2 === 0 ? x : '0' + x;
-    const normalizedY = y.length % 2 === 0 ? y : '0' + y;
-    console.log('\x1b[34m', 'n and k: ', n, k, '\x1b[0m');
+    // const normalizedX = x.length % 2 === 0 ? x : '0' + x;
+    // const normalizedY = y.length % 2 === 0 ? y : '0' + y;
+    // console.log('\x1b[34m', 'n and k: ', n, k, '\x1b[0m');
 
-    console.log('\x1b[34m', 'pubKey_dsc: ', pubKey_dsc, '\x1b[0m');
+    // console.log('\x1b[34m', 'pubKey_dsc: ', pubKey_dsc, '\x1b[0m');
 
-    const fullPubKey = normalizedX + normalizedY;
-    pubKey_dsc = splitToWords(BigInt(hexToDecimal(fullPubKey)), 8, 525);
-    const pubKeyBytes = Buffer.from(fullPubKey, 'hex');
-    startIndex = findStartIndexEC(pubKeyBytes.toString('hex'), dsc_message_padded).toString();
-    console.log('\x1b[34m', 'startIndex: ', startIndex, '\x1b[0m');
+    // const fullPubKey = normalizedX + normalizedY;
+    // pubKey_dsc = splitToWords(BigInt(hexToDecimal(fullPubKey)), 8, 525);
+    // const pubKeyBytes = Buffer.from(fullPubKey, 'hex');
+    // startIndex = findStartIndexEC(pubKeyBytes.toString('hex'), dsc_message_padded).toString();
+    // console.log('\x1b[34m', 'startIndex: ', startIndex, '\x1b[0m');
 
     dsc_message_padded_formatted = Array.from(dsc_message_padded).map((x) => x.toString());
     dsc_messagePaddedLen_formatted = BigInt(dsc_messagePaddedLen).toString();
@@ -268,7 +266,7 @@ export function generateCircuitInputsDSC(
     signature = [...signature_r, ...signature_s];
   }
 
-  console.log('dsc_pubKey_length', pubKey_dsc.length);
+  // console.log('dsc_pubKey_length', pubKey_dsc.length);
   return {
     signature_algorithm: `${signatureAlgorithm}_${curve || exponent}_${hashAlgorithm}_${bits}`,
     inputs: {
@@ -277,13 +275,11 @@ export function generateCircuitInputsDSC(
       dsc_pubkey_length_bytes: signatureAlgorithm === 'ecdsa' ? [(bits / 8) * 2] : [bits / 8],
       csca_pubKey: csca_pubKey_formatted,
       signature: signature,
-      dsc_pubKey_bytes: pubKey_dsc,
       dsc_pubKey_offset: [startIndex],
       merkle_root: [BigInt(root).toString()],
       path: proof.pathIndices.map((index) => index.toString()),
       siblings: proof.siblings.flat().map((sibling) => sibling.toString()),
       salt: dscSecret,
-      signatureAlgorithm_dsc: sigAlgIndex
     },
   };
 }

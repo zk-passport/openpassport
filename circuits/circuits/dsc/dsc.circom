@@ -14,7 +14,6 @@ include "../utils/passport/constants.circom";
 include "../utils/passport/dsc/StandardizePubKeyTo35Words.circom";
 include "../utils/passport/dsc/ExtractPublicKey.circom";
 
-///@input dsc_pubKey_bytes public key of the DSC in bytes padded to 525 bytes
 ///@input dsc_pubKey_offset offset of the DSC public key in the certificate
 ///@input dsc_pubkey_length_bytes length of the DSC public key in bytes. For ECDSA, it is x+y length
 template DSC(signatureAlgorithm, n_csca, k_csca, max_cert_bytes, nLevels) {
@@ -33,13 +32,11 @@ template DSC(signatureAlgorithm, n_csca, k_csca, max_cert_bytes, nLevels) {
     signal input raw_dsc_cert_padded_bytes;
     signal input csca_pubKey[kScaled];
     signal input signature[kScaled];
-    signal input dsc_pubKey_bytes[maxPubkeyBytesLength];
     signal input dsc_pubKey_offset;
     signal input dsc_pubkey_length_bytes;
     signal input merkle_root;
     signal input path[nLevels];
     signal input siblings[nLevels];
-    signal input signatureAlgorithm_dsc;
     signal input salt;
 
     // check offsets refer to valid ranges
@@ -55,24 +52,32 @@ template DSC(signatureAlgorithm, n_csca, k_csca, max_cert_bytes, nLevels) {
     // verify certificate signature
     signal hashedCertificate[hashLength] <== ShaBytesDynamic(hashLength, max_cert_bytes)(raw_dsc_cert, raw_dsc_cert_padded_bytes);
     SignatureVerifier(signatureAlgorithm, n_csca, k_csca)(hashedCertificate, csca_pubKey, signature);
-    
-    //Extract certificate public key from certificate
-    component extractPubKey = ExtractPublicKey(max_cert_bytes, maxPubkeyBytesLength);
-    extractPubKey.raw_dsc_cert <== raw_dsc_cert;
-    extractPubKey.dsc_pubKey_offset <== dsc_pubKey_offset;
-    extractPubKey.dsc_pubkey_length_bytes <== dsc_pubkey_length_bytes;
 
-    //compare extracted public key with the one provided
-    for (var i=0; i<maxPubkeyBytesLength; i++) {
-        extractPubKey.out[i] === dsc_pubKey_bytes[i];
+    signal extracted_pubkey[maxPubkeyBytesLength] <== SelectSubArray(max_cert_bytes, maxPubkeyBytesLength)(raw_dsc_cert, dsc_pubKey_offset, dsc_pubkey_length_bytes);
+
+    log("extracted_pubkey[0]", extracted_pubkey[0]);
+    log("extracted_pubkey[1]", extracted_pubkey[1]);
+    log("extracted_pubkey[2]", extracted_pubkey[2]);
+
+    log("extracted_pubkey[254]", extracted_pubkey[254]);
+    log("extracted_pubkey[255]", extracted_pubkey[255]);
+    log("extracted_pubkey[256]", extracted_pubkey[256]);
+    log("extracted_pubkey[257]", extracted_pubkey[257]);
+    log("extracted_pubkey[524]", extracted_pubkey[524]);
+
+    signal standardized_pubkey[35] <== SplitBytesToWords(maxPubkeyBytesLength, 120, 35)(extracted_pubkey);
+
+    for (var i = 0; i < 35; i++) {
+        log("standardized_pubkey[", i, "]", standardized_pubkey[i]);
     }
 
-    // Standardize public key to 35 words
-    signal standardizedDSCPubKey[35] <== StandardizePubKeyTo35Words(maxPubkeyBytesLength)(dsc_pubKey_bytes);
-
-    signal pubKey_dsc_hash <== CustomHasher(35)(standardizedDSCPubKey);
+    signal pubKey_dsc_hash <== CustomHasher(35)(standardized_pubkey);
     signal pubKey_csca_hash <== CustomHasher(kScaled)(csca_pubKey);
     
+    log("salt", salt);
+    log("dsc_pubkey_length_bytes", dsc_pubkey_length_bytes);
+    log("pubKey_dsc_hash", pubKey_dsc_hash);
+    log("pubKey_csca_hash", pubKey_csca_hash);
 
     // Compute glue values
     signal output glue <== Poseidon(4)([salt, dsc_pubkey_length_bytes, pubKey_dsc_hash, pubKey_csca_hash]);
