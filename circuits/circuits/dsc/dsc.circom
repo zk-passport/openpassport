@@ -75,5 +75,5 @@ template DSC(signatureAlgorithm, n_csca, k_csca, max_cert_bytes, nLevels) {
     
 
     // Compute glue values
-    signal output glue <== Poseidon(5)([salt, signatureAlgorithm_dsc, dsc_pubkey_length_bytes, pubKey_dsc_hash, pubKey_csca_hash]);
+    signal output glue <== Poseidon(4)([salt, dsc_pubkey_length_bytes, pubKey_dsc_hash, pubKey_csca_hash]);
 }
