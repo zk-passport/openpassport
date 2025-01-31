@@ -57,8 +57,8 @@ describe('ecdsa', () => {
 
     (
       [
-        [true, 'should verify correctly'],
-        [false, 'should not verify correctly'],
+        [true, 'should verify'],
+        [false, 'should not verify'],
       ] as [boolean, string][]
     ).forEach(([shouldVerify, shouldVerifyReason]) => {
       describe(shouldVerifyReason, function () {
@@ -90,6 +90,30 @@ describe('ecdsa', () => {
         });
       });
     });
+    it('should not verify if either signature component is greater than the order', async function () {
+      this.timeout(0);
+      const circuit = await wasmTester(
+        path.join(__dirname, `../../circuits/tests/utils/ecdsa/test_${curve}.circom`),
+        {
+          include: ['node_modules', './node_modules/@zk-kit/binary-merkle-root.circom/src'],
+        }
+      );
+
+      for (const item of [true, false]) {
+        try {
+          let inputs;
+          while (true) {
+            try {
+              inputs = signOverflow(message, curve, hash, k, n, item);
+              break;
+            } catch (err) {}
+          }
+          const witness = await circuit.calculateWitness(inputs);
+          await circuit.checkConstraints(witness);
+          throw new Error('Test failed: Invalid signature was verified.');
+        } catch (error) {}
+      }
+    });
   });
 });
 
@@ -112,6 +136,46 @@ function sign(message: Uint8Array, curve: string, hash: string, n: number, k: nu
       ...splitToWords(BigInt(signature.r), k, n),
       ...splitToWords(BigInt(signature.s), k, n),
     ],
+    pubKey: [
+      splitToWords(BigInt(pubkey.getX().toString()), k, n),
+      splitToWords(BigInt(pubkey.getY().toString()), k, n),
+    ],
+    hashParsed,
+  };
+}
+
+function signOverflow(
+  message: Uint8Array,
+  curve: string,
+  hash: string,
+  n: number,
+  k: number,
+  overflowS: boolean
+) {
+  const ec = new elliptic.ec(curve);
+
+  const key = ec.genKeyPair();
+
+  const messageHash = crypto.createHash(hash).update(message).digest();
+
+  const signature = key.sign(messageHash, 'hex');
+  const pubkey = key.getPublic();
+  const hashParsed = [];
+  Array.from(messageHash).forEach((x) =>
+    hashParsed.push(...x.toString(2).padStart(8, '0').split(''))
+  );
+
+  let r = BigInt(signature.r);
+  let s = BigInt(signature.s);
+
+  if (overflowS) {
+    s = s + BigInt(ec.n);
+  } else {
+    r = r + BigInt(ec.n);
+  }
+
+  return {
+    signature: [...splitToWords(r, k, n), ...splitToWords(s, k, n)],
     pubKey: [
       splitToWords(BigInt(pubkey.getX().toString()), k, n),
       splitToWords(BigInt(pubkey.getY().toString()), k, n),
