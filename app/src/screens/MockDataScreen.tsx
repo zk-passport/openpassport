@@ -108,7 +108,7 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
       },
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 200));
     useNavigationStore.getState().setSelectedTab('next');
   }, [selectedAlgorithm, selectedCountry, age, expiryYears, isInOfacList]);
 

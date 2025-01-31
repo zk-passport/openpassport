@@ -21,84 +21,68 @@ const parseUrlParams = (url: string): Map<string, string> => {
 };
 
 export const scanQRCode = () => {
-  const { toast, setSelectedApp, setSelectedTab } =
-    useNavigationStore.getState();
+  const { toast, setSelectedApp, setSelectedTab } = useNavigationStore.getState();
 
-  Linking.getInitialURL()
-    .then(url => {
-      if (url) {
-        handleUniversalLink(url);
-      } else {
-        if (Platform.OS === 'ios') {
-          console.log('Scanning QR code on iOS without Universal Link');
-
-          const qrScanner = NativeModules.QRScannerBridge;
-          if (qrScanner && qrScanner.scanQRCode) {
-            qrScanner
-              .scanQRCode()
-              .then((result: string) => {
-                const params = parseUrlParams(result);
-                const encodedData = params.get('data');
-                handleQRCodeScan(
-                  encodedData as string,
-                  toast,
-                  setSelectedApp,
-                  setSelectedTab,
-                );
-              })
-              .catch((error: any) => {
-                console.error('QR Scanner Error:', error);
-                toast.show('Error', {
-                  message: 'Failed to scan QR code',
-                  type: 'error',
-                });
-              });
-          } else {
-            console.error('QR Scanner module not found for iOS');
-            toast.show('Error', {
-              message: 'QR Scanner not available',
-              type: 'error',
-            });
-          }
-        } else if (Platform.OS === 'android') {
-          const qrScanner = NativeModules.QRCodeScanner;
-          if (qrScanner && qrScanner.scanQRCode) {
-            qrScanner
-              .scanQRCode()
-              .then((result: string) => {
-                const params = parseUrlParams(result);
-                const encodedData = params.get('data');
-                handleQRCodeScan(
-                  encodedData as string,
-                  toast,
-                  setSelectedApp,
-                  setSelectedTab,
-                );
-              })
-              .catch((error: any) => {
-                console.error('QR Scanner Error:', error);
-                toast.show('Error', {
-                  message: 'Failed to scan QR code',
-                  type: 'error',
-                });
-              });
-          } else {
-            console.error('QR Scanner module not found for Android');
-            toast.show('Error', {
-              message: 'QR Scanner not available',
-              type: 'error',
-            });
-          }
-        }
-      }
-    })
-    .catch(err => {
-      console.error('An error occurred while getting initial URL', err);
+  if (Platform.OS === 'ios') {
+    console.log('Scanning QR code on iOS');
+    const qrScanner = NativeModules.QRScannerBridge;
+    if (qrScanner && qrScanner.scanQRCode) {
+      qrScanner
+        .scanQRCode()
+        .then((result: string) => {
+          const params = parseUrlParams(result);
+          const encodedData = params.get('data');
+          handleQRCodeScan(
+            encodedData as string,
+            toast,
+            setSelectedApp,
+            setSelectedTab,
+          );
+        })
+        .catch((error: any) => {
+          console.error('QR Scanner Error:', error);
+          toast.show('Error', {
+            message: 'Failed to scan QR code',
+            type: 'error',
+          });
+        });
+    } else {
+      console.error('QR Scanner module not found for iOS');
       toast.show('Error', {
-        message: 'Failed to process initial link',
+        message: 'QR Scanner not available',
         type: 'error',
       });
-    });
+    }
+  } else if (Platform.OS === 'android') {
+    const qrScanner = NativeModules.QRCodeScanner;
+    if (qrScanner && qrScanner.scanQRCode) {
+      qrScanner
+        .scanQRCode()
+        .then((result: string) => {
+          const params = parseUrlParams(result);
+          const encodedData = params.get('data');
+          handleQRCodeScan(
+            encodedData as string,
+            toast,
+            setSelectedApp,
+            setSelectedTab,
+          );
+        })
+        .catch((error: any) => {
+          console.error('QR Scanner Error:', error);
+          toast.show('Error', {
+            message: 'Failed to scan QR code',
+            type: 'error',
+          });
+        });
+    } else {
+      console.error('QR Scanner module not found for Android');
+      toast.show('Error', {
+        message: 'QR Scanner not available',
+        type: 'error',
+      });
+    }
+  }
 };
 
 const handleQRCodeScan = (

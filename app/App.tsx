@@ -48,16 +48,12 @@ export const createSegmentClient = () => {
   const client = createClient({
     writeKey: SEGMENT_KEY,
     trackAppLifecycleEvents: true,
-    trackDeepLinks: true,
     debug: true,
     collectDeviceId: false,
-    flushAt: 20,
     defaultSettings: {
       integrations: {
         'Segment.io': {
           apiKey: SEGMENT_KEY,
-          trackApplicationLifecycleEvents: false,
-          trackDeepLinks: false,
         }
       }
     }
