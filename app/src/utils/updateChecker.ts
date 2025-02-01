@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { Platform } from 'react-native';
-import { APP_VERSION, STORE_URLS } from '../constants/appUpdate';
+import { APP_UPDATE_API_URL, APP_VERSION, STORE_URLS } from '../constants/appUpdate';
 
 type UpdateCheckerResponse = {
     isUpdateNeeded: boolean;
@@ -22,7 +22,7 @@ export async function checkForUpdate(): Promise<UpdateCheckerResponse> {
     try {
 
       console.log('Checking for updates...', { currentVersion: APP_VERSION });
-      const updateCheckUrl = `YOUR_API_URL?platform=${Platform.OS}&version=${APP_VERSION}`;
+      const updateCheckUrl = `${APP_UPDATE_API_URL}?platform=${Platform.OS}&version=${APP_VERSION}`;
       const response = await axios.get<UpdateCheckerResponse>(updateCheckUrl, {
         timeout: UPDATE_CHECK_TIMEOUT,
       });
