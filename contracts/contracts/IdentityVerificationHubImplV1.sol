@@ -408,14 +408,12 @@ contract IdentityVerificationHubImplV1 is
 
         // verify current date
         uint[6] memory dateNum;
-        uint256 date = proof.vcAndDiscloseProof.pubSignals[
-            CircuitConstants.VC_AND_DISCLOSE_CURRENT_DATE_INDEX
-        ];
-
-        // Split date (e.g., 250202) into individual digits [2,5,0,2,0,2]
-        for (uint256 i = 5; i >= 0; i--) {
-            dateNum[i] = date % 10;
-            date = date / 10;
+        for (uint256 i = 0; i < 6; i++) {
+            dateNum[i] =
+                (proof.vcAndDiscloseProof.pubSignals[
+                    CircuitConstants.VC_AND_DISCLOSE_CURRENT_DATE_INDEX
+                ] / 10 ** (5 - i)) %
+                10;
         }
 
         uint currentTimestamp = Formatter.proofDateToUnixTimestamp(dateNum);
