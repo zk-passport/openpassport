@@ -172,17 +172,15 @@ describe("VC and Disclose", () => {
 
             const date = new Date(oneDayAfter * 1000);
             const dateComponents = [
-                Math.floor((date.getUTCFullYear() % 100) / 10),
-                date.getUTCFullYear() % 10,
-                Math.floor((date.getUTCMonth() + 1) / 10),
-                (date.getUTCMonth() + 1) % 10,
-                Math.floor(date.getUTCDate() / 10),
+                Math.floor((date.getUTCFullYear() % 100) / 10) +
+                date.getUTCFullYear() % 10 +
+                Math.floor((date.getUTCMonth() + 1) / 10) +
+                (date.getUTCMonth() + 1) % 10 +
+                Math.floor(date.getUTCDate() / 10) +
                 date.getUTCDate() % 10
             ];
 
-            for (let i = 0; i < 6; i++) {
-                vcAndDiscloseProof.pubSignals[CIRCUIT_CONSTANTS.VC_AND_DISCLOSE_CURRENT_DATE_INDEX + i] = dateComponents[i].toString();
-            }
+            vcAndDiscloseProof.pubSignals[CIRCUIT_CONSTANTS.VC_AND_DISCLOSE_CURRENT_DATE_INDEX] = dateComponents.toString();
 
             const forbiddenCountriesListPacked = vcAndDiscloseProof.pubSignals[CIRCUIT_CONSTANTS.VC_AND_DISCLOSE_FORBIDDEN_COUNTRIES_LIST_PACKED_INDEX];
             const vcAndDiscloseHubProof = {
@@ -225,17 +223,15 @@ describe("VC and Disclose", () => {
 
             const date = new Date(oneDayBefore * 1000);
             const dateComponents = [
-                Math.floor((date.getUTCFullYear() % 100) / 10),
-                date.getUTCFullYear() % 10,
-                Math.floor((date.getUTCMonth() + 1) / 10),
-                (date.getUTCMonth() + 1) % 10,
-                Math.floor(date.getUTCDate() / 10),
+                Math.floor((date.getUTCFullYear() % 100) / 10) +
+                date.getUTCFullYear() % 10 +
+                Math.floor((date.getUTCMonth() + 1) / 10) +
+                (date.getUTCMonth() + 1) % 10 +
+                Math.floor(date.getUTCDate() / 10) +
                 date.getUTCDate() % 10
             ];
 
-            for (let i = 0; i < 6; i++) {
-                vcAndDiscloseProof.pubSignals[CIRCUIT_CONSTANTS.VC_AND_DISCLOSE_CURRENT_DATE_INDEX + i] = dateComponents[i].toString();
-            }
+            vcAndDiscloseProof.pubSignals[CIRCUIT_CONSTANTS.VC_AND_DISCLOSE_CURRENT_DATE_INDEX] = dateComponents.toString();
 
             await expect(
                 hub.verifyVcAndDisclose(vcAndDiscloseHubProof)
