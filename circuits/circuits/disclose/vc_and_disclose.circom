@@ -88,6 +88,7 @@ template VC_AND_DISCLOSE(nLevels, MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH) {
 
     signal output revealedData_packed[3] <== disclose.revealedData_packed;
 
+    signal output current_date_packed <== current_date[0] * 100000 + current_date[1]*10000 + current_date[2]*1000 + current_date[3]*100 + current_date[4]*10 + current_date[5]; 
     var chunkLength = computeIntChunkLength(MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH * 3);
     signal output forbidden_countries_list_packed[chunkLength] <== disclose.forbidden_countries_list_packed;
 
@@ -99,8 +100,6 @@ component main {
         merkle_root,
         smt_root,
         scope,
-        user_identifier,
-        current_date,
-        attestation_id
+        user_identifier
     ]
 } = VC_AND_DISCLOSE(33, 10);
