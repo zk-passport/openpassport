@@ -4,8 +4,8 @@ pragma solidity ^0.8.28;
 import "./IRegisterCircuitVerifier.sol";
 import "./IDscCircuitVerifier.sol";
 import "./IVcAndDiscloseCircuitVerifier.sol";
-interface IIdentityVerificationHubV1 {
 
+interface IIdentityVerificationHubV1 {
     enum RevealedDataType {
         ISSUING_STATE,
         NAME,
@@ -19,7 +19,6 @@ interface IIdentityVerificationHubV1 {
     }
 
     struct VcAndDiscloseVerificationResult {
-        uint256 attestationId;
         uint256 scope;
         uint256 userIdentifier;
         uint256 nullifier;
@@ -40,7 +39,6 @@ interface IIdentityVerificationHubV1 {
         uint256 ofac;
     }
 
-
     struct VcAndDiscloseHubProof {
         bool olderThanEnabled;
         uint256 olderThan;
@@ -52,17 +50,10 @@ interface IIdentityVerificationHubV1 {
 
     function verifyVcAndDisclose(
         VcAndDiscloseHubProof memory proof
-    )
-        external
-        view
-        returns (VcAndDiscloseVerificationResult memory);
+    ) external view returns (VcAndDiscloseVerificationResult memory);
 
     function getReadableRevealedData(
         uint256[3] memory revealedDataPacked,
         RevealedDataType[] memory types
-    )
-        external
-        view
-        returns (ReadableRevealedData memory);
-
-} 
+    ) external view returns (ReadableRevealedData memory);
+}

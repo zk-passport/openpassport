@@ -6,7 +6,6 @@ import {IIdentityRegistryV1} from "../interfaces/IIdentityRegistryV1.sol";
 import {CircuitConstants} from "../constants/CircuitConstants.sol";
 
 abstract contract PassportAirdropRoot {
-
     uint256 internal immutable scope;
     uint256 internal immutable attestationId;
     uint256 internal immutable targetRootTimestamp;
@@ -22,16 +21,21 @@ abstract contract PassportAirdropRoot {
     error InvalidScope();
     error InvalidTimestamp();
 
-    event AddressRegistered(address indexed registeredAddress, uint256 indexed nullifier);
+    event AddressRegistered(
+        address indexed registeredAddress,
+        uint256 indexed nullifier
+    );
 
     constructor(
-        address _identityVerificationHub, 
+        address _identityVerificationHub,
         address _IdentityRegistry,
-        uint256 _scope, 
+        uint256 _scope,
         uint256 _attestationId,
         uint256 _targetRootTimestamp
     ) {
-        identityVerificationHub = IIdentityVerificationHubV1(_identityVerificationHub);
+        identityVerificationHub = IIdentityVerificationHubV1(
+            _identityVerificationHub
+        );
         identityRegistry = IIdentityRegistryV1(_IdentityRegistry);
         scope = _scope;
         attestationId = _attestationId;
@@ -41,27 +45,35 @@ abstract contract PassportAirdropRoot {
     function _registerAddress(
         address addressToRegister,
         IIdentityVerificationHubV1.VcAndDiscloseHubProof memory proof
-    )
-        internal
-        returns (address registeredAddress)
-    {
-
-        if (scope != proof.vcAndDiscloseProof.pubSignals[CircuitConstants.VC_AND_DISCLOSE_SCOPE_INDEX]) {
+    ) internal returns (address registeredAddress) {
+        if (
+            scope !=
+            proof.vcAndDiscloseProof.pubSignals[
+                CircuitConstants.VC_AND_DISCLOSE_SCOPE_INDEX
+            ]
+        ) {
             revert InvalidScope();
         }
 
-        if (nullifiers[proof.vcAndDiscloseProof.pubSignals[CircuitConstants.VC_AND_DISCLOSE_NULLIFIER_INDEX]] != address(0)) {
+        if (
+            nullifiers[
+                proof.vcAndDiscloseProof.pubSignals[
+                    CircuitConstants.VC_AND_DISCLOSE_NULLIFIER_INDEX
+                ]
+            ] != address(0)
+        ) {
             revert RegisteredNullifier();
         }
 
-        if(attestationId != proof.vcAndDiscloseProof.pubSignals[CircuitConstants.VC_AND_DISCLOSE_ATTESTATION_ID_INDEX]) {
-            revert InvalidAttestationId();
-        }
-
-        IIdentityVerificationHubV1.VcAndDiscloseVerificationResult memory result = identityVerificationHub.verifyVcAndDisclose(proof);
+        IIdentityVerificationHubV1.VcAndDiscloseVerificationResult
+            memory result = identityVerificationHub.verifyVcAndDisclose(proof);
 
         if (targetRootTimestamp != 0) {
-            if (identityRegistry.rootTimestamps(result.identityCommitmentRoot) != targetRootTimestamp) {
+            if (
+                identityRegistry.rootTimestamps(
+                    result.identityCommitmentRoot
+                ) != targetRootTimestamp
+            ) {
                 revert InvalidTimestamp();
             }
         }
