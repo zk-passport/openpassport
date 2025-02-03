@@ -90,9 +90,14 @@ template verifyECDSABits(CHUNK_SIZE, CHUNK_NUMBER, A, B, P, ALGO){
     component add = EllipticCurveAdd(CHUNK_SIZE, CHUNK_NUMBER, A, B, P);
     add.in1 <== scalarMult1.out;
     add.in2 <== scalarMult2.out;
+
+    component addModN = BigMultModP(CHUNK_SIZE, CHUNK_NUMBER, CHUNK_NUMBER, CHUNK_NUMBER);
+    addModN.in1 <== add.out[0];
+    addModN.in2 <== one;
+    addModN.modulus <== order;
     
     // x1 === r
     for (var i = 0; i < CHUNK_NUMBER; i++){
-        add.out[0][i] === signature[0][i];
+        addModN.mod[i] === signature[0][i];
     }
 }

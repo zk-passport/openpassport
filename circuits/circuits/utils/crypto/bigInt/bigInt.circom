@@ -40,8 +40,8 @@ template BigMultModP(CHUNK_SIZE, CHUNK_NUMBER_GREATER, CHUNK_NUMBER_LESS, CHUNK_
     
     for (var i = 0; i < CHUNK_NUMBER_DIV; i++){
         div[i] <-- long_division[0][i];
-
     }
+
     component modChecks[CHUNK_NUMBER_MODULUS];
     for (var i = 0; i < CHUNK_NUMBER_MODULUS; i++){
         mod[i] <-- long_division[1][i];

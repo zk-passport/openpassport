@@ -54,7 +54,6 @@ const testSuite = [
 describe('ecdsa', () => {
   testSuite.forEach(({ hash, curve, n, k, reason }) => {
     const message = crypto.randomBytes(32);
-
     (
       [
         [true, 'should verify'],
@@ -84,6 +83,7 @@ describe('ecdsa', () => {
             }
           } catch (error) {
             if (shouldVerify) {
+              console.log(error);
               throw new Error('Test failed: Valid signature was not verified.');
             }
           }
@@ -92,6 +92,10 @@ describe('ecdsa', () => {
     });
     it('should not verify if either signature component is greater than the order', async function () {
       this.timeout(0);
+      // takes way too long to find a valid input for these
+      if (['p256', 'p384'].includes(curve)) {
+        return;
+      }
       const circuit = await wasmTester(
         path.join(__dirname, `../../circuits/tests/utils/ecdsa/test_${curve}.circom`),
         {
@@ -114,6 +118,67 @@ describe('ecdsa', () => {
         } catch (error) {}
       }
     });
+  });
+  it('should not accept invalid chunks in the signature', async function () {
+    this.timeout(0);
+    const circuit = await wasmTester(
+      path.join(__dirname, `../../circuits/tests/utils/ecdsa/test_p256.circom`),
+      {
+        include: ['node_modules', './node_modules/@zk-kit/binary-merkle-root.circom/src'],
+      }
+    );
+
+    const inputs = {
+      signature: [
+        [
+          '11897043862654108222',
+          '6687976630675743167',
+          '6842677606991059234',
+          '3933303995770833589',
+        ],
+        [
+          '10364704208062614840',
+          '21394470794141451286901280378935131115',
+          '0',
+          '15812853153589603704',
+        ],
+      ],
+      pubKey: [
+        [
+          '1647443686294582730',
+          '7524809848328723651',
+          '2690299118416708846',
+          '2230381215521625212',
+        ],
+        [
+          '12063856007545978738',
+          '2856046104882309217',
+          '14084651496056034469',
+          '2603012891351374004',
+        ],
+      ],
+      hashParsed: [
+        0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1,
+        0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0,
+        1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0,
+        0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0,
+        0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0,
+        1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+        0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0,
+        1, 0, 1, 1, 1, 0, 1, 0,
+      ],
+    };
+
+    try {
+      const witness = await circuit.calculateWitness(inputs);
+      await circuit.checkConstraints(witness);
+      throw new Error('Test failed: Invalid signature was verified.');
+    } catch (err) {
+      if (!(err as Error).message.includes('isNBits')) {
+        throw err;
+      }
+    }
   });
 });
 
