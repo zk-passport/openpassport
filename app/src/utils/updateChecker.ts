@@ -17,12 +17,14 @@ const MAX_RETRIES = 3;
 
 export async function checkForUpdate(): Promise<UpdateCheckerResponse> {
   let retries = 0;
+  const platform = Platform.OS as 'ios' | 'android';
+  const currentVersion = APP_VERSION[platform];
 
   while (retries < MAX_RETRIES) {
     try {
 
-      console.log('Checking for updates...', { currentVersion: APP_VERSION });
-      const updateCheckUrl = `${APP_UPDATE_API_URL}?platform=${Platform.OS}&version=${APP_VERSION}`;
+      console.log('Checking for updates...', { currentVersion });
+      const updateCheckUrl = `${APP_UPDATE_API_URL}?platform=${Platform.OS}&version=${currentVersion}`;
       const response = await axios.get<UpdateCheckerResponse>(updateCheckUrl, {
         timeout: UPDATE_CHECK_TIMEOUT,
       });
