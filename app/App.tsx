@@ -1,13 +1,9 @@
 import 'react-native-get-random-values';
 import '@ethersproject/shims';
 import { Buffer } from 'buffer';
-import { NativeModules, Platform } from 'react-native';
-
 global.Buffer = Buffer;
-
 import React, { useEffect } from 'react';
-import * as amplitude from '@amplitude/analytics-react-native';
-import { AMPLITUDE_KEY, SEGMENT_KEY } from '@env';
+import { SEGMENT_KEY } from '@env';
 import { useToastController } from '@tamagui/toast';
 import { YStack } from 'tamagui';
 import { createClient, EventPlugin, PluginType, SegmentEvent } from '@segment/analytics-react-native';
@@ -54,9 +50,9 @@ export const createSegmentClient = () => {
       integrations: {
         'Segment.io': {
           apiKey: SEGMENT_KEY,
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   client.add({ plugin: new DisableTrackingPlugin() });
@@ -69,7 +65,7 @@ export let segmentClient: ReturnType<typeof createClient> | null = null;
 
 function App(): React.JSX.Element {
   const toast = useToastController();
-  const { setToast, setSelectedTab, trackEvent } = useNavigationStore();
+  const { setToast, setSelectedTab } = useNavigationStore();
   const initUserStore = useUserStore(state => state.initUserStore);
 
   useEffect(() => {

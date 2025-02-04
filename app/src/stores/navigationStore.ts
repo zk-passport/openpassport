@@ -79,7 +79,7 @@ const useNavigationStore = create<NavigationState>((set, get) => ({
   trackNavigation: (tab: string) => {
     if (segmentClient) {
       segmentClient.track('Navigation Change', {
-        tab
+        tab,
       });
     }
     set({ selectedTab: tab });
