@@ -20,6 +20,7 @@ import CustomButton from '../components/CustomButton';
 import useNavigationStore from '../stores/navigationStore';
 import useUserStore from '../stores/userStore';
 import { borderColor, textBlack } from '../utils/colors';
+import { parsePassportData } from '../../../common/src/utils/parsePassportData';
 
 interface MockDataScreenProps {
   onCountryPress: () => void;
@@ -70,7 +71,7 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
             selectedAlgorithm == 'rsa sha1' ? 'sha1' : 'sha256',
             selectedAlgorithm == 'rsa sha1' ? 'sha1' : 'sha256',
             signatureAlgorithmToStrictSignatureAlgorithm[
-              selectedAlgorithm as keyof typeof signatureAlgorithmToStrictSignatureAlgorithm
+            selectedAlgorithm as keyof typeof signatureAlgorithmToStrictSignatureAlgorithm
             ],
             selectedCountry as keyof typeof countryCodes,
             castDate(-age),
@@ -84,7 +85,7 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
             selectedAlgorithm == 'rsa sha1' ? 'sha1' : 'sha256',
             selectedAlgorithm == 'rsa sha1' ? 'sha1' : 'sha256',
             signatureAlgorithmToStrictSignatureAlgorithm[
-              selectedAlgorithm as keyof typeof signatureAlgorithmToStrictSignatureAlgorithm
+            selectedAlgorithm as keyof typeof signatureAlgorithmToStrictSignatureAlgorithm
             ],
             selectedCountry as keyof typeof countryCodes,
             castDate(-age),
@@ -93,6 +94,8 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
           );
         }
         useUserStore.getState().registerPassportData(mockPassportData);
+        const parsedPassportData = parsePassportData(mockPassportData);
+        useUserStore.getState().setPassportMetadata(parsedPassportData);
         useUserStore.getState().setRegistered(true);
         resolve(null);
       }, 0),
@@ -105,7 +108,7 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
       },
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 200));
     useNavigationStore.getState().setSelectedTab('next');
   }, [selectedAlgorithm, selectedCountry, age, expiryYears, isInOfacList]);
 
