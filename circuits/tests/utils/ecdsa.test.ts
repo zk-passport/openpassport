@@ -181,7 +181,7 @@ describe('ecdsa', () => {
     }
   });
 
-  it.only('should reduce the final signature addition mod n', async function () {
+  it('should reduce the final signature addition mod n', async function () {
     this.timeout(0);
     const circuit = await wasmTester(
       path.join(__dirname, `../../circuits/tests/utils/ecdsa/test_p256.circom`),
