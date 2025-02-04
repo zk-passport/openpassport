@@ -1,6 +1,3 @@
-import axios from 'axios';
-import { ethers } from 'ethers';
-
 import {
   CHAIN_NAME,
   RELAYER_URL,
@@ -17,6 +14,8 @@ import registerArtefacts from '../../deployments/artifacts/Deploy_Registry#OpenP
 import sbtArtefacts from '../../deployments/artifacts/Deploy_Registry#SBT.json';
 import contractAddresses from '../../deployments/deployed_addresses.json';
 import groth16ExportSolidityCallData from './snarkjs';
+import axios from 'axios';
+import { ethers } from 'ethers';
 
 export const sendRegisterTransaction = async (
   proof: Proof,

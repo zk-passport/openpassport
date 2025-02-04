@@ -1,8 +1,3 @@
-import { CheckCircle } from '@tamagui/lucide-icons';
-import React, { useEffect, useState } from 'react';
-import io, { Socket } from 'socket.io-client';
-import { Progress, Spinner, Text, XStack, YStack } from 'tamagui';
-
 import {
   DEVELOPMENT_MODE,
   max_dsc_bytes,
@@ -34,6 +29,10 @@ import {
 import { generateCircuitInputsInApp } from '../utils/generateInputsInApp';
 import { generateProof } from '../utils/prover';
 import { CircuitName } from '../utils/zkeyDownload';
+import { CheckCircle } from '@tamagui/lucide-icons';
+import React, { useEffect, useState } from 'react';
+import io, { Socket } from 'socket.io-client';
+import { Progress, Spinner, Text, XStack, YStack } from 'tamagui';
 
 interface ProveScreenProps {
   setSheetRegisterIsOpen: (value: boolean) => void;

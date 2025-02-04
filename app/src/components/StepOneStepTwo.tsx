@@ -1,8 +1,6 @@
-import React from 'react';
-
-import { XStack } from 'tamagui';
-
 import { textBlack } from '../utils/colors';
+import React from 'react';
+import { XStack } from 'tamagui';
 
 interface StepOneStepTwoProps {
   variable: string;

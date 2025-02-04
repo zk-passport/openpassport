@@ -1,5 +1,4 @@
 // Function to extract information from a two-line MRZ.
-
 import { countryCodes } from '../../../common/src/constants/constants';
 import { Proof } from '../../../common/src/utils/types';
 
@@ -86,10 +85,14 @@ export const parseProofAndroid = (response: string) => {
 };
 
 export function getFirstName(mrz: string): string {
-  const names = mrz.split('<<');
-  const firstName = names[1].split('<')[0].trim();
-  const capitalized = firstName.charAt(0) + firstName.slice(1).toLowerCase();
-  return capitalized || 'Unknown';
+  try {
+    const names = mrz.split('<<');
+    const firstName = names[1].split('<')[0].trim();
+    const capitalized = firstName.charAt(0) + firstName.slice(1).toLowerCase();
+    return capitalized || 'Unknown';
+  } catch (error) {
+    return '';
+  }
 }
 
 export function checkInputs(

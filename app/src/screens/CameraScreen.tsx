@@ -1,12 +1,10 @@
-import React from 'react';
-
-import { Camera, SquarePen } from '@tamagui/lucide-icons';
-import { Image, Text, YStack } from 'tamagui';
-
 import CustomButton from '../components/CustomButton';
 import PASSPORT_DRAWING from '../images/passport_drawing.png';
 import { startCameraScan } from '../utils/cameraScanner';
 import { bgGreen, textBlack } from '../utils/colors';
+import { Camera, SquarePen } from '@tamagui/lucide-icons';
+import React from 'react';
+import { Image, Text, YStack } from 'tamagui';
 
 interface CameraScreenProps {
   setSheetIsOpen: (value: boolean) => void;

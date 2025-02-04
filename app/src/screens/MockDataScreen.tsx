@@ -1,6 +1,14 @@
-import React, { useCallback, useState } from 'react';
-
+import { countryCodes } from '../../../common/src/constants/constants';
+import { genMockPassportData } from '../../../common/src/utils/genMockPassportData';
+import { parsePassportData } from '../../../common/src/utils/parsePassportData';
+import CustomButton from '../components/CustomButton';
+import useNavigationStore from '../stores/navigationStore';
+import useUserStore from '../stores/userStore';
+import { borderColor, textBlack } from '../utils/colors';
 import { ChevronDown, Cpu, Minus, Plus } from '@tamagui/lucide-icons';
+import { flag } from 'country-emoji';
+import getCountryISO2 from 'country-iso-3-to-2';
+import React, { useCallback, useState } from 'react';
 import {
   Button,
   Fieldset,
@@ -10,16 +18,6 @@ import {
   XStack,
   YStack,
 } from 'tamagui';
-
-import { flag } from 'country-emoji';
-import getCountryISO2 from 'country-iso-3-to-2';
-
-import { countryCodes } from '../../../common/src/constants/constants';
-import { genMockPassportData } from '../../../common/src/utils/genMockPassportData';
-import CustomButton from '../components/CustomButton';
-import useNavigationStore from '../stores/navigationStore';
-import useUserStore from '../stores/userStore';
-import { borderColor, textBlack } from '../utils/colors';
 
 interface MockDataScreenProps {
   onCountryPress: () => void;
@@ -67,8 +65,8 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
         let mockPassportData;
         if (isInOfacList) {
           mockPassportData = genMockPassportData(
-            selectedAlgorithm == 'rsa sha1' ? 'sha1' : 'sha256',
-            selectedAlgorithm == 'rsa sha1' ? 'sha1' : 'sha256',
+            selectedAlgorithm === 'rsa sha1' ? 'sha1' : 'sha256',
+            selectedAlgorithm === 'rsa sha1' ? 'sha1' : 'sha256',
             signatureAlgorithmToStrictSignatureAlgorithm[
               selectedAlgorithm as keyof typeof signatureAlgorithmToStrictSignatureAlgorithm
             ],
@@ -81,8 +79,8 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
           );
         } else {
           mockPassportData = genMockPassportData(
-            selectedAlgorithm == 'rsa sha1' ? 'sha1' : 'sha256',
-            selectedAlgorithm == 'rsa sha1' ? 'sha1' : 'sha256',
+            selectedAlgorithm === 'rsa sha1' ? 'sha1' : 'sha256',
+            selectedAlgorithm === 'rsa sha1' ? 'sha1' : 'sha256',
             signatureAlgorithmToStrictSignatureAlgorithm[
               selectedAlgorithm as keyof typeof signatureAlgorithmToStrictSignatureAlgorithm
             ],
@@ -93,6 +91,8 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
           );
         }
         useUserStore.getState().registerPassportData(mockPassportData);
+        const parsedPassportData = parsePassportData(mockPassportData);
+        useUserStore.getState().setPassportMetadata(parsedPassportData);
         useUserStore.getState().setRegistered(true);
         resolve(null);
       }, 0),
@@ -105,7 +105,7 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
       },
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 200));
     useNavigationStore.getState().setSelectedTab('next');
   }, [selectedAlgorithm, selectedCountry, age, expiryYears, isInOfacList]);
 

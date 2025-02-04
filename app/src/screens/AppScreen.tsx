@@ -1,13 +1,11 @@
-import React from 'react';
-
-import { QrCode } from '@tamagui/lucide-icons';
-import { Image, Text, XStack, YStack } from 'tamagui';
-
 import CustomButton from '../components/CustomButton';
 import OPENPASSPORT_LOGO from '../images/openpassport.png';
 import useUserStore from '../stores/userStore';
 import { textBlack } from '../utils/colors';
 import { scanQRCode } from '../utils/qrCode';
+import { QrCode } from '@tamagui/lucide-icons';
+import React from 'react';
+import { Image, Text, XStack, YStack } from 'tamagui';
 
 interface AppScreenProps {
   setSheetAppListOpen: (value: boolean) => void;

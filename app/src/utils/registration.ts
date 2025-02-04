@@ -1,7 +1,3 @@
-import { LeanIMT, LeanIMTHashFunction } from '@openpassport/zk-kit-lean-imt';
-import axios from 'axios';
-import { poseidon2 } from 'poseidon-lite';
-
 import {
   COMMITMENT_TREE_TRACKER_URL,
   PASSPORT_ATTESTATION_ID,
@@ -13,6 +9,9 @@ import {
 } from '../../../common/src/utils/pubkeyTree';
 import { PassportData } from '../../../common/src/utils/types';
 import { formatMrz, packBytes } from '../../../common/src/utils/utils';
+import { LeanIMT, LeanIMTHashFunction } from '@openpassport/zk-kit-lean-imt';
+import axios from 'axios';
+import { poseidon2 } from 'poseidon-lite';
 
 export async function isCommitmentRegistered(
   secret: string,

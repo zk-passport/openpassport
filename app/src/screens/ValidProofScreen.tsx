@@ -1,11 +1,9 @@
-import React from 'react';
-
-import { QrCode } from '@tamagui/lucide-icons';
-import { Text, XStack, YStack } from 'tamagui';
-
 import CustomButton from '../components/CustomButton';
 import { bgGreen, textBlack } from '../utils/colors';
 import { scanQRCode } from '../utils/qrCode';
+import { QrCode } from '@tamagui/lucide-icons';
+import React from 'react';
+import { Text, XStack, YStack } from 'tamagui';
 
 const SuccessScreen: React.FC = () => {
   return (

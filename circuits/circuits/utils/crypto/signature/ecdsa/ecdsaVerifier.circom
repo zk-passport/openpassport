@@ -128,7 +128,7 @@ function get_a(signatureAlgorithm) {
         ];
     }
 
-    if (signatureAlgorithm == 41) { 
+    if (signatureAlgorithm == 41) { //p521
         return [
             73786976294838206460,
             73786976294838206463,
@@ -138,6 +138,18 @@ function get_a(signatureAlgorithm) {
             73786976294838206463,
             73786976294838206463,
             576460752303423487
+        ];
+    }
+
+    if (signatureAlgorithm == 44) { //p224
+        return [
+            4294967294,
+            4294967295,
+            4294967295,
+            4294967294,
+            4294967295,
+            4294967295,
+            4294967295
         ];
     }
 
@@ -207,7 +219,7 @@ function get_b(signatureAlgorithm) {
         ];
     }
 
-    if (signatureAlgorithm == 41) { 
+    if (signatureAlgorithm == 41) { //p521
         return [
             35687965819361312512,
             33244719099633405244,
@@ -217,6 +229,18 @@ function get_b(signatureAlgorithm) {
             4298886627987975365,
             30118149759215298644,
             91854278977009778
+        ];
+    }
+
+    if (signatureAlgorithm == 44) { //p224 
+        return [
+            592838580,
+            655046979,
+            3619674298,
+            1346678967,
+            4114690646,
+            201634731,
+            3020229253
         ];
     }
 
@@ -286,7 +310,7 @@ function get_p(signatureAlgorithm) {
         ];
     }
 
-    if (signatureAlgorithm == 41) { 
+    if (signatureAlgorithm == 41) { //p521
         return [
             73786976294838206463,
             73786976294838206463,
@@ -296,6 +320,18 @@ function get_p(signatureAlgorithm) {
             73786976294838206463,
             73786976294838206463,
             576460752303423487
+        ];
+    }
+
+    if (signatureAlgorithm == 44) { // p224
+        return [
+            1,
+            0,
+            0,
+            4294967295,
+            4294967295,
+            4294967295,
+            4294967295
         ];
     }
 
