@@ -1,14 +1,12 @@
-import React from 'react';
-
-import { YStack } from '@tamagui/stacks';
-import { Toast, useToastState } from '@tamagui/toast';
-
 import {
   blueColorLight,
   greenColorLight,
   redColorLight,
   textColor1,
 } from '../utils/colors';
+import { YStack } from '@tamagui/stacks';
+import { Toast, useToastState } from '@tamagui/toast';
+import React from 'react';
 
 export const ToastMessage = () => {
   const toast = useToastState();

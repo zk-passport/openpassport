@@ -1,6 +1,3 @@
-import { SMT } from '@openpassport/zk-kit-smt';
-import { poseidon2 } from 'poseidon-lite';
-
 import namejson from '../../../common/ofacdata/outputs/nameSMT.json';
 import {
   circuitToSelectorMode,
@@ -21,8 +18,9 @@ import {
 import { fetchTreeFromUrl } from '../../../common/src/utils/pubkeyTree';
 import { revealBitmapFromAttributes } from '../../../common/src/utils/revealBitmap';
 import { PassportData } from '../../../common/src/utils/types';
-
 import useUserStore from '../stores/userStore';
+import { SMT } from '@openpassport/zk-kit-smt';
+import { poseidon2 } from 'poseidon-lite';
 
 export const generateCircuitInputsInApp = async (
   passportData: PassportData,

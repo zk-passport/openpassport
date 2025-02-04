@@ -1,6 +1,14 @@
-import React, { useCallback, useState } from 'react';
-
+import { countryCodes } from '../../../common/src/constants/constants';
+import { genMockPassportData } from '../../../common/src/utils/genMockPassportData';
+import { parsePassportData } from '../../../common/src/utils/parsePassportData';
+import CustomButton from '../components/CustomButton';
+import useNavigationStore from '../stores/navigationStore';
+import useUserStore from '../stores/userStore';
+import { borderColor, textBlack } from '../utils/colors';
 import { ChevronDown, Cpu, Minus, Plus } from '@tamagui/lucide-icons';
+import { flag } from 'country-emoji';
+import getCountryISO2 from 'country-iso-3-to-2';
+import React, { useCallback, useState } from 'react';
 import {
   Button,
   Fieldset,
@@ -10,17 +18,6 @@ import {
   XStack,
   YStack,
 } from 'tamagui';
-
-import { flag } from 'country-emoji';
-import getCountryISO2 from 'country-iso-3-to-2';
-
-import { countryCodes } from '../../../common/src/constants/constants';
-import { genMockPassportData } from '../../../common/src/utils/genMockPassportData';
-import CustomButton from '../components/CustomButton';
-import useNavigationStore from '../stores/navigationStore';
-import useUserStore from '../stores/userStore';
-import { borderColor, textBlack } from '../utils/colors';
-import { parsePassportData } from '../../../common/src/utils/parsePassportData';
 
 interface MockDataScreenProps {
   onCountryPress: () => void;
@@ -71,7 +68,7 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
             selectedAlgorithm === 'rsa sha1' ? 'sha1' : 'sha256',
             selectedAlgorithm === 'rsa sha1' ? 'sha1' : 'sha256',
             signatureAlgorithmToStrictSignatureAlgorithm[
-            selectedAlgorithm as keyof typeof signatureAlgorithmToStrictSignatureAlgorithm
+              selectedAlgorithm as keyof typeof signatureAlgorithmToStrictSignatureAlgorithm
             ],
             selectedCountry as keyof typeof countryCodes,
             castDate(-age),
@@ -85,7 +82,7 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({
             selectedAlgorithm === 'rsa sha1' ? 'sha1' : 'sha256',
             selectedAlgorithm === 'rsa sha1' ? 'sha1' : 'sha256',
             signatureAlgorithmToStrictSignatureAlgorithm[
-            selectedAlgorithm as keyof typeof signatureAlgorithmToStrictSignatureAlgorithm
+              selectedAlgorithm as keyof typeof signatureAlgorithmToStrictSignatureAlgorithm
             ],
             selectedCountry as keyof typeof countryCodes,
             castDate(-age),

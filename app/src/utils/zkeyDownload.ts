@@ -1,8 +1,8 @@
-import RNFS from 'react-native-fs';
+import useNavigationStore from '../stores/navigationStore';
 import NetInfo from '@react-native-community/netinfo';
 import axios from 'axios';
+import RNFS from 'react-native-fs';
 import { unzip } from 'react-native-zip-archive';
-import useNavigationStore from '../stores/navigationStore';
 
 const zkeyZipUrls = {
   prove_rsa_65537_sha256:
@@ -51,7 +51,8 @@ export type IsZkeyDownloading = {
 // => this should be fine is the function is never called after the commitment is registered.
 
 export async function downloadZkey(circuit: CircuitName) {
-  const { isZkeyDownloading, update, trackEvent } = useNavigationStore.getState();
+  const { isZkeyDownloading, update, trackEvent } =
+    useNavigationStore.getState();
   const startTime = Date.now();
 
   trackEvent('Download Started', {
@@ -159,7 +160,13 @@ export async function isDownloadRequired(
 
 export async function fetchZkeyAndDat(circuit: CircuitName) {
   const startTime = Date.now();
-  const { isZkeyDownloading, toast, update, setZkeyDownloadedPercentage, trackEvent } = useNavigationStore.getState();
+  const {
+    isZkeyDownloading,
+    toast,
+    update,
+    setZkeyDownloadedPercentage,
+    trackEvent,
+  } = useNavigationStore.getState();
 
   trackEvent('Files Download Started', {
     success: true,
@@ -192,7 +199,10 @@ export async function fetchZkeyAndDat(circuit: CircuitName) {
           const percentComplete = Math.floor(
             (res.bytesWritten / res.contentLength) * 100,
           );
-          if (percentComplete % 5 === 0 && percentComplete !== previousPercentComplete) {
+          if (
+            percentComplete % 5 === 0 &&
+            percentComplete !== previousPercentComplete
+          ) {
             previousPercentComplete = percentComplete;
             setZkeyDownloadedPercentage(percentComplete);
           }
@@ -234,7 +244,6 @@ export async function fetchZkeyAndDat(circuit: CircuitName) {
       circuit: circuit,
       duration_ms: Date.now() - startTime,
     });
-
   } catch (error: any) {
     update({
       isZkeyDownloading: {

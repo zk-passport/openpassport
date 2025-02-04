@@ -1,8 +1,7 @@
+import { PassportMetadata } from '../../../common/src/utils/parsePassportData';
+import { PassportData } from '../../../common/src/utils/types';
 import { ethers } from 'ethers';
 import * as Keychain from 'react-native-keychain';
-
-import { PassportData } from '../../../common/src/utils/types';
-import { PassportMetadata } from '../../../common/src/utils/parsePassportData';
 
 export async function loadSecretOrCreateIt() {
   const secret = await loadSecret();

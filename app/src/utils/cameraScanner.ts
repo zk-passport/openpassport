@@ -1,8 +1,7 @@
-import { NativeModules, Platform } from 'react-native';
-
 import useNavigationStore from '../stores/navigationStore';
 import useUserStore from '../stores/userStore';
 import { extractMRZInfo, formatDateToYYMMDD } from './utils';
+import { NativeModules, Platform } from 'react-native';
 
 export const startCameraScan = async () => {
   const { toast, setSelectedTab, trackEvent } = useNavigationStore.getState();
@@ -23,7 +22,10 @@ export const startCameraScan = async () => {
         dateOfExpiry: formatDateToYYMMDD(result.expiryDate),
       });
       trackEvent('MRZ Success');
-      toast.show('✔︎', { message: 'Scan successful', customData: { type: 'success' } });
+      toast.show('✔︎', {
+        message: 'Scan successful',
+        customData: { type: 'success' },
+      });
     } catch (e) {
       console.error(e);
       trackEvent('Camera Failed', {
@@ -38,7 +40,8 @@ export const startCameraScan = async () => {
           trackEvent('Camera Success', {
             duration_ms: Date.now() - startTime,
           });
-          const { documentNumber, birthDate, expiryDate } = extractMRZInfo(mrzInfo);
+          const { documentNumber, birthDate, expiryDate } =
+            extractMRZInfo(mrzInfo);
           useUserStore.setState({
             passportNumber: documentNumber,
             dateOfBirth: birthDate,
@@ -46,7 +49,10 @@ export const startCameraScan = async () => {
           });
           setSelectedTab('nfc');
           trackEvent('MRZ Success');
-          toast.show('✔︎', { message: 'Scan successful', customData: { type: 'success' } });
+          toast.show('✔︎', {
+            message: 'Scan successful',
+            customData: { type: 'success' },
+          });
         } catch (error: any) {
           console.error('Invalid MRZ format:', error.message);
           trackEvent('MRZ Error', {

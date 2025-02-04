@@ -1,13 +1,12 @@
-import { NativeModules, Platform } from 'react-native';
-// @ts-ignore
-import { Buffer } from 'buffer';
-import PassportReader from 'react-native-passport-reader';
-
+import { parsePassportData } from '../../../common/src/utils/parsePassportData';
 import { PassportData } from '../../../common/src/utils/types';
 import useNavigationStore from '../stores/navigationStore';
 import useUserStore from '../stores/userStore';
 import { checkInputs } from '../utils/utils';
-import { parsePassportData } from '../../../common/src/utils/parsePassportData';
+// @ts-ignore
+import { Buffer } from 'buffer';
+import { NativeModules, Platform } from 'react-native';
+import PassportReader from 'react-native-passport-reader';
 
 export const scan = async (
   setModalProofStep: (modalProofStep: number) => void,
@@ -222,9 +221,7 @@ const handleResponseIOS = async (
   };
 
   try {
-
     parsePassportDataAsync(passportData);
-
   } catch (e: any) {
     console.log('error during parsing:', e);
     toast.show('Error during passport data parsing', {
@@ -320,7 +317,6 @@ const handleResponseAndroid = async (
 
   try {
     parsePassportDataAsync(passportData);
-
   } catch (e: any) {
     console.log('error during parsing:', e);
     toast.show('Error', {
@@ -369,5 +365,4 @@ async function parsePassportDataAsync(passportData: PassportData) {
   });
 
   useNavigationStore.getState().setSelectedTab('next');
-
 }

@@ -1,8 +1,5 @@
-import { DEFAULT_DOB, DEFAULT_DOE, DEFAULT_PNUMBER } from '@env';
-import { resetGenericPassword } from 'react-native-keychain';
-import { create } from 'zustand';
-
 import { generateDscSecret } from '../../../common/src/utils/csca';
+import { PassportMetadata } from '../../../common/src/utils/parsePassportData';
 import { PassportData, Proof } from '../../../common/src/utils/types';
 import {
   loadPassportData,
@@ -11,7 +8,9 @@ import {
   storePassportData,
   storePassportMetadata,
 } from '../utils/keychain';
-import { PassportMetadata } from '../../../common/src/utils/parsePassportData';
+import { DEFAULT_DOB, DEFAULT_DOE, DEFAULT_PNUMBER } from '@env';
+import { resetGenericPassword } from 'react-native-keychain';
+import { create } from 'zustand';
 
 interface UserState {
   passportNumber: string;
@@ -87,7 +86,9 @@ const useUserStore = create<UserState>((set, get) => ({
     const passportMetadataString = await loadPassportMetadata();
 
     if (!passportDataString || !passportMetadataString) {
-      console.log('No passport data or metadata found, starting onboarding flow');
+      console.log(
+        'No passport data or metadata found, starting onboarding flow',
+      );
       set({
         userLoaded: true,
       });
@@ -97,10 +98,14 @@ const useUserStore = create<UserState>((set, get) => ({
     // const isAlreadyRegistered = await isCommitmentRegistered(secret, JSON.parse(passportData));
     const isAlreadyRegistered = true;
     const passportData: PassportData = JSON.parse(passportDataString);
-    const passportMetadata: PassportMetadata = JSON.parse(passportMetadataString);
+    const passportMetadata: PassportMetadata = JSON.parse(
+      passportMetadataString,
+    );
 
     if (!isAlreadyRegistered) {
-      console.log('not registered but passport data found, skipping to nextScreen');
+      console.log(
+        'not registered but passport data found, skipping to nextScreen',
+      );
       set({
         passportData: passportData,
         passportMetadata: passportMetadata,
@@ -109,7 +114,9 @@ const useUserStore = create<UserState>((set, get) => ({
       return;
     }
 
-    console.log('registered and passport data found, skipping to app selection screen');
+    console.log(
+      'registered and passport data found, skipping to app selection screen',
+    );
     set({
       passportData: passportData,
       passportMetadata: passportMetadata,

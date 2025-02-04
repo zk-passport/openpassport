@@ -1,18 +1,25 @@
-import 'react-native-get-random-values';
-import '@ethersproject/shims';
-import { Buffer } from 'buffer';
-global.Buffer = Buffer;
-import React, { useEffect } from 'react';
-import { SEGMENT_KEY } from '@env';
-import { useToastController } from '@tamagui/toast';
-import { YStack } from 'tamagui';
-import { createClient, EventPlugin, PluginType, SegmentEvent } from '@segment/analytics-react-native';
-
 import MainScreen from './src/screens/MainScreen';
 import useNavigationStore from './src/stores/navigationStore';
 import useUserStore from './src/stores/userStore';
 import { bgWhite } from './src/utils/colors';
-import { setupUniversalLinkListener } from './src/utils/qrCode'; // Adjust the import path as needed
+import { setupUniversalLinkListener } from './src/utils/qrCode';
+import { SEGMENT_KEY } from '@env';
+import '@ethersproject/shims';
+import {
+  createClient,
+  EventPlugin,
+  PluginType,
+  SegmentEvent,
+} from '@segment/analytics-react-native';
+import { useToastController } from '@tamagui/toast';
+import { Buffer } from 'buffer';
+import React, { useEffect } from 'react';
+import 'react-native-get-random-values';
+import { YStack } from 'tamagui';
+
+global.Buffer = Buffer;
+
+// Adjust the import path as needed
 
 export class DisableTrackingPlugin extends EventPlugin {
   type = PluginType.before;

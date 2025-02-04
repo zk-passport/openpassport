@@ -1,12 +1,11 @@
-import msgpack from 'msgpack-lite';
-import pako from 'pako';
-import { Linking, NativeModules, Platform } from 'react-native';
-
 import { Mode, OpenPassportApp } from '../../../common/src/utils/appType';
 import { getCircuitNameOld } from '../../../common/src/utils/certificate_parsing/parseCertificateSimple';
 import useNavigationStore from '../stores/navigationStore';
 import useUserStore from '../stores/userStore';
 import { downloadZkey } from './zkeyDownload';
+import msgpack from 'msgpack-lite';
+import pako from 'pako';
+import { Linking, NativeModules, Platform } from 'react-native';
 
 const parseUrlParams = (url: string): Map<string, string> => {
   const [, queryString] = url.split('?');
@@ -21,7 +20,8 @@ const parseUrlParams = (url: string): Map<string, string> => {
 };
 
 export const scanQRCode = () => {
-  const { toast, setSelectedApp, setSelectedTab } = useNavigationStore.getState();
+  const { toast, setSelectedApp, setSelectedTab } =
+    useNavigationStore.getState();
 
   if (Platform.OS === 'ios') {
     console.log('Scanning QR code on iOS');
@@ -107,10 +107,10 @@ const handleQRCodeScan = (
         openPassportApp.mode === 'vc_and_disclose'
           ? 'vc_and_disclose'
           : getCircuitNameOld(
-            'prove' as Mode,
-            passportMetadata.signatureAlgorithm,
-            passportMetadata.signedAttrHashFunction,
-          );
+              'prove' as Mode,
+              passportMetadata.signatureAlgorithm,
+              passportMetadata.signedAttrHashFunction,
+            );
       downloadZkey(circuitName as any);
 
       setSelectedTab('prove');

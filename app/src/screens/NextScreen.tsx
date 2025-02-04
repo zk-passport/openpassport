@@ -1,8 +1,3 @@
-import React from 'react';
-
-import { ArrowRight } from '@tamagui/lucide-icons';
-import { Fieldset, Image, Text, useWindowDimensions, YStack } from 'tamagui';
-
 import { attributeToPosition } from '../../../common/src/constants/constants';
 import CustomButton from '../components/CustomButton';
 import USER_PROFILE from '../images/user_profile.png';
@@ -10,6 +5,9 @@ import useNavigationStore from '../stores/navigationStore';
 import useUserStore from '../stores/userStore';
 import { bgGreen, textBlack } from '../utils/colors';
 import { formatAttribute, getFirstName, maskString } from '../utils/utils';
+import { ArrowRight } from '@tamagui/lucide-icons';
+import React from 'react';
+import { Fieldset, Image, Text, useWindowDimensions, YStack } from 'tamagui';
 
 const NextScreen: React.FC = () => {
   const { height } = useWindowDimensions();
@@ -46,9 +44,10 @@ const NextScreen: React.FC = () => {
             h={height > 750 ? 190 : 130}
             borderRadius={height > 750 ? '$7' : '$6'}
             source={{
-              uri: passportData?.mockUser || !!!passportData?.photoBase64
-                ? USER_PROFILE
-                : passportData?.photoBase64 ?? USER_PROFILE,
+              uri:
+                passportData?.mockUser || !!!passportData?.photoBase64
+                  ? USER_PROFILE
+                  : passportData?.photoBase64 ?? USER_PROFILE,
             }}
           />
         )}
@@ -84,8 +83,13 @@ const NextScreen: React.FC = () => {
             .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
 
-          if (indexes[0] >= passportData.mrz.length || indexes[1] >= passportData.mrz.length) {
-            console.warn(`Invalid indexes for key ${key_}: [${indexes[0]}, ${indexes[1]}]`);
+          if (
+            indexes[0] >= passportData.mrz.length ||
+            indexes[1] >= passportData.mrz.length
+          ) {
+            console.warn(
+              `Invalid indexes for key ${key_}: [${indexes[0]}, ${indexes[1]}]`,
+            );
             return null;
           }
 
@@ -93,7 +97,10 @@ const NextScreen: React.FC = () => {
             indexes[0],
             indexes[1] + 1,
           );
-          const mrzAttributeFormatted = formatAttribute(key_, mrzAttribute ?? '');
+          const mrzAttributeFormatted = formatAttribute(
+            key_,
+            mrzAttribute ?? '',
+          );
 
           return (
             <Fieldset horizontal key={key} gap="$3" alignItems="center">

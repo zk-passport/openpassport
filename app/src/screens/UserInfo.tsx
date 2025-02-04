@@ -1,10 +1,8 @@
-import React from 'react';
-
-import { ScrollView, Separator, Text, XStack, YStack } from 'tamagui';
-
 import { parsePassportData } from '../../../common/src/utils/parsePassportData';
 import useUserStore from '../stores/userStore';
 import { separatorColor, textBlack } from '../utils/colors';
+import React from 'react';
+import { ScrollView, Separator, Text, XStack, YStack } from 'tamagui';
 
 const InfoRow: React.FC<{
   label: string;

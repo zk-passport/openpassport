@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
-
-import { AnimatePresence } from '@tamagui/animate-presence';
-import { ArrowLeft, Nfc } from '@tamagui/lucide-icons';
-import { Button, Image, styled, Text, XStack, YStack } from 'tamagui';
-
 import { bgGreen, textBlack } from '../utils/colors';
 import CustomButton from './CustomButton';
+import { AnimatePresence } from '@tamagui/animate-presence';
+import { ArrowLeft, Nfc } from '@tamagui/lucide-icons';
+import React, { useState } from 'react';
+import { Button, Image, styled, Text, XStack, YStack } from 'tamagui';
 
 const GalleryItem = styled(YStack, {
   zIndex: 1,

@@ -1,7 +1,7 @@
+import useNavigationStore from '../stores/navigationStore';
+import { parseProofAndroid } from './utils';
 import { NativeModules, Platform } from 'react-native';
 import RNFS from 'react-native-fs';
-import { parseProofAndroid } from './utils';
-import useNavigationStore from '../stores/navigationStore';
 
 export const generateProof = async (circuit: string, inputs: any) => {
   const startTime = Date.now();
