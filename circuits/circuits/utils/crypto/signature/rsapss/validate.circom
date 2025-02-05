@@ -3,6 +3,11 @@ pragma circom 2.1.6;
 include "../../bigInt/bigInt.circom";
 include "../../utils/isNBits.circom";
 
+/// @notice Validates the RSA-PSS signature format
+/// @dev Checks that the signature and public key are within the modulus length.
+/// @param CHUNK_SIZE Size of each chunk in bits
+/// @param CHUNK_NUMBER Number of chunks in modulus
+/// @param KEY_LENGTH RSA key length (modulus length) in bits
 template ValidateRsaPss(CHUNK_SIZE, CHUNK_NUMBER, KEY_LENGTH) {
     signal input pubkey[CHUNK_NUMBER]; 
     signal input signature[CHUNK_NUMBER];
@@ -26,6 +31,7 @@ template ValidateRsaPss(CHUNK_SIZE, CHUNK_NUMBER, KEY_LENGTH) {
         sigBitChecks[fullChunks].in <== signature[fullChunks];
         pubkeyBitChecks[fullChunks].in <== pubkey[fullChunks];
     }
+    //zero padding for remaining chunks
     for(var i = fullChunks + 1; i < CHUNK_NUMBER; i++) {
         signature[i] === 0;
         pubkey[i] === 0;
