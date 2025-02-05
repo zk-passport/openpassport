@@ -127,13 +127,13 @@ describe('VerifyRsapss Circuit Test', function () {
     });
 
   it('Should reject signatures greater than or equal to modulus', async function () {
-    const { signature, modulus, message } = generateMockRsaPssInputs(
+    const { signature, modulus, message, n, k } = generateMockRsaPssInputs(
       algorithm.algo,
       algorithm.saltLength
     );
   
     const largeSignature = [...signature];
-    largeSignature[0] = String(BigInt(modulus[0]) + 1n);
+    largeSignature[k-1] = String(BigInt(modulus[k-1]) + 1n);
   
     const circuit = await wasmTester(
       path.join(
@@ -212,7 +212,6 @@ describe('VerifyRsapss Circuit Test', function () {
         });
         throw new Error('Circuit accepted malleable signature');
       } catch (error) {
-        console.log(error);
         expect(error.message).to.include('Assert Failed');
       }
     });

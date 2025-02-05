@@ -49,6 +49,8 @@ export const generateMockRsaPssInputs = (
     signature: splitToWords(BigInt(bytesToBigDecimal(signature)), n, k),
     modulus: splitToWords(BigInt(hexToDecimal(modulus)), n, k),
     message: messageBits,
+    n,
+    k,
   };
 };
 

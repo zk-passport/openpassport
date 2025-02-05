@@ -2,6 +2,7 @@ pragma circom 2.1.6;
 
 include "../../bigInt/bigInt.circom";
 include "../../utils/isNBits.circom";
+include "@openpassport/zk-email-circuits/lib/bigint.circom";
 
 /// @notice Validates the RSA-PSS signature format
 /// @dev Checks that the signature and public key are within the modulus length.
@@ -38,8 +39,8 @@ template ValidateRsaPss(CHUNK_SIZE, CHUNK_NUMBER, KEY_LENGTH) {
     }
 
     //signature cannot exceed public key modulus
-    component bigLessEqThan = BigLessEqThan(CHUNK_SIZE, CHUNK_NUMBER);
-    bigLessEqThan.in[0] <== signature;
-    bigLessEqThan.in[1] <== pubkey;
-    bigLessEqThan.out === 1;
+    component bigLessThan = BigLessThan(CHUNK_SIZE, CHUNK_NUMBER);
+    bigLessThan.a <== signature;
+    bigLessThan.b <== pubkey;
+    bigLessThan.out === 1;
 }
