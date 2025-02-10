@@ -10,6 +10,7 @@ include "../utils/crypto/bitify/splitWordsToBytes.circom";
 include "../utils/crypto/bitify/bytes.circom";
 include "@zk-kit/binary-merkle-root.circom/src/binary-merkle-root.circom";
 include "../utils/passport/checkPubkeysEqual.circom";
+include "../utils/passport/checkRSAPrefix.circom";
 
 /// @title REGISTER
 /// @notice Main circuit — verifies the integrity of the passport data, the signature, and generates commitment and nullifier
@@ -68,6 +69,8 @@ template REGISTER(
 
     var MAX_DSC_PUBKEY_LENGTH = n * kScaled / 8;
 
+    var prefixLength = 5;
+
     signal input raw_dsc[MAX_DSC_LENGTH];
     signal input raw_dsc_actual_length;
     signal input dsc_pubKey_offset;
@@ -114,11 +117,31 @@ template REGISTER(
     merkle_root === computed_merkle_root;
 
     // get DSC public key from the certificate
-    signal extracted_dsc_pubKey[MAX_DSC_PUBKEY_LENGTH] <== SelectSubArray(MAX_DSC_LENGTH, MAX_DSC_PUBKEY_LENGTH)(
+    // we also grab the prefix (previous `prefixLength` bytes)
+    signal extracted_dsc_pubKey_with_prefix[MAX_DSC_PUBKEY_LENGTH + prefixLength] <== SelectSubArray(
+        MAX_DSC_LENGTH,
+        MAX_DSC_PUBKEY_LENGTH + prefixLength
+    )(
         raw_dsc,
-        dsc_pubKey_offset,
-        dsc_pubKey_actual_size
+        dsc_pubKey_offset - prefixLength,
+        dsc_pubKey_actual_size + prefixLength
     );
+
+    // If using RSA or RSAPSS, check that the extracted prefix matches one of the allowed RSA prefixes
+    if (kLengthFactor == 1) {
+        CheckRSAPrefix(
+            prefixLength,
+            MAX_DSC_PUBKEY_LENGTH + prefixLength
+        )(
+            extracted_dsc_pubKey_with_prefix
+        );
+    }
+
+    // remove the prefix from the DSC public key
+    signal extracted_dsc_pubKey[MAX_DSC_PUBKEY_LENGTH];
+    for (var i = 0; i < MAX_DSC_PUBKEY_LENGTH; i++) {
+        extracted_dsc_pubKey[i] <== extracted_dsc_pubKey_with_prefix[prefixLength + i];
+    }
 
     // check if the DSC public key is the same as the one in the certificate
     CheckPubkeysEqual(n, kScaled, kLengthFactor, MAX_DSC_PUBKEY_LENGTH)(

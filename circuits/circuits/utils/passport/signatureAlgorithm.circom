@@ -508,3 +508,13 @@ function getExponentBits(signatureAlgorithm) {
     }
     return 0;
 }
+
+function getRSAPrefixes() {
+    var prefixes[3][5];
+
+    prefixes[0] = [0x02, 0x82, 0x01, 0x01, 0x00]; // 2048 bits
+    prefixes[1] = [0x02, 0x82, 0x02, 0x01, 0x00]; // 4096 bits
+    prefixes[2] = [0x02, 0x82, 0x01, 0x81, 0x00]; // 3072 bits
+
+    return prefixes;
+}
