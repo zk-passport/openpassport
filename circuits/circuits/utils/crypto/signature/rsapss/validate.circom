@@ -1,7 +1,6 @@
 pragma circom 2.1.6;
 
 include "../../bigInt/bigInt.circom";
-include "../../utils/isNBits.circom";
 include "@openpassport/zk-email-circuits/lib/bigint.circom";
 
 /// @notice Validates the RSA-PSS signature format
@@ -21,14 +20,14 @@ template ValidateRsaPss(CHUNK_SIZE, CHUNK_NUMBER, KEY_LENGTH) {
 
     // Check value in each chunk can be represented in CHUNK_SIZE bits
     for (var i = 0; i < fullChunks; i++) {
-        sigBitChecks[i] = isNBits(CHUNK_SIZE);
-        pubkeyBitChecks[i] = isNBits(CHUNK_SIZE);
+        sigBitChecks[i] = Num2Bits(CHUNK_SIZE);
+        pubkeyBitChecks[i] = Num2Bits(CHUNK_SIZE);
         sigBitChecks[i].in <== signature[i];
         pubkeyBitChecks[i].in <== pubkey[i];
     }
     if (remainingBits > 0) {
-        sigBitChecks[fullChunks] = isNBits(remainingBits);
-        pubkeyBitChecks[fullChunks] = isNBits(remainingBits);
+        sigBitChecks[fullChunks] = Num2Bits(remainingBits);
+        pubkeyBitChecks[fullChunks] = Num2Bits(remainingBits);
         sigBitChecks[fullChunks].in <== signature[fullChunks];
         pubkeyBitChecks[fullChunks].in <== pubkey[fullChunks];
     }
