@@ -12,7 +12,7 @@ function derToPem(derBuffer: Buffer): string {
 
 export async function extractMasterlistCsca() {
   // Extract masterlists from ICAO ldif file
-  const ldif_path = path.join(__dirname, '..', '..', 'inputs', 'icao_download_section', 'icaopkd-complete-311024.ldif');
+  const ldif_path = path.join(__dirname, '..', '..', 'inputs', 'icao_download_section', 'ICAO PKD Complete.ldif');
   const masterlist_path = path.join(__dirname, '..', '..', 'outputs', 'csca', 'masterlists');
   const csca_path = path.join(__dirname, '..', '..', 'outputs', 'csca');
 
@@ -170,3 +170,9 @@ export async function extractMasterlistCsca() {
 
   console.log(`Deduplicated and saved ${uniqueCertCount} unique certificates in PEM format. Skipped ${skippedFiles} non-certificate files.`);
 }
+
+// Add this at the end of the file
+extractMasterlistCsca().catch(error => {
+  console.error('Error:', error);
+  process.exit(1);
+});
