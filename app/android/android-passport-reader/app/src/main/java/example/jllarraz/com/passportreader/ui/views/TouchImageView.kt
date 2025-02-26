@@ -708,7 +708,7 @@ class TouchImageView : androidx.appcompat.widget.AppCompatImageView {
             if (fling != null) {
                 //
                 // If a previous fling is still active, it should be cancelled so that two flings
-                // are not run simultaenously.
+                // are not run simultaneously.
                 //
                 fling!!.cancelFling()
             }
