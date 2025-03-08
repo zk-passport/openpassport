@@ -35,6 +35,18 @@ const config: HardhatUserConfig = {
   },
   defaultNetwork: "hardhat",
   networks: {
+    hardhat: {
+      mining: {
+        auto: true,
+        interval: 0
+      },
+      chainId: 31337,
+      hardfork: "london",
+      forking: {
+        url: "https://rpc.ankr.com/celo",
+        blockNumber: 30709382
+      }
+    },
     localhost: {
       chainId: 31337,
       url: "http://127.0.0.1:8545",
