@@ -45,8 +45,8 @@ async function main() {
         {
             a: [registerProof.pi_a[0], registerProof.pi_a[1]],
             b: [
-                [registerProof.pi_b[0][0], registerProof.pi_b[0][1]],
-                [registerProof.pi_b[1][0], registerProof.pi_b[1][1]],
+                [registerProof.pi_b[0][1], registerProof.pi_b[0][0]],
+                [registerProof.pi_b[1][1], registerProof.pi_b[1][0]],
             ],
             c: [registerProof.pi_c[0], registerProof.pi_c[1]],
             pubSignals: registerProof.pubSignals
