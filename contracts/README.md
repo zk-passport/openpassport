@@ -1,6 +1,6 @@
-# OpenPassport Contracts
+# Self Contracts
 
-Contracts for OpenPassport.
+Contracts for Self.
 
 ## ⚠️Cautions⚠️
 
