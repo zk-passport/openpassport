@@ -26,10 +26,7 @@ import {
   unsafe_clearSecrets,
   unsafe_getPrivateKey,
 } from '../../stores/authProvider';
-import {
-  storePassportData,
-  usePassport,
-} from '../../stores/passportDataProvider';
+import { usePassport } from '../../stores/passportDataProvider';
 import { borderColor, textBlack } from '../../utils/colors';
 
 interface DevSettingsScreenProps {}
@@ -132,7 +129,7 @@ const ScreenSelector = ({}) => {
 };
 
 const DevSettingsScreen: React.FC<DevSettingsScreenProps> = ({}) => {
-  const { clearPassportData } = usePassport();
+  const { clearPassportData, setPassportData } = usePassport();
   const [privateKey, setPrivateKey] = useState('Loading private key…');
 
   const nav = useNavigation();
@@ -156,7 +153,7 @@ const DevSettingsScreen: React.FC<DevSettingsScreenProps> = ({}) => {
       '000101',
       '300101',
     );
-    storePassportData(passportData);
+    setPassportData(passportData);
   }
 
   useEffect(() => {

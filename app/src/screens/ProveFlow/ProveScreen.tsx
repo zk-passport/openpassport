@@ -40,7 +40,7 @@ import {
 
 const ProveScreen: React.FC = () => {
   const { navigate } = useNavigation();
-  const { getPassportDataAndSecret } = usePassport();
+  const { passportData, secret } = usePassport();
   const { selectedApp, resetProof, cleanSelfApp } = useProofInfo();
   const { handleProofVerified } = useApp();
   const selectedAppRef = useRef(selectedApp);
@@ -119,25 +119,20 @@ const ProveScreen: React.FC = () => {
       try {
         let timeToNavigateToStatusScreen: NodeJS.Timeout;
 
-        const passportDataAndSecret = await getPassportDataAndSecret().catch(
-          (e: Error) => {
-            console.error('Error getting passport data', e);
-            globalSetDisclosureStatus?.(ProofStatusEnum.ERROR);
-          },
-        );
-
         timeToNavigateToStatusScreen = setTimeout(() => {
           navigate('ProofRequestStatusScreen');
         }, 1000);
 
-        if (!passportDataAndSecret) {
+        if (!passportData || !secret) {
           console.log('No passport data or secret');
           globalSetDisclosureStatus?.(ProofStatusEnum.ERROR);
           return;
         }
 
-        const { passportData, secret } = passportDataAndSecret.data;
-        const isRegistered = await isUserRegistered(passportData, secret);
+        const isRegistered = await isUserRegistered(
+          passportData,
+          secret.password,
+        );
         console.log('isRegistered', isRegistered);
 
         if (!isRegistered) {
@@ -152,7 +147,7 @@ const ProveScreen: React.FC = () => {
 
         console.log('currentApp', currentApp);
         const status = await sendVcAndDisclosePayload(
-          secret,
+          secret.password,
           passportData,
           currentApp,
         );
@@ -167,7 +162,14 @@ const ProveScreen: React.FC = () => {
         isProcessing.current = false;
       }
     },
-    [navigate, getPassportDataAndSecret, handleProofVerified, resetProof],
+    [
+      navigate,
+      handleProofVerified,
+      resetProof,
+      cleanSelfApp,
+      passportData,
+      secret,
+    ],
   );
 
   const handleScroll = useCallback(

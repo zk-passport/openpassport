@@ -40,7 +40,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({}) => {
   };
   const [animationSource, setAnimationSource] = useState<any>(miscAnimation);
   const { registrationStatus, resetProof } = useProofInfo();
-  const { getPassportDataAndSecret, clearPassportData } = usePassport();
+  const { passportData, secret, clearPassportData } = usePassport();
 
   useEffect(() => {
     // TODO this makes sense if reset proof was only about passport registration
@@ -63,17 +63,16 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({}) => {
   }, [registrationStatus]);
 
   const processPayloadCalled = useRef(false);
-
   useEffect(() => {
     if (!processPayloadCalled.current) {
       processPayloadCalled.current = true;
       const processPayload = async () => {
         try {
-          const passportDataAndSecret = await getPassportDataAndSecret();
-          if (!passportDataAndSecret) {
+          if (!passportData || !secret) {
+            console.warn('no passportData or secret');
+            navigation.navigate('Launch');
             return;
           }
-          const { passportData, secret } = passportDataAndSecret.data;
           const isSupported = await checkPassportSupported(passportData);
           if (isSupported.status !== 'passport_supported') {
             trackEvent('Passport not supported', {
@@ -85,7 +84,10 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({}) => {
             clearPassportData();
             return;
           }
-          const isRegistered = await isUserRegistered(passportData, secret);
+          const isRegistered = await isUserRegistered(
+            passportData,
+            secret.password,
+          );
           console.log('User is registered:', isRegistered);
           if (isRegistered) {
             console.log(
@@ -103,7 +105,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({}) => {
             navigation.navigate('AccountRecoveryChoice');
             return;
           }
-          registerPassport(passportData, secret);
+          registerPassport(passportData, secret.password);
         } catch (error) {
           console.error('Error processing payload:', error);
           setTimeout(() => resetProof(), 1000);

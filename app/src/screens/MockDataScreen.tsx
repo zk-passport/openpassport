@@ -26,13 +26,14 @@ import { PrimaryButton } from '../components/buttons/PrimaryButton';
 import { SecondaryButton } from '../components/buttons/SecondaryButton';
 import { BodyText } from '../components/typography/BodyText';
 import { Title } from '../components/typography/Title';
-import { storePassportData } from '../stores/passportDataProvider';
+import { usePassport } from '../stores/passportDataProvider';
 import { borderColor, separatorColor, textBlack, white } from '../utils/colors';
 import { buttonTap, selectionChange } from '../utils/haptic';
 
 interface MockDataScreenProps {}
 
-const MockDataScreen: React.FC<MockDataScreenProps> = ({}) => {
+const MockDataScreen: React.FC<MockDataScreenProps> = () => {
+  const { setPassportData } = usePassport(false);
   const navigation = useNavigation();
   const [age, setAge] = useState(24);
   const [expiryYears, setExpiryYears] = useState(5);
@@ -192,7 +193,7 @@ const MockDataScreen: React.FC<MockDataScreenProps> = ({}) => {
           );
         }
         mockPassportData = initPassportDataParsing(mockPassportData);
-        await storePassportData(mockPassportData);
+        await setPassportData(mockPassportData);
         resolve(null);
       }, 0),
     );

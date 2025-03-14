@@ -6,7 +6,7 @@ import LottieView from 'lottie-react-native';
 
 import splashAnimation from '../assets/animations/splash.json';
 import { useAuth } from '../stores/authProvider';
-import { loadPassportDataAndSecret } from '../stores/passportDataProvider';
+import { usePassport } from '../stores/passportDataProvider';
 import { useSettingStore } from '../stores/settingStore';
 import { black } from '../utils/colors';
 import { impactLight } from '../utils/haptic';
@@ -14,12 +14,13 @@ import { isUserRegistered } from '../utils/proving/payload';
 
 const SplashScreen: React.FC = ({}) => {
   const navigation = useNavigation();
+  const { passportData, secret } = usePassport(false);
   const { createSigningKeyPair } = useAuth();
   const { setBiometricsAvailable } = useSettingStore();
 
   useEffect(() => {
     createSigningKeyPair()
-      .then(setBiometricsAvailable)
+      .then(() => setBiometricsAvailable(true))
       .catch(err => {
         console.warn(
           'Something ELSE and totally unexpected went wrong during keypair creation',
@@ -31,14 +32,11 @@ const SplashScreen: React.FC = ({}) => {
   const handleAnimationFinish = useCallback(() => {
     setTimeout(async () => {
       impactLight();
-      const passportDataAndSecret = await loadPassportDataAndSecret();
 
-      if (!passportDataAndSecret) {
+      if (!passportData || !secret) {
         navigation.navigate('Launch');
         return;
       }
-
-      const { passportData, secret } = JSON.parse(passportDataAndSecret);
 
       const isRegistered = await isUserRegistered(passportData, secret);
       console.log('User is registered:', isRegistered);
@@ -56,7 +54,7 @@ const SplashScreen: React.FC = ({}) => {
       // Rest of the time, keep the LaunchScreen flow
       navigation.navigate('Launch');
     }, 1000);
-  }, [navigation]);
+  }, [navigation, passportData, secret]);
 
   return (
     <LottieView
