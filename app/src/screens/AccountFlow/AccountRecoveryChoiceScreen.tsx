@@ -12,8 +12,7 @@ import useHapticNavigation from '../../hooks/useHapticNavigation';
 import Keyboard from '../../images/icons/keyboard.svg';
 import RestoreAccountSvg from '../../images/icons/restore_account.svg';
 import { ExpandableBottomLayout } from '../../layouts/ExpandableBottomLayout';
-import { useAuth } from '../../stores/authProvider';
-import { loadPassportDataAndSecret } from '../../stores/passportDataProvider';
+import { usePassport } from '../../stores/passportDataProvider';
 import { useSettingStore } from '../../stores/settingStore';
 import { STORAGE_NAME, useBackupMnemonic } from '../../utils/cloudBackup';
 import { black, slate500, slate600, white } from '../../utils/colors';
@@ -24,13 +23,12 @@ interface AccountRecoveryChoiceScreenProps {}
 const AccountRecoveryChoiceScreen: React.FC<
   AccountRecoveryChoiceScreenProps
 > = ({}) => {
-  const { restoreAccountFromMnemonic } = useAuth();
+  const { passportData, restorefromSecret, status } = usePassport();
   const [restoring, setRestoring] = useState(false);
   const { cloudBackupEnabled, toggleCloudBackupEnabled, biometricsAvailable } =
     useSettingStore();
   const { download } = useBackupMnemonic();
   const navigation = useNavigation();
-
   const onRestoreFromCloudNext = useHapticNavigation('AccountVerifiedSuccess');
   const onEnterRecoveryPress = useHapticNavigation('RecoverWithPhrase');
 
@@ -38,44 +36,57 @@ const AccountRecoveryChoiceScreen: React.FC<
     setRestoring(true);
     try {
       const mnemonic = await download();
-      const result = await restoreAccountFromMnemonic(mnemonic.phrase);
+      try {
+        if (status !== 'success') {
+          return;
+        }
+        const secret = await restorefromSecret(mnemonic.phrase);
+        if (!secret || !passportData) {
+          console.warn('Secret or passport data is missing');
+          navigation.navigate('Launch');
+          setRestoring(false);
+          return;
+        }
 
-      if (!result) {
-        console.warn('Failed to restore account');
-        navigation.navigate('Launch');
-        setRestoring(false);
-        return;
-      }
-
-      const passportDataAndSecret =
-        (await loadPassportDataAndSecret()) as string;
-      const { passportData, secret } = JSON.parse(passportDataAndSecret);
-      const isRegistered = await isUserRegistered(passportData, secret);
-      console.log('User is registered:', isRegistered);
-      if (!isRegistered) {
-        console.log(
-          'Secret provided did not match a registered passport. Please try again.',
+        const isRegistered = await isUserRegistered(
+          passportData,
+          secret.password,
         );
-        navigation.navigate('Launch');
-        setRestoring(false);
-        return;
-      }
+        console.log('User is registered:', isRegistered);
+        if (!isRegistered) {
+          console.log(
+            'Secret provided did not match a registered passport. Please try again.',
+          );
+          navigation.navigate('Launch');
+          setRestoring(false);
+          return;
+        }
 
-      if (!cloudBackupEnabled) {
-        toggleCloudBackupEnabled();
+        if (!cloudBackupEnabled) {
+          toggleCloudBackupEnabled();
+        }
+        onRestoreFromCloudNext();
+        setRestoring(false);
+      } catch (e) {
+        console.error(e);
+        setRestoring(false);
+        throw new Error('Something wrong happened during cloud recovery');
       }
-      onRestoreFromCloudNext();
+    } catch (error) {
+      console.warn('Failed to restore account');
+      navigation.navigate('Launch');
       setRestoring(false);
-    } catch (e) {
-      console.error(e);
-      setRestoring(false);
-      throw new Error('Something wrong happened during cloud recovery');
+      return;
     }
   }, [
     cloudBackupEnabled,
     download,
-    restoreAccountFromMnemonic,
+    restorefromSecret,
     onRestoreFromCloudNext,
+    navigation.navigate,
+    passportData,
+    toggleCloudBackupEnabled,
+    status,
   ]);
 
   return (
