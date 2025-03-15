@@ -34,7 +34,7 @@ const CloudBackupScreen: React.FC<CloudBackupScreenProps> = ({
   route: { params },
 }) => {
   const { loginWithBiometrics } = useAuth();
-  const { secret } = usePassport();
+  const { secret, status } = usePassport();
   const { cloudBackupEnabled, toggleCloudBackupEnabled, biometricsAvailable } =
     useSettingStore();
   const { upload, disableBackup } = useBackupMnemonic();
@@ -66,7 +66,7 @@ const CloudBackupScreen: React.FC<CloudBackupScreenProps> = ({
 
   const enableCloudBackups = useCallback(async () => {
     buttonTap();
-    if (cloudBackupEnabled) {
+    if (cloudBackupEnabled || status !== 'success') {
       return;
     }
 

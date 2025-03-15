@@ -40,7 +40,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({}) => {
   };
   const [animationSource, setAnimationSource] = useState<any>(miscAnimation);
   const { registrationStatus, resetProof } = useProofInfo();
-  const { passportData, secret, clearPassportData } = usePassport();
+  const { passportData, clearPassportData, setSecret, status } = usePassport();
 
   useEffect(() => {
     // TODO this makes sense if reset proof was only about passport registration
@@ -68,6 +68,12 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({}) => {
       processPayloadCalled.current = true;
       const processPayload = async () => {
         try {
+          if (status !== 'success') {
+            return;
+          }
+
+          const secret = await setSecret();
+
           if (!passportData || !secret) {
             console.warn('no passportData or secret');
             navigation.navigate('Launch');
@@ -113,7 +119,15 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({}) => {
       };
       processPayload();
     }
-  }, []);
+  }, [
+    clearPassportData,
+    goToUnsupportedScreen,
+    passportData,
+    setSecret,
+    navigation.navigate,
+    resetProof,
+    status,
+  ]);
 
   return (
     <View style={styles.container}>

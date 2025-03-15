@@ -40,7 +40,7 @@ import {
 
 const ProveScreen: React.FC = () => {
   const { navigate } = useNavigation();
-  const { passportData, secret } = usePassport();
+  const { passportData, secret, status: passportStatus } = usePassport();
   const { selectedApp, resetProof, cleanSelfApp } = useProofInfo();
   const { handleProofVerified } = useApp();
   const selectedAppRef = useRef(selectedApp);
@@ -107,9 +107,10 @@ const ProveScreen: React.FC = () => {
 
   const onVerify = useCallback(
     async function () {
-      if (isProcessing.current) {
+      if (passportStatus !== 'success' || isProcessing.current) {
         return;
       }
+
       isProcessing.current = true;
 
       resetProof();

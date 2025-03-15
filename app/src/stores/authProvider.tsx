@@ -8,48 +8,6 @@ import React, {
 } from 'react';
 import ReactNativeBiometrics from 'react-native-biometrics';
 
-type SignedPayload<T> = { signature: string; data: T };
-const _getSecurely = async function <T>(
-  fn: () => Promise<string | false>,
-  formatter: (dataString: string) => T,
-): Promise<SignedPayload<T> | null> {
-  console.log('Starting _getSecurely');
-
-  const keysExist = await biometrics.biometricKeysExist();
-  console.log('Biometric keys exist:', keysExist.keysExist);
-
-  if (!keysExist.keysExist) {
-    console.log('Creating new biometric keys');
-    await biometrics.createKeys();
-  }
-
-  const dataString = await fn();
-  console.log('Got data string:', dataString ? 'exists' : 'not found');
-
-  if (dataString === false) {
-    console.log('No data string available');
-    return null;
-  }
-
-  try {
-    const simpleCheck = await biometrics.simplePrompt({
-      promptMessage: 'Allow access to identity',
-    });
-
-    if (!simpleCheck.success) {
-      throw new Error('Authentication failed');
-    }
-
-    return {
-      signature: 'authenticated',
-      data: formatter(dataString),
-    };
-  } catch (error) {
-    console.error('Error in _getSecurely:', error);
-    throw error;
-  }
-};
-
 async function createSigningKeyPair(): Promise<void> {
   const { available } = await biometrics.isSensorAvailable();
   if (!available) {
@@ -82,14 +40,12 @@ interface IAuthContext {
   isAuthenticating: boolean;
   loginWithBiometrics: () => Promise<void>;
   createSigningKeyPair: () => Promise<void>;
-  _getSecurely: typeof _getSecurely;
 }
 export const AuthContext = createContext<IAuthContext>({
   isAuthenticated: false,
   isAuthenticating: false,
   loginWithBiometrics: () => Promise.resolve(),
   createSigningKeyPair: () => Promise.resolve(),
-  _getSecurely,
 });
 
 export const AuthProvider = ({
@@ -101,50 +57,55 @@ export const AuthProvider = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticatingPromise, setIsAuthenticatingPromise] =
     useState<Promise<{ success: boolean; error?: string }> | null>(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const loginWithBiometrics = useCallback(async () => {
-    if (isAuthenticatingPromise) {
-      await isAuthenticatingPromise;
-      return;
-    }
-
-    const promise = biometrics.simplePrompt({
-      promptMessage: 'Confirm your identity to access the stored secret',
-    });
-    setIsAuthenticatingPromise(promise);
-    const { success, error } = await promise;
-    if (error) {
-      setIsAuthenticatingPromise(null);
-      // handle error
-      throw error;
-    }
-    if (!success) {
-      // user canceled
-      throw new Error('Canceled by user');
-    }
-
-    setIsAuthenticatingPromise(null);
-    setIsAuthenticated(true);
-    setAuthenticatedTimeout(previousTimeout => {
-      if (previousTimeout) {
-        clearTimeout(previousTimeout);
+    setIsAuthenticating(true);
+    try {
+      if (isAuthenticatingPromise) {
+        await isAuthenticatingPromise;
+        return;
       }
-      return setTimeout(
-        () => setIsAuthenticated(false),
-        authenticationTimeoutinMs,
-      );
-    });
+
+      const promise = biometrics.simplePrompt({
+        promptMessage: 'Confirm your identity to access the stored secret',
+      });
+      setIsAuthenticatingPromise(promise);
+      const { success, error } = await promise;
+      if (error) {
+        setIsAuthenticatingPromise(null);
+        // handle error
+        throw error;
+      }
+      if (!success) {
+        // user canceled
+        throw new Error('Canceled by user');
+      }
+
+      setIsAuthenticatingPromise(null);
+      setIsAuthenticated(true);
+      setAuthenticatedTimeout(previousTimeout => {
+        if (previousTimeout) {
+          clearTimeout(previousTimeout);
+        }
+        return setTimeout(
+          () => setIsAuthenticated(false),
+          authenticationTimeoutinMs,
+        );
+      });
+    } finally {
+      setIsAuthenticating(false);
+    }
   }, [isAuthenticatingPromise, authenticationTimeoutinMs]);
 
   const state: IAuthContext = useMemo(
     () => ({
       isAuthenticated,
-      isAuthenticating: !!isAuthenticatingPromise,
+      isAuthenticating,
       loginWithBiometrics,
       createSigningKeyPair,
-      _getSecurely,
     }),
-    [isAuthenticated, isAuthenticatingPromise, loginWithBiometrics],
+    [isAuthenticated, isAuthenticating, loginWithBiometrics],
   );
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;

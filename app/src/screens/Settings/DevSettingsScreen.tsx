@@ -129,12 +129,15 @@ const ScreenSelector = ({}) => {
 };
 
 const DevSettingsScreen: React.FC<DevSettingsScreenProps> = ({}) => {
-  const { clearPassportData, setPassportData } = usePassport();
+  const { clearPassportData, setPassportData, status } = usePassport();
   const [privateKey, setPrivateKey] = useState('Loading private key…');
 
   const nav = useNavigation();
 
   async function handleRestart() {
+    if (status !== 'success') {
+      return;
+    }
     await clearPassportData();
     nav.navigate('Launch');
   }

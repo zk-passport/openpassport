@@ -23,7 +23,7 @@ interface AccountRecoveryChoiceScreenProps {}
 const AccountRecoveryChoiceScreen: React.FC<
   AccountRecoveryChoiceScreenProps
 > = ({}) => {
-  const { passportData, restorefromSecret } = usePassport();
+  const { passportData, restorefromSecret, status } = usePassport();
   const [restoring, setRestoring] = useState(false);
   const { cloudBackupEnabled, toggleCloudBackupEnabled, biometricsAvailable } =
     useSettingStore();
@@ -37,6 +37,9 @@ const AccountRecoveryChoiceScreen: React.FC<
     try {
       const mnemonic = await download();
       try {
+        if (status !== 'success') {
+          return;
+        }
         const secret = await restorefromSecret(mnemonic.phrase);
         if (!secret || !passportData) {
           console.warn('Secret or passport data is missing');
@@ -82,8 +85,8 @@ const AccountRecoveryChoiceScreen: React.FC<
     onRestoreFromCloudNext,
     navigation.navigate,
     passportData,
-    secret,
     toggleCloudBackupEnabled,
+    status,
   ]);
 
   return (

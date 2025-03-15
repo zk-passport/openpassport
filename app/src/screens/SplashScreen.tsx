@@ -14,7 +14,7 @@ import { isUserRegistered } from '../utils/proving/payload';
 
 const SplashScreen: React.FC = ({}) => {
   const navigation = useNavigation();
-  const { passportData, secret } = usePassport(false);
+  const { passportData, secret, status } = usePassport(false);
   const { createSigningKeyPair } = useAuth();
   const { setBiometricsAvailable } = useSettingStore();
 
@@ -32,13 +32,19 @@ const SplashScreen: React.FC = ({}) => {
   const handleAnimationFinish = useCallback(() => {
     setTimeout(async () => {
       impactLight();
+      if (status !== 'success') {
+        return;
+      }
 
       if (!passportData || !secret) {
         navigation.navigate('Launch');
         return;
       }
 
-      const isRegistered = await isUserRegistered(passportData, secret);
+      const isRegistered = await isUserRegistered(
+        passportData,
+        secret.password,
+      );
       console.log('User is registered:', isRegistered);
       if (isRegistered) {
         console.log('Passport is registered already. Skipping to HomeScreen');
@@ -54,7 +60,7 @@ const SplashScreen: React.FC = ({}) => {
       // Rest of the time, keep the LaunchScreen flow
       navigation.navigate('Launch');
     }, 1000);
-  }, [navigation, passportData, secret]);
+  }, [navigation, passportData, secret, status]);
 
   return (
     <LottieView

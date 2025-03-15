@@ -48,13 +48,16 @@ async function restoreFromMnemonic(mnemonic: string) {
 interface PassportProviderProps extends PropsWithChildren {
   authenticationTimeoutinMs?: number;
 }
+
+type Status = 'idle' | 'initializing' | 'updating' | 'error' | 'success';
 interface IPassportContext {
   passportData: PassportData | null;
   secret: Mnemonic | null;
   setPassportData: (data: PassportData) => Promise<void>;
   clearPassportData: () => Promise<void>;
-  setSecret: () => Promise<void>;
+  setSecret: () => Promise<Mnemonic | null>;
   restorefromSecret: (mnemonic: string) => Promise<Mnemonic | null>;
+  status: Status;
 }
 
 const PassportContext = createContext<IPassportContext>({
@@ -62,11 +65,13 @@ const PassportContext = createContext<IPassportContext>({
   secret: null,
   setPassportData: () => Promise.resolve(),
   clearPassportData: () => Promise.resolve(),
-  setSecret: () => Promise.resolve(),
+  setSecret: () => Promise.resolve(null),
   restorefromSecret: () => Promise.resolve(null),
+  status: 'idle',
 });
 
 export const PassportProvider = ({ children }: PassportProviderProps) => {
+  const [status, setStatus] = useState<Status>('idle');
   const [passportCache, setPasspotCache] = useState<PassportData | null>(null);
   const [secretCache, setSecretCache] = useState<Mnemonic | null>(null);
 
@@ -91,18 +96,30 @@ export const PassportProvider = ({ children }: PassportProviderProps) => {
     }
   }, []);
 
+  const isPassportNull = useMemo(() => !passportCache, [passportCache]);
+
   useEffect(() => {
     (async () => {
-      const passportData = await getPassportDataFromKeychain();
-      if (passportData) {
-        setPasspotCache(passportData.data);
-      }
-      const secret = await getSecretDataFromKeyChain();
-      if (secret) {
-        setSecretCache(secret);
+      setStatus(isPassportNull ? 'initializing' : 'updating');
+      try {
+        const passportData = await getPassportDataFromKeychain();
+        if (passportData) {
+          setPasspotCache(passportData);
+        }
+        const secret = await getSecretDataFromKeyChain();
+        if (secret) {
+          setSecretCache(secret);
+        }
+        setStatus('success');
+      } catch (error) {
+        console.error(
+          'Error fetching passport data or secret from keychain:',
+          error,
+        );
+        setStatus('error');
       }
     })();
-  }, [getPassportDataFromKeychain, getSecretDataFromKeyChain]);
+  }, [getPassportDataFromKeychain, getSecretDataFromKeyChain, isPassportNull]);
 
   const setPassportData = useCallback(async (data: PassportData) => {
     await storePassportDataInKeychain(data);
@@ -118,6 +135,7 @@ export const PassportProvider = ({ children }: PassportProviderProps) => {
       service: SERVICE_NAME,
     });
     setSecretCache(mnemonic);
+    return mnemonic;
   }, []);
 
   const clearPassportData = useCallback(async () => {
@@ -139,6 +157,7 @@ export const PassportProvider = ({ children }: PassportProviderProps) => {
       clearPassportData,
       setSecret,
       restorefromSecret,
+      status,
     }),
     [
       passportCache,
@@ -147,6 +166,7 @@ export const PassportProvider = ({ children }: PassportProviderProps) => {
       clearPassportData,
       restorefromSecret,
       setSecret,
+      status,
     ],
   );
 
@@ -169,12 +189,12 @@ export const usePassport = (auth = true) => {
     throw new Error('usePassport must be used within a PassportProvider');
   }
 
-  const { isAuthenticated, loginWithBiometrics } = useAuth();
+  const { isAuthenticated, isAuthenticating, loginWithBiometrics } = useAuth();
   useEffect(() => {
-    if (!isAuthenticated && auth) {
+    if (!isAuthenticated && !isAuthenticating && auth) {
       loginWithBiometrics();
     }
-  }, [isAuthenticated, loginWithBiometrics, auth]);
+  }, [isAuthenticated, loginWithBiometrics, auth, isAuthenticating]);
 
   return c;
 };

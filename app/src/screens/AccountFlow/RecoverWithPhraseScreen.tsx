@@ -26,7 +26,7 @@ const RecoverWithPhraseScreen: React.FC<
   RecoverWithPhraseScreenProps
 > = ({}) => {
   const navigation = useNavigation();
-  const { restorefromSecret, passportData } = usePassport();
+  const { restorefromSecret, passportData, status } = usePassport();
   const [mnemonic, setMnemonic] = useState<string>();
   const [restoring, setRestoring] = useState(false);
   const onPaste = useCallback(async () => {
@@ -38,6 +38,9 @@ const RecoverWithPhraseScreen: React.FC<
   }, []);
 
   const restoreAccount = useCallback(async () => {
+    if (status !== 'success') {
+      return;
+    }
     setRestoring(true);
     const slimMnemonic = mnemonic?.trim();
     if (!slimMnemonic || !ethers.Mnemonic.isValidMnemonic(slimMnemonic)) {
@@ -77,7 +80,7 @@ const RecoverWithPhraseScreen: React.FC<
       setRestoring(false);
       return;
     }
-  }, [mnemonic, restorefromSecret, navigation, passportData]);
+  }, [mnemonic, restorefromSecret, navigation, passportData, status]);
 
   return (
     <YStack alignItems="center" gap="$6" pb="$2.5" style={styles.layout}>
